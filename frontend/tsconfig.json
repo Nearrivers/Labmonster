@@ -16,7 +16,8 @@
     ],
     "skipLibCheck": true,
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "$/*": ["./wailsjs/go/*"]
     }
   },
   "include": [
