@@ -1,7 +1,10 @@
 <template>
-    <HelloWorld />
+  <HelloWorld />
 </template>
 
 <script lang="ts" setup>
-    import HelloWorld from "./components/HelloWorld.vue"
+import { useColorMode } from '@vueuse/core';
+import HelloWorld from './components/HelloWorld.vue';
+
+const mode = useColorMode();
 </script>
