@@ -4,7 +4,7 @@ export const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     {
-      path: '/', component: () => import("@/views/CreateLab.vue")
+      path: '/', component: () => import("@/views/HomeView.vue")
     }
   ]
 })
