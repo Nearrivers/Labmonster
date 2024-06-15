@@ -5,6 +5,7 @@ import (
 	"embed"
 
 	"flow-poc/backend/config"
+	"flow-poc/backend/filetree"
 	"flow-poc/backend/topmenu"
 
 	"github.com/wailsapp/wails/v2"
@@ -21,6 +22,7 @@ func main() {
 	app := NewApp()
 	topmenu := topmenu.NewTopMenu()
 	config := config.NewAppConfig()
+	filetree := filetree.NewFileTree(config)
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -36,11 +38,13 @@ func main() {
 			app.SetContext(ctx)
 			topmenu.SetContext(ctx)
 			config.SetContext(ctx)
+			filetree.SetContext(ctx)
 		},
 		Bind: []interface{}{
 			app,
 			topmenu,
 			config,
+			filetree,
 		},
 		Windows: &windows.Options{
 			CustomTheme: &windows.ThemeSettings{

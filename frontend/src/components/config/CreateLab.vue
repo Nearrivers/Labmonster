@@ -38,7 +38,7 @@
             {{ dir }}
           </p>
         </div>
-        <Button @click="CreateAppConfig(dir)">Valider</Button>
+        <Button @click="createConfigFile(dir)">Valider</Button>
       </div>
     </AlertDialogContent>
   </AlertDialog>
@@ -63,6 +63,13 @@ const isDialogOpen = ref(true);
 async function getLabDirectory() {
   try {
     dir.value = await OpenCreateLabDialog();
+  } catch (error) {}
+}
+
+async function createConfigFile(path: string) {
+  try {
+    await CreateAppConfig(path);
+    isDialogOpen.value = false;
   } catch (error) {}
 }
 </script>
