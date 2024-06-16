@@ -1,15 +1,9 @@
-<template></template>
+<template>
+  <SideHeader></SideHeader>
+  <FileTree></FileTree>
+</template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import { GetFileTree } from '$/filetree/FileTreeExplorer';
-
-const fileTree = ref<{ [key: string]: Array<any> }>({ '': [] });
-
-onMounted(async () => {
-  try {
-    fileTree.value = await GetFileTree();
-    console.log(fileTree.value);
-  } catch (error) {}
-});
+import SideHeader from '@/components/sidepanel/SideHeader.vue';
+import FileTree from '@/components/sidepanel/FileTree.vue';
 </script>

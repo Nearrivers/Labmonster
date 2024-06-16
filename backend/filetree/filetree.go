@@ -2,7 +2,6 @@ package filetree
 
 import (
 	"context"
-	"fmt"
 	"io/fs"
 	"path/filepath"
 	"strings"
@@ -12,85 +11,131 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/logger"
 )
 
+type NodeType string
+
+const (
+	FILE NodeType = "FILE"
+	DIR  NodeType = "DIR"
+)
+
 type FileTreeExplorer struct {
-	ctx    context.Context
-	logger logger.Logger
-	cfg    *config.AppConfig
+	Ctx      context.Context   `json:"ctx"`
+	Logger   logger.Logger     `json:"logger"`
+	Cfg      *config.AppConfig `json:"cfg"`
+	FileTree Node              `json:"file_tree"`
 }
 
 type Node struct {
-	files map[string]Node
+	Name  string   `json:"name"`
+	Type  NodeType `json:"type"`
+	Files []*Node  `json:"files"`
 }
 
 func NewFileTree(cfg *config.AppConfig) *FileTreeExplorer {
 	return &FileTreeExplorer{
-		logger: logger.NewDefaultLogger(),
-		cfg:    cfg,
+		Logger: logger.NewDefaultLogger(),
+		Cfg:    cfg,
 	}
 }
 
 func (ft *FileTreeExplorer) SetContext(ctx context.Context) {
-	ft.ctx = ctx
+	ft.Ctx = ctx
 }
 
 func (ft *FileTreeExplorer) SetConfigFile(cfg config.AppConfig) {
-	ft.cfg = &cfg
+	ft.Cfg = &cfg
 }
 
-func (ft *FileTreeExplorer) GetFileTree() (map[string]Node, error) {
-	tree := make(map[string]Node)
+func (ft *FileTreeExplorer) GetFileTree() ([]*Node, error) {
+	ft.FileTree = Node{
+		Name:  "Lab",
+		Type:  DIR,
+		Files: make([]*Node, 0),
+	}
 
-	err := filepath.WalkDir(ft.cfg.ConfigFile.LabPath, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(ft.Cfg.ConfigFile.LabPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		// On skip la lecture du dossier
-		if path == ft.cfg.ConfigFile.LabPath {
+		if path == ft.Cfg.ConfigFile.LabPath {
 			return nil
 		}
 
-		pathFromLab := strings.Split(path, ft.cfg.ConfigFile.LabPath+string(filepath.Separator))[1]
+		pathFromLab := strings.Split(path, ft.Cfg.ConfigFile.LabPath+string(filepath.Separator))[1]
 		nodes := strings.Split(pathFromLab, string(filepath.Separator))
 
-		GoDownTree(d, tree, nodes)
-		ft.logger.Debug(fmt.Sprintf("Chemin relatif au lab: %v", nodes))
-
+		CreateFileTree(d, &ft.FileTree, nodes)
 		return nil
 	})
+
+	ft.PrintTree()
 	if err != nil {
-		ft.logger.Error("erreur lors de l'obtention des dossiers:" + err.Error() + " chemin: " + ft.cfg.ConfigFile.LabPath)
+		ft.Logger.Error("erreur lors de l'obtention des dossiers:" + err.Error() + " chemin: " + ft.Cfg.ConfigFile.LabPath)
 		return nil, err
 	}
 
-	ft.logger.Debug(fmt.Sprintf("%v", tree))
-	return tree, nil
+	return ft.FileTree.Files, nil
 }
 
-func GoDownTree(d fs.DirEntry, tree map[string]Node, nodes []string) {
+func CreateFileTree(d fs.DirEntry, node *Node, nodeNames []string) {
 	// Noeud actuel puis noeuds restants
-	currentNode, nextNode := nodes[0], nodes[1:]
-	nodeName := ""
+	currentNodeName, nextNodeNames := nodeNames[0], nodeNames[1:]
 
-	if d.IsDir() {
-		nodeName = currentNode
-	} else {
-		info, _ := d.Info()
-		nodeName = info.Name()
-	}
+	// Si l'arbre est vide, on insère le premier noeud d'office
+	if len(node.Files) == 0 {
+		var nodetype NodeType
 
-	_, ok := tree[nodeName]
-	if !ok {
-		tree[nodeName] = Node{
-			files: make(map[string]Node),
+		if d.IsDir() {
+			nodetype = DIR
+		} else {
+			nodetype = FILE
 		}
+
+		node.Files = append(node.Files, &Node{
+			Name:  currentNodeName,
+			Type:  nodetype,
+			Files: []*Node{},
+		})
 	}
 
 	// Si les noeuds suivants n'existent pas, alors nous avont terminé la récursion
-	if len(nextNode) == 0 {
+	if len(nextNodeNames) == 0 {
 		return
 	}
 
-	// Sinon on continue
-	GoDownTree(d, tree[currentNode].files, nextNode)
+	var nextNode *Node
+	for _, n := range node.Files {
+		if n.Name == currentNodeName {
+			nextNode = n
+		}
+	}
+
+	if nextNode == nil {
+		newNode := InsertNode(d.IsDir(), node, currentNodeName)
+		nextNode = &newNode
+	}
+
+	CreateFileTree(d, nextNode, nextNodeNames)
+}
+
+func InsertNode(isDir bool, node *Node, name string) Node {
+	var nodetype NodeType
+
+	if isDir {
+		nodetype = DIR
+	} else {
+		nodetype = FILE
+	}
+
+	newNode := Node{
+		Name:  name,
+		Type:  nodetype,
+		Files: []*Node{},
+	}
+
+	node.Files = append(node.Files, &newNode)
+
+	return newNode
 }
