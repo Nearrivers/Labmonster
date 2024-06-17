@@ -29,7 +29,7 @@
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-    <ul v-show="isOpen" v-if="isFolder" class="w-full pl-[18px]">
+    <ul v-show="isOpen" v-if="isFolder" class="w-full pl-[19px]">
       <FileNode
         class="item"
         v-for="(child, index) in node.files"

@@ -1,7 +1,9 @@
 <template>
-  <ul class="w-full px-2 text-sm text-muted-foreground [&>li]:!border-none">
-    <FileNode v-for="(file, index) in fileTree" :node="file" :key="index" />
-  </ul>
+  <ScrollArea class="h-[95svh]">
+    <ul class="w-full px-2 text-sm text-muted-foreground [&>li]:!border-none">
+      <FileNode v-for="(file, index) in fileTree" :node="file" :key="index" />
+    </ul>
+  </ScrollArea>
 </template>
 
 <script setup lang="ts">
@@ -9,6 +11,7 @@ import { GetFileTree } from '$/filetree/FileTreeExplorer';
 import { filetree } from '$/models';
 import { onMounted, ref } from 'vue';
 import FileNode from './FileNode.vue';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const fileTree = ref<filetree.Node[]>([]);
 
