@@ -53,6 +53,7 @@ func (ft *FileTreeExplorer) GetFileTree() ([]*Node, error) {
 		Files: make([]*Node, 0),
 	}
 
+	// TODO: Cette méthode peut très probablement être optimisée
 	err := filepath.WalkDir(ft.Cfg.ConfigFile.LabPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -69,6 +70,7 @@ func (ft *FileTreeExplorer) GetFileTree() ([]*Node, error) {
 		CreateFileTree(d, &ft.FileTree, nodes)
 		return nil
 	})
+
 	if err != nil {
 		ft.Logger.Error("erreur lors de l'obtention des dossiers:" + err.Error() + " chemin: " + ft.Cfg.ConfigFile.LabPath)
 		return nil, err

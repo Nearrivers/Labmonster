@@ -77,9 +77,12 @@ func (ac *AppConfig) CreateAppConfig(configDirPath string) {
 			return
 		}
 
-		err = os.Mkdir(filepath.Join(configDirPath, "Lab"), 0o644)
-		if err != nil {
-			ac.Logger.Error(err.Error())
+		// Création du dossier "Lab" s'il n'existe pas
+		if _, err := os.Stat(filepath.Join(configDirPath, "Lab")); errors.Is(err, os.ErrNotExist) {
+			err = os.Mkdir(filepath.Join(configDirPath, "Lab"), 0o644)
+			if err != nil {
+				ac.Logger.Error(err.Error())
+			}
 		}
 	}()
 

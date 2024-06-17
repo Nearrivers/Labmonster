@@ -1,5 +1,5 @@
 <template>
-  <li class="w-full border-l border-muted-foreground">
+  <li class="w-full">
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
@@ -7,7 +7,7 @@
             cn(
               buttonVariants({ variant: 'ghost', size: 'sm' }),
               // 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white',
-              'w-full justify-start py-1',
+              'h-6 w-full justify-start',
             )
           "
           @click="toggle"
@@ -23,13 +23,13 @@
             </p>
           </div>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent :side="'right'">
           <p v-if="node.type === 'DIR'">Dossier</p>
           <p v-else>Fichier</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-    <ul v-show="isOpen" v-if="isFolder" class="w-full pl-[19px]">
+    <ul v-show="isOpen" v-if="isFolder" class="w-full pl-[18.5px]">
       <FileNode
         class="item"
         v-for="(child, index) in node.files"
