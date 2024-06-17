@@ -69,8 +69,6 @@ func (ft *FileTreeExplorer) GetFileTree() ([]*Node, error) {
 		CreateFileTree(d, &ft.FileTree, nodes)
 		return nil
 	})
-
-	ft.PrintTree()
 	if err != nil {
 		ft.Logger.Error("erreur lors de l'obtention des dossiers:" + err.Error() + " chemin: " + ft.Cfg.ConfigFile.LabPath)
 		return nil, err
@@ -85,19 +83,14 @@ func CreateFileTree(d fs.DirEntry, node *Node, nodeNames []string) {
 
 	// Si l'arbre est vide, on insère le premier noeud d'office
 	if len(node.Files) == 0 {
-		var nodetype NodeType
+		InsertNode(d.IsDir(), node, currentNodeName)
+	}
 
-		if d.IsDir() {
-			nodetype = DIR
-		} else {
-			nodetype = FILE
-		}
+	nextNode := GetNodeIfNameTaken(currentNodeName, node.Files)
 
-		node.Files = append(node.Files, &Node{
-			Name:  currentNodeName,
-			Type:  nodetype,
-			Files: []*Node{},
-		})
+	if nextNode == nil {
+		newNode := InsertNode(d.IsDir(), node, currentNodeName)
+		nextNode = &newNode
 	}
 
 	// Si les noeuds suivants n'existent pas, alors nous avont terminé la récursion
@@ -105,19 +98,17 @@ func CreateFileTree(d fs.DirEntry, node *Node, nodeNames []string) {
 		return
 	}
 
-	var nextNode *Node
-	for _, n := range node.Files {
-		if n.Name == currentNodeName {
-			nextNode = n
+	CreateFileTree(d, nextNode, nextNodeNames)
+}
+
+func GetNodeIfNameTaken(nodeName string, files []*Node) *Node {
+	for _, n := range files {
+		if n.Name == nodeName {
+			return n
 		}
 	}
 
-	if nextNode == nil {
-		newNode := InsertNode(d.IsDir(), node, currentNodeName)
-		nextNode = &newNode
-	}
-
-	CreateFileTree(d, nextNode, nextNodeNames)
+	return nil
 }
 
 func InsertNode(isDir bool, node *Node, name string) Node {

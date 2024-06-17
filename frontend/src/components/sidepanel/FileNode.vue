@@ -3,13 +3,16 @@
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
-          class="mb-1 flex items-center rounded-md px-2 hover:bg-zinc-700"
+          :class="
+            cn(
+              buttonVariants({ variant: 'ghost', size: 'sm' }),
+              // 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white',
+              'w-full justify-start py-1',
+            )
+          "
+          @click="toggle"
         >
-          <div
-            :class="{ bold: isFolder }"
-            class="flex items-center gap-1"
-            @click="toggle"
-          >
+          <div class="flex items-center gap-1 font-normal">
             <ChevronRight
               v-if="isFolder"
               class="w-[14px] transition-transform"
@@ -21,11 +24,12 @@
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Créer un nouveau diagramme</p>
+          <p v-if="node.type === 'DIR'">Dossier</p>
+          <p v-else>Fichier</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-    <ul v-show="isOpen" v-if="isFolder" class="w-full px-3.5">
+    <ul v-show="isOpen" v-if="isFolder" class="w-full pl-[18px]">
       <FileNode
         class="item"
         v-for="(child, index) in node.files"
@@ -46,6 +50,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { ChevronRight } from 'lucide-vue-next';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 
 const props = defineProps<{
   node: filetree.Node;

@@ -1,5 +1,5 @@
 <template>
-  <ul class="w-full px-2 text-sm text-muted-foreground">
+  <ul class="w-full px-2 text-sm text-muted-foreground [&>li]:!border-none">
     <FileNode v-for="(file, index) in fileTree" :node="file" :key="index" />
   </ul>
 </template>

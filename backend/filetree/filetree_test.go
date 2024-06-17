@@ -53,12 +53,22 @@ func TestGetFileTree(t *testing.T) {
 		},
 	}
 
-	tree, err := ft.GetFileTree()
+	ft2 := NewFileTree(&config.AppConfig{
+		ConfigFile: config.ConfigFile{
+			LabPath: "D:\\Projets\\test\\Lab",
+		},
+	})
+	ft2.FileTree = want
+
+	_, err := ft.GetFileTree()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if !ft.Same(&want) {
-		t.Fatalf("Les 2 arbres ne sont pas égaux. want: %v, result: %v", want, tree)
+		ft.PrintTree()
+		ft.Logger.Debug("-----------")
+		ft2.PrintTree()
+		t.Fatal("Les 2 arbres ne sont pas égaux")
 	}
 }

@@ -1,15 +1,10 @@
 <template>
   <ResizablePanelGroup direction="horizontal">
-    <ResizablePanel
-      :default-size="15"
-      :min-size="10"
-      collapsible
-      class="border-r border-zinc-700 bg-secondary"
-    >
+    <ResizablePanel :default-size="15" :min-size="10" collapsible>
       <SidePanel></SidePanel>
     </ResizablePanel>
     <ResizableHandle />
-    <ResizablePanel class="bg-primary-foreground">
+    <ResizablePanel>
       <GraphPanel></GraphPanel>
     </ResizablePanel>
   </ResizablePanelGroup>

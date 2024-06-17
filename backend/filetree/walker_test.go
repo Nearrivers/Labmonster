@@ -2,7 +2,7 @@ package filetree
 
 import "testing"
 
-func SameTest(t *testing.T) {
+func TestSame(t *testing.T) {
 	tree := Node{
 		Name: "Lab",
 		Type: DIR,
@@ -49,6 +49,6 @@ func SameTest(t *testing.T) {
 	want := true
 	result := ft.Same(&tree)
 	if want != result {
-		t.Fatal("L'arbre n'est pas égal à lui même")
+		t.Fatal("Un arbre vient d'être comparé à lui-même et Same() à trouvé qu'il été quand même différent")
 	}
 }
