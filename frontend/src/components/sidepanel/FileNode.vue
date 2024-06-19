@@ -1,18 +1,17 @@
 <template>
-  <li class="w-full">
+  <li class="h-min w-full">
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
           :class="
             cn(
               buttonVariants({ variant: 'ghost', size: 'sm' }),
-              // 'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white',
-              'h-6 w-full justify-start',
+              'h-6 w-full justify-start py-0',
             )
           "
           @click="toggle"
         >
-          <div class="flex items-center gap-1 font-normal">
+          <div class="flex items-center gap-x-1 font-normal">
             <ChevronRight
               v-if="isFolder"
               class="w-[14px] transition-transform"
@@ -31,7 +30,6 @@
     </TooltipProvider>
     <ul v-show="isOpen" v-if="isFolder" class="w-full pl-[18.5px]">
       <FileNode
-        class="item"
         v-for="(child, index) in node.files"
         :key="index"
         :node="child"
@@ -58,7 +56,7 @@ const props = defineProps<{
 }>();
 
 const isOpen = ref(false);
-const isFolder = computed(() => props.node.files && props.node.files.length);
+const isFolder = computed(() => props.node.type === 'DIR');
 
 function toggle() {
   isOpen.value = !isOpen.value;
