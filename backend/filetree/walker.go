@@ -24,7 +24,7 @@ func (ns NodeSequences) Less(i, j int) bool {
 	return ns[i].Name < ns[j].Name
 }
 
-func (ft *FileTreeExplorer) Walk(root *Node, ch chan NodeSequence) {
+func Walk(root *Node, ch chan NodeSequence) {
 	defer close(ch)
 	if root != nil {
 		ch <- NodeSequence{
@@ -53,7 +53,7 @@ func walkRecursively(node *Node, ch chan NodeSequence) {
 func (ft *FileTreeExplorer) PrintTree() {
 	ch1 := make(chan NodeSequence)
 
-	go ft.Walk(&ft.FileTree, ch1)
+	go Walk(&ft.FileTree, ch1)
 
 	for n1 := range ch1 {
 		ft.Logger.Debug(fmt.Sprintf("Nom: %s, Type: %s", n1.Name, n1.Type))
@@ -68,8 +68,8 @@ func (ft *FileTreeExplorer) Same(otherFileTree *Node) bool {
 	namesInR1 := NodeSequences{}
 	namesInR2 := NodeSequences{}
 
-	go ft.Walk(&ft.FileTree, ch1)
-	go ft.Walk(otherFileTree, ch2)
+	go Walk(&ft.FileTree, ch1)
+	go Walk(otherFileTree, ch2)
 
 	for n1 := range ch1 {
 		namesInR1 = append(namesInR1, n1)

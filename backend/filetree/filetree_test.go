@@ -60,7 +60,7 @@ func TestGetFileTree(t *testing.T) {
 	})
 	ft2.FileTree = want
 
-	_, err := ft.GetFileTree()
+	_, err := ft.GetTheWholeTree()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"flow-poc/backend/config"
@@ -13,24 +13,11 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/logger"
 )
 
-type NodeType string
-
-const (
-	FILE NodeType = "FILE"
-	DIR  NodeType = "DIR"
-)
-
 type FileTreeExplorer struct {
 	Ctx      context.Context   `json:"ctx"`
 	Logger   logger.Logger     `json:"logger"`
 	Cfg      *config.AppConfig `json:"cfg"`
 	FileTree Node              `json:"file_tree"`
-}
-
-type Node struct {
-	Name  string   `json:"name"`
-	Type  NodeType `json:"type"`
-	Files []*Node  `json:"files"`
 }
 
 func NewFileTree(cfg *config.AppConfig) *FileTreeExplorer {
@@ -48,7 +35,33 @@ func (ft *FileTreeExplorer) SetConfigFile(cfg config.AppConfig) {
 	ft.Cfg = &cfg
 }
 
-func (ft *FileTreeExplorer) GetFileTree() ([]*Node, error) {
+func (ft *FileTreeExplorer) GetFirstDepth() ([]*Node, error) {
+	entries, err := os.ReadDir(ft.Cfg.ConfigFile.LabPath)
+	if err != nil {
+		return nil, err
+	}
+
+	dirNames := make([]*Node, 0)
+
+	for _, entry := range entries {
+		newSimpleNode := Node{
+			Name:  entry.Name(),
+			Files: make([]*Node, 0),
+		}
+
+		if entry.IsDir() {
+			newSimpleNode.Type = DIR
+		} else {
+			newSimpleNode.Type = FILE
+		}
+		dirNames = append(dirNames, &newSimpleNode)
+	}
+
+	SortNodes(dirNames)
+	return dirNames, nil
+}
+
+func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 	ft.FileTree = Node{
 		Name:  "Lab",
 		Type:  DIR,
@@ -120,34 +133,4 @@ func (ft *FileTreeExplorer) GetFileTree() ([]*Node, error) {
 
 	SortNodes(ft.FileTree.Files)
 	return ft.FileTree.Files, nil
-}
-
-func SortNodes(files []*Node) {
-	sort.SliceStable(files, func(i, j int) bool {
-		if files[i].Type != files[j].Type {
-			return files[i].Type < files[j].Type
-		}
-
-		return files[i].Name < files[j].Name
-	})
-}
-
-func InsertNode(isDir bool, node *Node, name string) *Node {
-	var nodetype NodeType
-
-	if isDir {
-		nodetype = DIR
-	} else {
-		nodetype = FILE
-	}
-
-	newNode := Node{
-		Name:  name,
-		Type:  nodetype,
-		Files: []*Node{},
-	}
-
-	node.Files = append(node.Files, &newNode)
-
-	return &newNode
 }
