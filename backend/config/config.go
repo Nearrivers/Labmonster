@@ -71,26 +71,25 @@ func (ac *AppConfig) CreateAppConfig(configDirPath string) {
 			return
 		}
 
-		err = os.WriteFile("config.toml", data, 0o644)
+		// Création du dossier "Lab" s'il n'existe pas
+		err = os.MkdirAll(filepath.Join(configDirPath, ".labmonster"), os.ModePerm)
+		if err != nil {
+			ac.Logger.Error(err.Error())
+		}
+
+		err = os.WriteFile(filepath.Join(configDirPath, ".labmonster", "config.toml"), data, os.ModePerm)
 		if err != nil {
 			ac.Logger.Error(err.Error())
 			return
 		}
 
-		// Création du dossier "Lab" s'il n'existe pas
-		if _, err := os.Stat(filepath.Join(configDirPath, "Lab")); errors.Is(err, os.ErrNotExist) {
-			err = os.Mkdir(filepath.Join(configDirPath, "Lab"), 0o644)
-			if err != nil {
-				ac.Logger.Error(err.Error())
-			}
-		}
 	}()
 
 	ac.SetConfigFile(config)
 }
 
 func (ac *AppConfig) CheckConfigPresence() bool {
-	if _, err := os.Stat("config.toml"); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(filepath.Join(ac.GetConfigFile().LabPath, ".labmonster", "config.toml")); errors.Is(err, os.ErrNotExist) {
 		ac.Logger.Error(err.Error())
 		return false
 	}
@@ -99,7 +98,7 @@ func (ac *AppConfig) CheckConfigPresence() bool {
 }
 
 func (ac *AppConfig) LoadConfigFileInMemory() {
-	f, err := os.Open("config.toml")
+	f, err := os.Open(filepath.Join(ac.GetConfigFile().LabPath, ".labmonster", "config.toml"))
 	if err != nil {
 		ac.Logger.Error(err.Error())
 		return

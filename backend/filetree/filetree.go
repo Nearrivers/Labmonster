@@ -44,6 +44,10 @@ func (ft *FileTreeExplorer) GetFirstDepth() ([]*Node, error) {
 	dirNames := make([]*Node, 0)
 
 	for _, entry := range entries {
+		if entry.Name() == ".labmonster" && entry.IsDir() {
+			continue
+		}
+
 		newSimpleNode := Node{
 			Name:  entry.Name(),
 			Files: make([]*Node, 0),
