@@ -1,5 +1,5 @@
 <template>
-  <ScrollArea class="h-[95svh]">
+  <ScrollArea class="h-[95svh] pb-4">
     <ul
       class="w-full px-2 text-sm text-muted-foreground"
       v-if="fileTree.length > 0"
@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { GetFileTree } from '$/filetree/FileTreeExplorer';
+import { GetFirstDepth } from '$/filetree/FileTreeExplorer';
 import { filetree } from '$/models';
 import { onMounted, ref } from 'vue';
 import FileNode from './FileNode.vue';
@@ -23,7 +23,7 @@ const fileTree = ref<filetree.Node[]>([]);
 
 onMounted(async () => {
   try {
-    fileTree.value = await GetFileTree();
+    fileTree.value = await GetFirstDepth();
   } catch (error) {}
 });
 </script>
