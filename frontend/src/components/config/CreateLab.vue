@@ -17,17 +17,6 @@
           </div>
           <Button @click="getLabDirectory">Créer</Button>
         </div>
-        <div class="grid grid-cols-4 items-center gap-4">
-          <div class="col-span-3">
-            <p class="leading-7 [&:not(:first-child)]:mt-6">
-              Ouvrir un dossier comme lab
-            </p>
-            <p class="text-sm text-muted-foreground">
-              Défini un dossier comme "Lab"
-            </p>
-          </div>
-          <Button variant="outline">Ouvrir</Button>
-        </div>
       </div>
       <div class="flex items-center justify-between gap-4 py-4" v-else>
         <div class="col-span-3">

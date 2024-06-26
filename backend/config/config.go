@@ -40,11 +40,11 @@ func (ac *AppConfig) SetConfigFile(cfg ConfigFile) {
 	ac.ConfigFile = cfg
 }
 
-func (ac *AppConfig) OpenCreateLabDialog() string {
+func (ac *AppConfig) OpenCreateLabDialog() (string, error) {
 	pwd, err := os.Getwd()
 	if err != nil {
 		ac.Logger.Error(err.Error())
-		return ""
+		return "", err
 	}
 
 	dir, err := runtime.OpenDirectoryDialog(ac.Ctx, runtime.OpenDialogOptions{
@@ -53,10 +53,10 @@ func (ac *AppConfig) OpenCreateLabDialog() string {
 	})
 	if err != nil {
 		ac.Logger.Error(err.Error())
-		return ""
+		return "", err
 	}
 
-	return dir
+	return dir, nil
 }
 
 func (ac *AppConfig) CreateAppConfig(configDirPath string) {
