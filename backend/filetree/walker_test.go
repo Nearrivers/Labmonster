@@ -42,12 +42,9 @@ func TestSame(t *testing.T) {
 			},
 		},
 	}
-	ft := FileTreeExplorer{
-		FileTree: tree,
-	}
 
 	want := true
-	result := ft.Same(&tree)
+	result := Same(&tree, &tree)
 	if want != result {
 		t.Fatal("Un arbre vient d'être comparé à lui-même et Same() à trouvé qu'il été quand même différent")
 	}

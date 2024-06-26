@@ -1,7 +1,6 @@
 package filetree
 
 import (
-	"context"
 	"fmt"
 	"io/fs"
 	"os"
@@ -14,7 +13,6 @@ import (
 )
 
 type FileTreeExplorer struct {
-	Ctx      context.Context   `json:"ctx"`
 	Logger   logger.Logger     `json:"logger"`
 	Cfg      *config.AppConfig `json:"cfg"`
 	FileTree Node              `json:"file_tree"`
@@ -25,14 +23,6 @@ func NewFileTree(cfg *config.AppConfig) *FileTreeExplorer {
 		Logger: logger.NewDefaultLogger(),
 		Cfg:    cfg,
 	}
-}
-
-func (ft *FileTreeExplorer) SetContext(ctx context.Context) {
-	ft.Ctx = ctx
-}
-
-func (ft *FileTreeExplorer) SetConfigFile(cfg config.AppConfig) {
-	ft.Cfg = &cfg
 }
 
 func (ft *FileTreeExplorer) GetFirstDepth() ([]*Node, error) {

@@ -10,18 +10,6 @@ export function GetTheWholeTree() {
   return window['go']['filetree']['FileTreeExplorer']['GetTheWholeTree']();
 }
 
-export function PrintTree() {
-  return window['go']['filetree']['FileTreeExplorer']['PrintTree']();
-}
-
-export function Same(arg1) {
-  return window['go']['filetree']['FileTreeExplorer']['Same'](arg1);
-}
-
 export function SetConfigFile(arg1) {
   return window['go']['filetree']['FileTreeExplorer']['SetConfigFile'](arg1);
-}
-
-export function SetContext(arg1) {
-  return window['go']['filetree']['FileTreeExplorer']['SetContext'](arg1);
 }

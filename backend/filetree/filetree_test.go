@@ -65,11 +65,11 @@ func TestGetFileTree(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ft.PrintTree()
+	PrintTree(ft.FileTree)
 	ft.Logger.Debug("-----------")
-	ft2.PrintTree()
+	PrintTree(ft2.FileTree)
 
-	if !ft.Same(&want) {
+	if !Same(&ft.FileTree, &want) {
 		t.Fatal("Les 2 arbres ne sont pas égaux")
 	}
 }

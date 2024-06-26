@@ -38,7 +38,6 @@ func main() {
 			app.SetContext(ctx)
 			topmenu.SetContext(ctx)
 			config.SetContext(ctx)
-			filetree.SetContext(ctx)
 		},
 		Bind: []interface{}{
 			app,

@@ -1,5 +1,5 @@
 <template>
-  <ContextMenu>
+  <ContextMenu :modal="false">
     <ContextMenuTrigger as-child>
       <li class="h-7 w-full">
         <TooltipProvider>
