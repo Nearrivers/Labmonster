@@ -3,13 +3,11 @@
 import {config} from '../models';
 import {context} from '../models';
 
-export function CheckConfigPresence():Promise<boolean>;
+export function CheckConfigPresenceAndLoadIt():Promise<boolean>;
 
 export function CreateAppConfig(arg1:string):Promise<void>;
 
-export function GetConfigFile():Promise<config.ConfigFile>;
-
-export function LoadConfigFileInMemory():Promise<void>;
+export function LoadConfigFile():Promise<void>;
 
 export function OpenCreateLabDialog():Promise<string>;
 

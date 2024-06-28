@@ -23,17 +23,16 @@ type AppConfig struct {
 }
 
 func NewAppConfig() *AppConfig {
-	return &AppConfig{
+	ac := AppConfig{
 		Logger: logger.NewDefaultLogger(),
 	}
+	ac.CheckConfigPresenceAndLoadIt()
+
+	return &ac
 }
 
 func (ac *AppConfig) SetContext(ctx context.Context) {
 	ac.Ctx = ctx
-}
-
-func (ac *AppConfig) GetConfigFile() ConfigFile {
-	return ac.ConfigFile
 }
 
 func (ac *AppConfig) SetConfigFile(cfg ConfigFile) {
@@ -65,40 +64,41 @@ func (ac *AppConfig) CreateAppConfig(configDirPath string) {
 	}
 
 	go func() {
-		data, err := toml.Marshal(config)
-		if err != nil {
-			ac.Logger.Error(err.Error())
-			return
-		}
-
 		// Création du dossier "Lab" s'il n'existe pas
-		err = os.MkdirAll(filepath.Join(configDirPath, ".labmonster"), os.ModePerm)
+		err := os.MkdirAll(filepath.Join(configDirPath, ".labmonster"), os.ModePerm)
 		if err != nil {
 			ac.Logger.Error(err.Error())
 		}
-
-		err = os.WriteFile(filepath.Join(configDirPath, ".labmonster", "config.toml"), data, os.ModePerm)
-		if err != nil {
-			ac.Logger.Error(err.Error())
-			return
-		}
-
 	}()
+
+	data, err := toml.Marshal(config)
+	if err != nil {
+		ac.Logger.Error(err.Error())
+		return
+	}
+
+	err = os.WriteFile("config.toml", data, os.ModePerm)
+	if err != nil {
+		ac.Logger.Error(err.Error())
+		return
+	}
 
 	ac.SetConfigFile(config)
 }
 
-func (ac *AppConfig) CheckConfigPresence() bool {
-	if _, err := os.Stat(filepath.Join(ac.GetConfigFile().LabPath, ".labmonster", "config.toml")); errors.Is(err, os.ErrNotExist) {
+// Vérifie la présence du fichie de configuration et le charge si c'est le cas
+func (ac *AppConfig) CheckConfigPresenceAndLoadIt() bool {
+	if _, err := os.Stat("config.toml"); errors.Is(err, os.ErrNotExist) {
 		ac.Logger.Error(err.Error())
 		return false
 	}
-	go ac.LoadConfigFileInMemory()
+	go ac.LoadConfigFile()
 	return true
 }
 
-func (ac *AppConfig) LoadConfigFileInMemory() {
-	f, err := os.Open(filepath.Join(ac.GetConfigFile().LabPath, ".labmonster", "config.toml"))
+// Charge le fichier de configuration
+func (ac *AppConfig) LoadConfigFile() {
+	f, err := os.Open(filepath.Join(ac.ConfigFile.LabPath, ".labmonster", "config.toml"))
 	if err != nil {
 		ac.Logger.Error(err.Error())
 		return

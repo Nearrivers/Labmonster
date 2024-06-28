@@ -7,14 +7,14 @@
 import { useColorMode } from '@vueuse/core';
 import CreateLab from './components/config/CreateLab.vue';
 import { onMounted, ref } from 'vue';
-import { CheckConfigPresence } from '$/config/AppConfig';
+import { CheckConfigPresenceAndLoadIt } from '$/config/AppConfig';
 
 const isConfigFilePresent = ref(false);
 const mode = useColorMode();
 
 onMounted(async () => {
   try {
-    isConfigFilePresent.value = await CheckConfigPresence();
+    isConfigFilePresent.value = await CheckConfigPresenceAndLoadIt();
   } catch (error) {}
 });
 </script>
