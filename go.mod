@@ -6,6 +6,7 @@ toolchain go1.21.4
 
 require (
 	github.com/BurntSushi/toml v1.4.0
+	github.com/pkg/errors v0.9.1
 	github.com/wailsapp/wails/v2 v2.8.2
 )
 
@@ -24,7 +25,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/pkg/browser v0.0.0-20210911075715-681adbf594b8 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/samber/lo v1.38.1 // indirect
 	github.com/tkrajina/go-reflector v0.5.6 // indirect

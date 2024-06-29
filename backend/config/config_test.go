@@ -4,12 +4,15 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 func TestCheckConfigPresence(t *testing.T) {
 	ac := NewAppConfig()
 	wd, err := os.Getwd()
 	if err != nil {
+		errors.Cause(err)
 		t.Fatal("Impossible de récupérer le répertoire de travail")
 	}
 

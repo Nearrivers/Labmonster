@@ -34,6 +34,18 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { CreateNewFile } from '$/filetree/FileTreeExplorer';
 
-async function createNewFileAtRoot() {}
+const emit = defineEmits<{
+  (e: 'fileCreated', name: string): void;
+}>();
+
+async function createNewFileAtRoot() {
+  try {
+    const newFileName = await CreateNewFile();
+    emit('fileCreated', newFileName);
+  } catch (error) {
+    console.log(error);
+  }
+}
 </script>

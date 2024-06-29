@@ -98,7 +98,7 @@ func (ac *AppConfig) CheckConfigPresenceAndLoadIt() bool {
 
 // Charge le fichier de configuration
 func (ac *AppConfig) LoadConfigFile() {
-	f, err := os.Open(filepath.Join(ac.ConfigFile.LabPath, ".labmonster", "config.toml"))
+	f, err := os.Open("config.toml")
 	if err != nil {
 		ac.Logger.Error(err.Error())
 		return

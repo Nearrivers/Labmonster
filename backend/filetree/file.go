@@ -14,17 +14,17 @@ func doesFileExist(path string) bool {
 }
 
 // Créer un fichier "Sans titre" à la racine et l'ajoute aux noeuds
-func (ft *FileTreeExplorer) CreateNewFile() error {
+func (ft *FileTreeExplorer) CreateNewFile() (string, error) {
 	// Création d'un fichier "Sans titre.json" si ce dernier n'existe pas
-	if !doesFileExist("Sans titre.json") {
+	if !doesFileExist(filepath.Join(ft.Cfg.ConfigFile.LabPath, "Sans titre.json")) {
 		_, err := os.Create(filepath.Join(ft.Cfg.ConfigFile.LabPath, "Sans titre.json"))
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		InsertNode(false, &ft.FileTree, "Sans titre.json")
+		newNode := InsertNode(false, &ft.FileTree, "Sans titre.json")
 		SortNodes(ft.FileTree.Files)
-		return nil
+		return newNode.Name, nil
 	}
 
 	// Si un fichier "Sans titre.json" existe déjà alors on va boucler avec un compteur afin de créer un
@@ -39,12 +39,12 @@ func (ft *FileTreeExplorer) CreateNewFile() error {
 
 		_, err := os.Create(filepath.Join(ft.Cfg.ConfigFile.LabPath, name))
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		InsertNode(false, &ft.FileTree, name)
+		newNode := InsertNode(false, &ft.FileTree, name)
 		SortNodes(ft.FileTree.Files)
-		return nil
+		return newNode.Name, nil
 	}
 }
 
