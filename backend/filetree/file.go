@@ -56,7 +56,7 @@ func RenameFile() {}
 
 // Supprime le fichier
 func (ft *FileTreeExplorer) DeleteFile(pathFromRoot string) error {
-	err := os.Remove(filepath.Join(ft.Cfg.ConfigFile.LabPath))
+	err := os.Remove(filepath.Join(ft.Cfg.ConfigFile.LabPath, pathFromRoot))
 	if err != nil {
 		return err
 	}

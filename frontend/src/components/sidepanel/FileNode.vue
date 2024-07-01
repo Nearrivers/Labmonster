@@ -37,9 +37,10 @@
             :key="index"
             :node="child"
           ></FileNode>
-        </ul></li
-    ></ContextMenuTrigger>
-    <ContextMenuContent class="w-64">
+        </ul>
+      </li>
+    </ContextMenuTrigger>
+    <!-- <ContextMenuContent class="w-64">
       <ContextMenuItem inset>
         Back
         <ContextMenuShortcut>⌘[</ContextMenuShortcut>
@@ -80,19 +81,13 @@
         </ContextMenuRadioItem>
         <ContextMenuRadioItem value="colm"> Colm Tuite </ContextMenuRadioItem>
       </ContextMenuRadioGroup>
-    </ContextMenuContent>
+    </ContextMenuContent> -->
   </ContextMenu>
 </template>
 
 <script setup lang="ts">
 import { filetree } from '$/models';
 import { computed, ref } from 'vue';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import {
   ContextMenu,
   ContextMenuCheckboxItem,
@@ -108,6 +103,12 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from '@/components/ui/context-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { ChevronRight } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
