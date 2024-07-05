@@ -28,13 +28,23 @@
     <ul
       class="w-full px-2 text-sm text-muted-foreground"
       v-if="files.length > 0"
-      @contextmenu="onRightClick"
+      @contextmenu.prevent="onRightClick"
       @click="onLeftClick"
     >
-      <FileNode v-for="(file, index) in files" :node="file" :key="index" />
+      <FileNode
+        v-for="(file, index) in files"
+        :node="file"
+        :key="index"
+        path=""
+      />
     </ul>
   </ScrollArea>
-  <FileContextMenu ref="fileContextMenu" :x="contextMenuX" :y="contextMenuY" />
+  <FileContextMenu
+    ref="fileContextMenu"
+    :x="contextMenuX"
+    :y="contextMenuY"
+    :selected-node="selectedNode"
+  />
   <FolderContextMenu />
 </template>
 
@@ -48,7 +58,7 @@ import {
 } from '@/components/ui/tooltip';
 import { CreateNewFile } from '$/filetree/FileTreeExplorer';
 import { filetree } from '$/models';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { GetFirstDepth } from '$/filetree/FileTreeExplorer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileNode from '@/components/sidepanel/FileNode.vue';
@@ -59,6 +69,7 @@ const files = ref<filetree.Node[]>([]);
 const contextMenuX = ref(100);
 const contextMenuY = ref(100);
 const fileContextMenu = ref<InstanceType<typeof FileContextMenu> | null>(null);
+const selectedNode = ref<HTMLLIElement | null>(null);
 
 onMounted(async () => {
   try {
@@ -110,10 +121,12 @@ async function createNewFileAtRoot() {
   }
 }
 
-function onRightClick(event: MouseEvent) {
+async function onRightClick(event: MouseEvent) {
   contextMenuX.value = event.clientX;
   contextMenuY.value = event.clientY;
   console.log((event.target as HTMLElement).closest('li'));
+  selectedNode.value = (event.target as HTMLElement).closest('li');
+  await nextTick();
   fileContextMenu.value?.showPopover();
 }
 

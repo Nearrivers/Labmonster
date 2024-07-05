@@ -7,6 +7,11 @@ import (
 	"path/filepath"
 )
 
+var (
+	ErrNoFileInThisLevel = errors.New("aucun fichier à ce niveau")
+	ErrNodeNotFound      = errors.New("le fichier n'a pas été trouvé")
+)
+
 // Fonction utilitaire qui permet de déterminer si un fichier existe au chemin indiqué
 func doesFileExist(path string) bool {
 	_, err := os.Stat(path)
@@ -74,14 +79,14 @@ func DuplicateFile() {}
 // Les noms sont uniques et triés dans l'ordre alphabétique
 func searchFile(name string, level []*Node) (*Node, error) {
 	if len(level) == 0 {
-		return nil, errors.New("aucun fichier à ce niveau")
+		return nil, ErrNoFileInThisLevel
 	}
 
 	if len(level) == 1 {
 		if level[0].Name == name {
 			return level[0], nil
 		} else {
-			return nil, errors.New("le fichier n'a pas été trouvé")
+			return nil, ErrNodeNotFound
 		}
 	}
 
@@ -103,5 +108,5 @@ func searchFile(name string, level []*Node) (*Node, error) {
 		return level[low], nil
 	}
 
-	return nil, errors.New("le fichier n'a pas été trouvé")
+	return nil, ErrNodeNotFound
 }

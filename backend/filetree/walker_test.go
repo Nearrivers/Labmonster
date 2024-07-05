@@ -44,8 +44,8 @@ func TestSame(t *testing.T) {
 	}
 
 	want := true
-	result := Same(&tree, &tree)
-	if want != result {
-		t.Fatal("Un arbre vient d'être comparé à lui-même et Same() à trouvé qu'il été quand même différent")
+	got := Same(&tree, &tree)
+	if want != got {
+		t.Error("Un arbre vient d'être comparé à lui-même et Same() à trouvé qu'il été quand même différent")
 	}
 }
