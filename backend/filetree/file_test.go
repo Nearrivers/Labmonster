@@ -18,7 +18,7 @@ func getNewFileTreeExplorer() *FileTreeExplorer {
 }
 
 func TestCreateNewFile(t *testing.T) {
-	t.Run("Happy path test", func(t *testing.T) {
+	t.Run("Creating one file", func(t *testing.T) {
 		ft := getNewFileTreeExplorer()
 
 		testFileName := "happyPath test"
@@ -73,6 +73,23 @@ func TestCreateNewFile(t *testing.T) {
 			}
 
 			cpt++
+		}
+	})
+
+	t.Run("Checking node presence inside in-memory tree", func(t *testing.T) {
+		ft := getNewFileTreeExplorer()
+
+		fileName := "in-memory test"
+		_, err := ft.CreateNewFile(fileName)
+		if err != nil {
+			t.Errorf("An error occured while creating the file: %v", err)
+		}
+
+		defer ft.DeleteFile(fileName + ".json")
+
+		_, _, err = searchFile(fileName+".json", ft.FileTree.Files)
+		if err != nil {
+			t.Error("The node wasn't found inside the in-memory tree")
 		}
 	})
 }
@@ -157,7 +174,7 @@ func TestDeleteFile(t *testing.T) {
 
 		_, err := ft.CreateNewFile(fileName)
 		if err != nil {
-			t.Error("An error occured while creating the file but should've have")
+			t.Error("An error occured while creating the file but shouldn't have")
 		}
 
 		err = ft.DeleteFile(fileName + ".json")
@@ -169,6 +186,27 @@ func TestDeleteFile(t *testing.T) {
 		got := doesFileExist(filepath.Join(ft.Cfg.ConfigFile.LabPath, fileName+".json"))
 
 		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("Non existant file deletion at first level", func(t *testing.T) {
+		ft := getNewFileTreeExplorer()
+		fileName := "test non existant"
+
+		_, err := ft.CreateNewFile("non-existant")
+		if err != nil {
+			t.Error("An error occured while creating the file but shouldn't have")
+		}
+
+		got := ft.DeleteFile(fileName + ".json")
+		want := os.ErrNotExist
+
+		if got == nil {
+			t.Error("An occured didn't occur but should've")
+		}
+
+		if !errors.Is(got, want) {
 			t.Errorf("got %v, want %v", got, want)
 		}
 	})
