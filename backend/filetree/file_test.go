@@ -9,62 +9,68 @@ import (
 	"testing"
 )
 
+const (
+	TestFileName = "Sans titre test"
+)
+
 func TestCreateNewFile(t *testing.T) {
-	t.Run("Création fichier basique", func(t *testing.T) {
+	t.Run("Happy path test", func(t *testing.T) {
 		ft := NewFileTree(&config.AppConfig{
 			ConfigFile: config.ConfigFile{
 				LabPath: "D:\\Projets\\test\\Lab",
 			},
 		})
 
-		defer ft.DeleteFile("Sans titre.json")
+		want := TestFileName + ".json"
+		defer ft.DeleteFile(want)
 
-		_, err := ft.CreateNewFile()
+		got, err := ft.CreateNewFile(TestFileName)
 		if err != nil {
-			t.Errorf("Une erreur est survenue lors de la création du fichier: %v", err.Error())
+			t.Errorf("An error occured while creating the file: %v", err.Error())
 		}
 
-		_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, "Sans titre.json"))
+		_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, want))
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				t.Error("Le fichier n'a pas été créé")
+				t.Error("The file was not found after its supposed creation")
 			}
-			t.Errorf("Une erreur est survenue lors de la création du fichier: %v", err.Error())
+			t.Errorf("An error occured while using os.Stat: %v", err.Error())
 		}
 
-		if errors.Is(err, os.ErrNotExist) {
-			t.Error("Le fichier n'a pas été créé")
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
 		}
 	})
 
-	t.Run("Création de plusieurs fichiers à la suite", func(t *testing.T) {
+	t.Run("Creating multiple files in a row", func(t *testing.T) {
 		ft := NewFileTree(&config.AppConfig{
 			ConfigFile: config.ConfigFile{
 				LabPath: "D:\\Projets\\test\\Lab",
 			},
 		})
 
-		defer ft.DeleteFile("Sans titre.json")
-		defer ft.DeleteFile("Sans titre 1.json")
-		defer ft.DeleteFile("Sans titre 2.json")
+		defer ft.DeleteFile(TestFileName + ".json")
+		defer ft.DeleteFile(TestFileName + " 1.json")
+		defer ft.DeleteFile(TestFileName + " 2.json")
 
 		cpt := 0
 		for cpt < 3 {
-			_, err := ft.CreateNewFile()
+			_, err := ft.CreateNewFile(TestFileName)
 			if err != nil {
-				t.Errorf("Une erreur est survenue lors de la création du fichier: %v", err.Error())
+				t.Errorf("An error occured while creating the file: %s", err.Error())
 			}
 
 			if cpt > 0 {
-				_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, fmt.Sprintf("Sans titre %d.json", cpt)))
+				_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, fmt.Sprintf(TestFileName+" %d.json", cpt)))
 			} else {
-				_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, "Sans titre.json"))
+				_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, TestFileName+".json"))
 			}
 
-			if errors.Is(err, os.ErrNotExist) {
-				t.Error("Le fichier n'a pas été créé")
-			} else {
-				t.Errorf("Une erreur est survenue lors de la création du fichier: %q", err)
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					t.Fatal("The file was not found after its supposed creation")
+				}
+				t.Errorf("An error occured while using os.Stat: %v", err)
 			}
 
 			cpt++
@@ -72,9 +78,19 @@ func TestCreateNewFile(t *testing.T) {
 	})
 }
 
-// Test du happy path
 func TestSearchFile(t *testing.T) {
-	t.Run("Recherche d'un noeud existant", func(t *testing.T) {
+	assertError := func(t testing.TB, got, want error) {
+		t.Helper()
+
+		if got == nil {
+			t.Error("An error should have occured")
+		}
+
+		if got != want {
+			t.Errorf("got %v want %v", got, want)
+		}
+	}
+	t.Run("Searching for existing node", func(t *testing.T) {
 		ft := NewFileTree(&config.AppConfig{
 			ConfigFile: config.ConfigFile{
 				LabPath: "D:\\Projets\\test\\Lab",
@@ -86,34 +102,32 @@ func TestSearchFile(t *testing.T) {
 		InsertNode(false, &ft.FileTree, "Test 3")
 		InsertNode(false, &ft.FileTree, "Test 4")
 
-		file, err := searchFile("Test 3", ft.FileTree.Files)
+		want := "Test 3"
+		file, err := searchFile(want, ft.FileTree.Files)
 		if err != nil {
 			t.Error(err.Error())
 		}
 
-		if file.Name != "Test 3" {
-			t.Error("Le mauvais noeud à été trouvé")
+		got := file.Name
+
+		if got != want {
+			t.Errorf("got %s want %s", got, want)
 		}
 	})
 
-	t.Run("Recherche d'un noeud dans un niveau vide", func(t *testing.T) {
+	t.Run("Searching in an empty level", func(t *testing.T) {
 		ft := NewFileTree(&config.AppConfig{
 			ConfigFile: config.ConfigFile{
 				LabPath: "D:\\Projets\\test\\Lab",
 			},
 		})
 
-		_, err := searchFile("Test 3", ft.FileTree.Files)
-		if err == nil {
-			t.Error("Une erreur aurait dû survenir")
-		}
-
-		if err != ErrNoFileInThisLevel {
-			t.Error("La mauvaise erreur a été retournée")
-		}
+		want := ErrNoFileInThisLevel
+		_, got := searchFile("Test 3", ft.FileTree.Files)
+		assertError(t, got, want)
 	})
 
-	t.Run("Recherche d'un noeud qui n'existe pas", func(t *testing.T) {
+	t.Run("Searching for a node that doesn't exist", func(t *testing.T) {
 		ft := NewFileTree(&config.AppConfig{
 			ConfigFile: config.ConfigFile{
 				LabPath: "D:\\Projets\\test\\Lab",
@@ -125,13 +139,8 @@ func TestSearchFile(t *testing.T) {
 		InsertNode(false, &ft.FileTree, "Test 3")
 		InsertNode(false, &ft.FileTree, "Test 4")
 
-		_, err := searchFile("Test 5", ft.FileTree.Files)
-		if err == nil {
-			t.Error("Une erreur aurait dû survenir")
-		}
-
-		if err != ErrNodeNotFound {
-			t.Error("La mauvaise erreur a été retournée")
-		}
+		want := ErrNodeNotFound
+		_, got := searchFile("Test 5", ft.FileTree.Files)
+		assertError(t, got, want)
 	})
 }

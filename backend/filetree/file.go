@@ -19,15 +19,15 @@ func doesFileExist(path string) bool {
 }
 
 // Créer un fichier "Sans titre" à la racine et l'ajoute aux noeuds
-func (ft *FileTreeExplorer) CreateNewFile() (string, error) {
+func (ft *FileTreeExplorer) CreateNewFile(newFileName string) (string, error) {
 	// Création d'un fichier "Sans titre.json" si ce dernier n'existe pas
-	if !doesFileExist(filepath.Join(ft.Cfg.ConfigFile.LabPath, "Sans titre.json")) {
-		_, err := os.Create(filepath.Join(ft.Cfg.ConfigFile.LabPath, "Sans titre.json"))
+	if !doesFileExist(filepath.Join(ft.Cfg.ConfigFile.LabPath, newFileName+".json")) {
+		_, err := os.Create(filepath.Join(ft.Cfg.ConfigFile.LabPath, newFileName+".json"))
 		if err != nil {
 			return "", err
 		}
 
-		newNode := InsertNode(false, &ft.FileTree, "Sans titre.json")
+		newNode := InsertNode(false, &ft.FileTree, newFileName+".json")
 		SortNodes(ft.FileTree.Files)
 		return newNode.Name, nil
 	}
@@ -36,7 +36,7 @@ func (ft *FileTreeExplorer) CreateNewFile() (string, error) {
 	// "Sans titre n.json" avec n un compteur incrémenté à chaque fois qu'un fichier du même nom est trouvé
 	cpt := 1
 	for {
-		name := fmt.Sprintf("Sans titre %d.json", cpt)
+		name := fmt.Sprintf("%s %d.json", newFileName, cpt)
 		if doesFileExist(filepath.Join(ft.Cfg.ConfigFile.LabPath, name)) {
 			cpt++
 			continue
@@ -47,9 +47,9 @@ func (ft *FileTreeExplorer) CreateNewFile() (string, error) {
 			return "", err
 		}
 
-		newNode := InsertNode(false, &ft.FileTree, name)
+		InsertNode(false, &ft.FileTree, name)
 		SortNodes(ft.FileTree.Files)
-		return newNode.Name, nil
+		return name, nil
 	}
 }
 
