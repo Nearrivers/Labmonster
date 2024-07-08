@@ -31,7 +31,7 @@
       <Trash2 :stroke-width="1.75" class="h-[16px] w-4" />
       Supprimer
     </li>
-    <DeleteFileDialog :isDialogOpen="isDialogOpen" :fileTitle="path" />
+    <DeleteFileDialog ref="deleteFileDialog" />
   </ul>
 </template>
 
@@ -40,7 +40,7 @@ import { Files } from 'lucide-vue-next';
 import { FolderTree } from 'lucide-vue-next';
 import { PencilLine } from 'lucide-vue-next';
 import { Trash2 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 import DeleteFileDialog from '../AlertDialog/DeleteFileDialog.vue';
 
 const props = defineProps<{
@@ -50,8 +50,9 @@ const props = defineProps<{
 }>();
 
 const menu = ref<any | null>(null);
-const path = ref(props.selectedNode?.dataset.path);
-const isDialogOpen = ref(false);
+const deleteFileDialog = ref<InstanceType<typeof DeleteFileDialog> | null>(
+  null,
+);
 
 function showPopover() {
   menu.value?.showPopover();
@@ -61,8 +62,11 @@ function hidePopover() {
   menu.value?.hidePopover();
 }
 
-function onDeleteClick() {
-  isDialogOpen.value = true;
+async function onDeleteClick() {
+  console.log('bonjour', props.selectedNode?.dataset.path);
+  hidePopover();
+  await nextTick();
+  deleteFileDialog.value?.openDialog(props.selectedNode?.dataset.path!);
 }
 
 defineExpose({

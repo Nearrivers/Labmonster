@@ -61,7 +61,9 @@ const props = defineProps<{
 
 const isOpen = ref(false);
 const isFolder = computed(() => props.node.type === 'DIR');
-const nodePath = ref(props.path + '/' + props.node.name);
+const nodePath = ref(
+  props.path ? props.path + '/' + props.node.name : props.node.name,
+);
 
 function toggle() {
   isOpen.value = !isOpen.value;

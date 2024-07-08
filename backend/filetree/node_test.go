@@ -12,7 +12,7 @@ func TestInsertNode(t *testing.T) {
 
 		wantedName := "nodetest"
 		newNode := InsertNode(false, &testNode, wantedName)
-		if newNode.Name == wantedName {
+		if newNode.Name != wantedName {
 			t.Errorf("got %s want %s", wantedName, newNode.Name)
 		}
 

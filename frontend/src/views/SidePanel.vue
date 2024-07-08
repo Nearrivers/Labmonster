@@ -58,28 +58,46 @@ import {
 } from '@/components/ui/tooltip';
 import { CreateNewFile } from '$/filetree/FileTreeExplorer';
 import { filetree } from '$/models';
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, h } from 'vue';
 import { GetFirstDepth } from '$/filetree/FileTreeExplorer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
 import FolderContextMenu from '@/components/contextmenus/FolderContextMenu.vue';
+import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
+import { ToastAction, useToast } from '@/components/ui/toast';
 
 const files = ref<filetree.Node[]>([]);
 const contextMenuX = ref(100);
 const contextMenuY = ref(100);
 const fileContextMenu = ref<InstanceType<typeof FileContextMenu> | null>(null);
 const selectedNode = ref<HTMLLIElement | null>(null);
+const { toast } = useToast();
 
 onMounted(async () => {
   try {
     files.value = await GetFirstDepth();
-  } catch (error) {}
+  } catch (error) {
+    toast({
+      description: 'Erreur lors du chargement des fichiers du lab',
+      variant: 'destructive',
+      action: h(
+        ToastAction,
+        {
+          altText: 'Réessayer',
+          onClick: () => location.reload(),
+        },
+        {
+          default: () => 'Réessayer',
+        },
+      ),
+    });
+  }
 });
 
 async function createNewFileAtRoot() {
   try {
-    const newFileName = await CreateNewFile();
+    const newFileName = await CreateNewFile(NEW_FILE_NAME);
     files.value.push(
       new filetree.Node({
         name: newFileName,
@@ -117,7 +135,21 @@ async function createNewFileAtRoot() {
       return 0;
     });
   } catch (error) {
-    console.log(error);
+    toast({
+      title: 'Impossible de créer le fichier',
+      description: String(error),
+      variant: 'destructive',
+      action: h(
+        ToastAction,
+        {
+          altText: 'Réessayer',
+          onClick: () => location.reload(),
+        },
+        {
+          default: () => 'Réessayer',
+        },
+      ),
+    });
   }
 }
 

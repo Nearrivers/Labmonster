@@ -9,10 +9,6 @@ import (
 	"testing"
 )
 
-const (
-	TestFileName = "Sans titre test"
-)
-
 func TestCreateNewFile(t *testing.T) {
 	t.Run("Happy path test", func(t *testing.T) {
 		ft := NewFileTree(&config.AppConfig{
@@ -21,10 +17,12 @@ func TestCreateNewFile(t *testing.T) {
 			},
 		})
 
-		want := TestFileName + ".json"
+		testFileName := "happyPath test"
+
+		want := testFileName + ".json"
 		defer ft.DeleteFile(want)
 
-		got, err := ft.CreateNewFile(TestFileName)
+		got, err := ft.CreateNewFile(testFileName)
 		if err != nil {
 			t.Errorf("An error occured while creating the file: %v", err.Error())
 		}
@@ -49,21 +47,22 @@ func TestCreateNewFile(t *testing.T) {
 			},
 		})
 
-		defer ft.DeleteFile(TestFileName + ".json")
-		defer ft.DeleteFile(TestFileName + " 1.json")
-		defer ft.DeleteFile(TestFileName + " 2.json")
+		testFileName := "Multiple test"
+		defer ft.DeleteFile(testFileName + ".json")
+		defer ft.DeleteFile(testFileName + " 1.json")
+		defer ft.DeleteFile(testFileName + " 2.json")
 
 		cpt := 0
 		for cpt < 3 {
-			_, err := ft.CreateNewFile(TestFileName)
+			_, err := ft.CreateNewFile(testFileName)
 			if err != nil {
 				t.Errorf("An error occured while creating the file: %s", err.Error())
 			}
 
 			if cpt > 0 {
-				_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, fmt.Sprintf(TestFileName+" %d.json", cpt)))
+				_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, fmt.Sprintf(testFileName+" %d.json", cpt)))
 			} else {
-				_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, TestFileName+".json"))
+				_, err = os.Stat(filepath.Join(ft.Cfg.ConfigFile.LabPath, testFileName+".json"))
 			}
 
 			if err != nil {
