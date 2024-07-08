@@ -9,13 +9,17 @@ import (
 	"testing"
 )
 
+func getNewFileTreeExplorer() *FileTreeExplorer {
+	return NewFileTree(&config.AppConfig{
+		ConfigFile: config.ConfigFile{
+			LabPath: "D:\\Projets\\test",
+		},
+	})
+}
+
 func TestCreateNewFile(t *testing.T) {
 	t.Run("Happy path test", func(t *testing.T) {
-		ft := NewFileTree(&config.AppConfig{
-			ConfigFile: config.ConfigFile{
-				LabPath: "D:\\Projets\\test\\Lab",
-			},
-		})
+		ft := getNewFileTreeExplorer()
 
 		testFileName := "happyPath test"
 
@@ -41,11 +45,7 @@ func TestCreateNewFile(t *testing.T) {
 	})
 
 	t.Run("Creating multiple files in a row", func(t *testing.T) {
-		ft := NewFileTree(&config.AppConfig{
-			ConfigFile: config.ConfigFile{
-				LabPath: "D:\\Projets\\test\\Lab",
-			},
-		})
+		ft := getNewFileTreeExplorer()
 
 		testFileName := "Multiple test"
 		defer ft.DeleteFile(testFileName + ".json")
@@ -102,15 +102,21 @@ func TestSearchFile(t *testing.T) {
 		InsertNode(false, &ft.FileTree, "Test 4")
 
 		want := "Test 3"
-		file, err := searchFile(want, ft.FileTree.Files)
+		wantedIndex := 2
+		file, index, err := searchFile(want, ft.FileTree.Files)
 		if err != nil {
 			t.Error(err.Error())
 		}
 
 		got := file.Name
+		gotIndex := index
 
 		if got != want {
 			t.Errorf("got %s want %s", got, want)
+		}
+
+		if gotIndex != wantedIndex {
+			t.Errorf("Indexes are different: got %d, want %d", gotIndex, wantedIndex)
 		}
 	})
 
@@ -122,7 +128,7 @@ func TestSearchFile(t *testing.T) {
 		})
 
 		want := ErrNoFileInThisLevel
-		_, got := searchFile("Test 3", ft.FileTree.Files)
+		_, _, got := searchFile("Test 3", ft.FileTree.Files)
 		assertError(t, got, want)
 	})
 
@@ -139,7 +145,31 @@ func TestSearchFile(t *testing.T) {
 		InsertNode(false, &ft.FileTree, "Test 4")
 
 		want := ErrNodeNotFound
-		_, got := searchFile("Test 5", ft.FileTree.Files)
+		_, _, got := searchFile("Test 5", ft.FileTree.Files)
 		assertError(t, got, want)
+	})
+}
+
+func TestDeleteFile(t *testing.T) {
+	t.Run("Existing file deletion at first level", func(t *testing.T) {
+		ft := getNewFileTreeExplorer()
+		fileName := "test delete"
+
+		_, err := ft.CreateNewFile(fileName)
+		if err != nil {
+			t.Error("An error occured while creating the file but should've have")
+		}
+
+		err = ft.DeleteFile(fileName + ".json")
+		if err != nil {
+			t.Errorf("An error occured while deleting the file: %v", err)
+		}
+
+		want := false
+		got := doesFileExist(filepath.Join(ft.Cfg.ConfigFile.LabPath, fileName+".json"))
+
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
 	})
 }

@@ -2,8 +2,8 @@ package filetree
 
 import "testing"
 
-func TestSame(t *testing.T) {
-	tree := Node{
+func getTestTree() Node {
+	return Node{
 		Name: "Lab",
 		Type: DIR,
 		Files: []*Node{
@@ -42,12 +42,16 @@ func TestSame(t *testing.T) {
 			},
 		},
 	}
+}
+func TestSame(t *testing.T) {
+	tree := getTestTree()
 
 	t.Run("Tree compared to himself", func(t *testing.T) {
+		otherTree := getTestTree()
 		want := true
-		got := Same(&tree, &tree)
+		got := Same(&tree, &otherTree)
 		if want != got {
-			t.Error("The three was compared with himself and the function still found it was different")
+			t.Error("The three was compared with an identical tree and the function still found it was different")
 		}
 	})
 

@@ -1,12 +1,19 @@
 package filetree
 
-import "sort"
+import (
+	"errors"
+	"sort"
+)
 
 type NodeType string
 
 const (
 	FILE NodeType = "FILE"
 	DIR  NodeType = "DIR"
+)
+
+var (
+	ErrIndexOutOfBounds = errors.New("l'index donné est trop grand")
 )
 
 type Node struct {
@@ -43,4 +50,29 @@ func InsertNode(isDir bool, node *Node, name string) *Node {
 	node.Files = append(node.Files, &newNode)
 
 	return &newNode
+}
+
+func RemoveNode(node *Node, name string) (*Node, error) {
+	_, index, err := searchFile(name, node.Files)
+	if err != nil {
+		return nil, err
+	}
+
+	newFiles, err := removeIndex(node.Files, index)
+	if err != nil {
+		return nil, err
+	}
+
+	node.Files = newFiles
+	return node, nil
+}
+
+func removeIndex(n []*Node, index int) ([]*Node, error) {
+	if index >= len(n) {
+		return nil, ErrIndexOutOfBounds
+	}
+
+	ret := make([]*Node, 0)
+	ret = append(ret, n[:index]...)
+	return append(ret, n[index+1:]...), nil
 }

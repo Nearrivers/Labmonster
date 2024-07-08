@@ -18,21 +18,23 @@ func doesFileExist(path string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-// Créer un fichier "Sans titre" à la racine et l'ajoute aux noeuds
+// Créer un fichier à la racine et l'ajoute aux noeuds
 func (ft *FileTreeExplorer) CreateNewFile(newFileName string) (string, error) {
-	// Création d'un fichier "Sans titre.json" si ce dernier n'existe pas
+	// Création d'un fichier si ce dernier n'existe pas
 	if !doesFileExist(filepath.Join(ft.Cfg.ConfigFile.LabPath, newFileName+".json")) {
-		_, err := os.Create(filepath.Join(ft.Cfg.ConfigFile.LabPath, newFileName+".json"))
+		f, err := os.Create(filepath.Join(ft.Cfg.ConfigFile.LabPath, newFileName+".json"))
 		if err != nil {
 			return "", err
 		}
+
+		defer f.Close()
 
 		newNode := InsertNode(false, &ft.FileTree, newFileName+".json")
 		SortNodes(ft.FileTree.Files)
 		return newNode.Name, nil
 	}
 
-	// Si un fichier "Sans titre.json" existe déjà alors on va boucler avec un compteur afin de créer un
+	// Si un fichier avec le même nom existe déjà alors on va boucler avec un compteur afin de créer un
 	// "Sans titre n.json" avec n un compteur incrémenté à chaque fois qu'un fichier du même nom est trouvé
 	cpt := 1
 	for {
@@ -42,10 +44,12 @@ func (ft *FileTreeExplorer) CreateNewFile(newFileName string) (string, error) {
 			continue
 		}
 
-		_, err := os.Create(filepath.Join(ft.Cfg.ConfigFile.LabPath, name))
+		f, err := os.Create(filepath.Join(ft.Cfg.ConfigFile.LabPath, name))
 		if err != nil {
 			return "", err
 		}
+
+		defer f.Close()
 
 		InsertNode(false, &ft.FileTree, name)
 		SortNodes(ft.FileTree.Files)
@@ -77,16 +81,16 @@ func DuplicateFile() {}
 
 // Implémente une recherche binaire du noeud via son nom
 // Les noms sont uniques et triés dans l'ordre alphabétique
-func searchFile(name string, level []*Node) (*Node, error) {
+func searchFile(name string, level []*Node) (*Node, int, error) {
 	if len(level) == 0 {
-		return nil, ErrNoFileInThisLevel
+		return nil, -1, ErrNoFileInThisLevel
 	}
 
 	if len(level) == 1 {
 		if level[0].Name == name {
-			return level[0], nil
+			return level[0], 0, nil
 		} else {
-			return nil, ErrNodeNotFound
+			return nil, -1, ErrNodeNotFound
 		}
 	}
 
@@ -105,8 +109,8 @@ func searchFile(name string, level []*Node) (*Node, error) {
 	}
 
 	if low != len(level) && level[low].Name == name {
-		return level[low], nil
+		return level[low], low, nil
 	}
 
-	return nil, ErrNodeNotFound
+	return nil, -1, ErrNodeNotFound
 }
