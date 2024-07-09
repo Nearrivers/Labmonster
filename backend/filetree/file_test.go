@@ -199,6 +199,8 @@ func TestDeleteFile(t *testing.T) {
 			t.Error("An error occured while creating the file but shouldn't have")
 		}
 
+		defer ft.DeleteFile("non-existant.json")
+
 		got := ft.DeleteFile(fileName + ".json")
 		want := os.ErrNotExist
 

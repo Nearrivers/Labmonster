@@ -31,7 +31,10 @@
       <Trash2 :stroke-width="1.75" class="h-[16px] w-4" />
       Supprimer
     </li>
-    <DeleteFileDialog ref="deleteFileDialog" />
+    <DeleteFileDialog
+      ref="deleteFileDialog"
+      :path="props.selectedNode?.dataset.path"
+    ></DeleteFileDialog>
   </ul>
 </template>
 
@@ -63,11 +66,12 @@ function hidePopover() {
 }
 
 async function onDeleteClick() {
-  console.log('bonjour', props.selectedNode?.dataset.path);
   hidePopover();
   await nextTick();
   deleteFileDialog.value?.openDialog(props.selectedNode?.dataset.path!);
 }
+
+function onFileDelete() {}
 
 defineExpose({
   showPopover,
