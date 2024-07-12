@@ -25,8 +25,12 @@ func NewFileTree(cfg *config.AppConfig) *FileTreeExplorer {
 	}
 }
 
+func (ft *FileTreeExplorer) GetLabPath() string {
+	return ft.Cfg.ConfigFile.LabPath
+}
+
 func (ft *FileTreeExplorer) GetFirstDepth() ([]*Node, error) {
-	entries, err := os.ReadDir(ft.Cfg.ConfigFile.LabPath)
+	entries, err := os.ReadDir(ft.GetLabPath())
 	if err != nil {
 		return nil, err
 	}
@@ -68,17 +72,17 @@ func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 	visited = append(visited, lastInsertedNode)
 
 	// TODO: Cette méthode peut très probablement être optimisée
-	err := filepath.WalkDir(ft.Cfg.ConfigFile.LabPath, func(path string, d fs.DirEntry, err error) error {
+	err := filepath.WalkDir(ft.GetLabPath(), func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		// On skip la lecture du dossier
-		if path == ft.Cfg.ConfigFile.LabPath {
+		if path == ft.GetLabPath() {
 			return nil
 		}
 
-		pathFromLab := strings.Split(path, ft.Cfg.ConfigFile.LabPath+string(filepath.Separator))[1]
+		pathFromLab := strings.Split(path, ft.GetLabPath()+string(filepath.Separator))[1]
 		nodes := strings.Split(pathFromLab, string(filepath.Separator))
 		currentDepth := len(nodes)
 		ft.Logger.Debug(pathFromLab + " Profondeur: " + fmt.Sprint(currentDepth))
@@ -121,7 +125,7 @@ func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 	})
 
 	if err != nil {
-		ft.Logger.Error("erreur lors de l'obtention des dossiers:" + err.Error() + " chemin: " + ft.Cfg.ConfigFile.LabPath)
+		ft.Logger.Error("erreur lors de l'obtention des dossiers:" + err.Error() + " chemin: " + ft.GetLabPath())
 		return nil, err
 	}
 

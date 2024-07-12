@@ -16,6 +16,7 @@ describe('DeleFileDialog', () => {
     wrapper.vm.openDialog("test")
     await nextTick()
 
+    // Ne fonctionnent pas à cause du warning "Extraneous props...."
     const dialog = wrapper.find('[data-test="dialog"]')
     expect(dialog.exists()).toBe(true)
     const description = wrapper.find('[data-test="description"]')

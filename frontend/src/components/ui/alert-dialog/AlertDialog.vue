@@ -14,6 +14,8 @@ const forwarded = useForwardPropsEmits(props, emits);
 
 <template>
   <AlertDialogRoot v-bind="forwarded" :class="'!max-w-48'">
-    <slot />
+    <div>
+      <slot />
+    </div>
   </AlertDialogRoot>
 </template>

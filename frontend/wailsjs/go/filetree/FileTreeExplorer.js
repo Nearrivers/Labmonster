@@ -14,6 +14,14 @@ export function GetFirstDepth() {
   return window['go']['filetree']['FileTreeExplorer']['GetFirstDepth']();
 }
 
+export function GetLabPath() {
+  return window['go']['filetree']['FileTreeExplorer']['GetLabPath']();
+}
+
 export function GetTheWholeTree() {
   return window['go']['filetree']['FileTreeExplorer']['GetTheWholeTree']();
+}
+
+export function RenameFile(arg1, arg2, arg3) {
+  return window['go']['filetree']['FileTreeExplorer']['RenameFile'](arg1, arg2, arg3);
 }
