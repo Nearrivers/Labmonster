@@ -62,7 +62,7 @@ func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (string, err
 }
 
 // Sauvegarde le fichier JSON du graph
-func SaveFile() {}
+func (ft *FileTreeExplorer) SaveFile() {}
 
 // Renomme le fichier
 func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName string) error {
@@ -210,7 +210,7 @@ func fileContentCompare(ft *FileTreeExplorer, file1, file2 string) error {
 
 // Implémente une recherche binaire du noeud via son nom
 // Les noms sont uniques et triés dans l'ordre alphabétique
-func searchFile(name string, level []*Node) (*Node, int, error) {
+func searchFileOrDir(name string, level []*Node) (*Node, int, error) {
 	if len(level) == 0 {
 		return nil, -1, ErrNoFileInThisLevel
 	}
@@ -242,8 +242,4 @@ func searchFile(name string, level []*Node) (*Node, int, error) {
 	}
 
 	return nil, -1, ErrNodeNotFound
-}
-
-func findNodeWithPath(pathToFile string, node *Node) {
-
 }

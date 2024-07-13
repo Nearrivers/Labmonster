@@ -88,7 +88,7 @@ func TestCreateNewFile(t *testing.T) {
 
 		defer ft.DeleteFile(fileName)
 
-		_, _, err = searchFile(fileName+".json", ft.FileTree.Files)
+		_, _, err = searchFileOrDir(fileName+".json", ft.FileTree.Files)
 		if err != nil {
 			t.Error("The node wasn't found inside the in-memory tree")
 		}
@@ -121,7 +121,7 @@ func TestSearchFile(t *testing.T) {
 
 		want := "Test 3"
 		wantedIndex := 2
-		file, index, err := searchFile(want, ft.FileTree.Files)
+		file, index, err := searchFileOrDir(want, ft.FileTree.Files)
 		if err != nil {
 			t.Error(err.Error())
 		}
@@ -146,7 +146,7 @@ func TestSearchFile(t *testing.T) {
 		})
 
 		want := ErrNoFileInThisLevel
-		_, _, got := searchFile("Test 3", ft.FileTree.Files)
+		_, _, got := searchFileOrDir("Test 3", ft.FileTree.Files)
 		assertError(t, got, want)
 	})
 
@@ -163,7 +163,7 @@ func TestSearchFile(t *testing.T) {
 		InsertNode(false, &ft.FileTree, "Test 4")
 
 		want := ErrNodeNotFound
-		_, _, got := searchFile("Test 5", ft.FileTree.Files)
+		_, _, got := searchFileOrDir("Test 5", ft.FileTree.Files)
 		assertError(t, got, want)
 	})
 }

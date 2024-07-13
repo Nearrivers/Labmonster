@@ -18,9 +18,9 @@ func TestCheckConfigPresence(t *testing.T) {
 
 	ac.CreateAppConfig(wd)
 	want := true
-	result := ac.CheckConfigPresenceAndLoadIt()
+	got := ac.CheckConfigPresenceAndLoadIt()
 
-	if result != want {
+	if got != want {
 		t.Error("La config n'a pas été trouvée alors qu'elle est créée")
 	}
 }

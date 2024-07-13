@@ -29,34 +29,70 @@ func (ft *FileTreeExplorer) GetLabPath() string {
 	return ft.Cfg.ConfigFile.LabPath
 }
 
-func (ft *FileTreeExplorer) GetFirstDepth() ([]*Node, error) {
-	entries, err := os.ReadDir(ft.GetLabPath())
+func (ft *FileTreeExplorer) GetSubDirAndFiles(pathFromLabRoot string) ([]*Node, error) {
+	dirPath := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
+	entries, err := os.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
 	}
 
-	dirNames := make([]*Node, 0)
+	nodes := ft.createNodesFromDirEntries(entries)
 
+	if len(nodes) > 0 {
+		err = ft.SetNodeFiles(pathFromLabRoot, nodes)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return nodes, nil
+}
+
+func (ft *FileTreeExplorer) SetNodeFiles(pathFromLabRoot string, nodes []*Node) error {
+	if pathFromLabRoot == "" {
+		ft.FileTree.Files = nodes
+		return nil
+	}
+
+	separator := string(filepath.Separator)
+	path := strings.Split(pathFromLabRoot, separator)
+	n := &ft.FileTree
+
+	for _, dir := range path {
+		SortNodes(n.Files)
+		node, _, err := searchFileOrDir(dir, n.Files)
+		if err != nil {
+			return err
+		}
+
+		n = node
+	}
+
+	n.Files = nodes
+	return nil
+}
+
+func (ft *FileTreeExplorer) createNodesFromDirEntries(entries []fs.DirEntry) []*Node {
+	dirNames := make([]*Node, 0)
 	for _, entry := range entries {
 		if entry.Name() == ".labmonster" && entry.IsDir() {
 			continue
 		}
 
-		newSimpleNode := Node{
+		newNode := Node{
 			Name:  entry.Name(),
 			Files: make([]*Node, 0),
 		}
 
 		if entry.IsDir() {
-			newSimpleNode.Type = DIR
+			newNode.Type = DIR
 		} else {
-			newSimpleNode.Type = FILE
+			newNode.Type = FILE
 		}
-		dirNames = append(dirNames, &newSimpleNode)
-	}
 
-	SortNodes(dirNames)
-	return dirNames, nil
+		dirNames = append(dirNames, &newNode)
+	}
+	return dirNames
 }
 
 func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {

@@ -53,7 +53,7 @@ func InsertNode(isDir bool, node *Node, name string) *Node {
 }
 
 func RemoveNode(node *Node, name string) (*Node, error) {
-	_, index, err := searchFile(name, node.Files)
+	_, index, err := searchFileOrDir(name, node.Files)
 	if err != nil {
 		return nil, err
 	}
