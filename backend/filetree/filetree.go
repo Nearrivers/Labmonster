@@ -73,6 +73,23 @@ func (ft *FileTreeExplorer) RemoveNode(pathFromLabRoot string) error {
 		return ErrPathMissing
 	}
 
+	path := strings.Split(pathFromLabRoot, string(filepath.Separator))
+
+	if len(path) == 1 {
+		_, i, err := searchFileOrDir(pathFromLabRoot, ft.FileTree.Files)
+		if err != nil {
+			return err
+		}
+
+		newFiles, err := removeIndex(ft.FileTree.Files, i)
+		if err != nil {
+			return err
+		}
+
+		ft.FileTree.Files = newFiles
+		return nil
+	}
+
 	n, i, err := ft.FindNodeWithPath(pathFromLabRoot)
 	if err != nil {
 		return err

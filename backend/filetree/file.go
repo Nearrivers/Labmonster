@@ -22,7 +22,7 @@ func doesFileExist(path string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-// Créer un fichier à la racine et l'ajoute aux noeuds
+// Create a file at lab root and adds it to the in-memory tree
 func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (string, error) {
 	// Création d'un fichier si ce dernier n'existe pas
 	if !doesFileExist(filepath.Join(ft.GetLabPath(), newFileName+".json")) {
@@ -91,7 +91,10 @@ func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
 		return err
 	}
 
-	// TODO: Suppression du fichier dans l'arbre en mémoire
+	err = ft.RemoveNode(pathFromRootOfTheLab)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
