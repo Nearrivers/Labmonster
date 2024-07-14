@@ -52,21 +52,6 @@ func InsertNode(isDir bool, node *Node, name string) *Node {
 	return &newNode
 }
 
-func RemoveNode(node *Node, name string) (*Node, error) {
-	_, index, err := searchFileOrDir(name, node.Files)
-	if err != nil {
-		return nil, err
-	}
-
-	newFiles, err := removeIndex(node.Files, index)
-	if err != nil {
-		return nil, err
-	}
-
-	node.Files = newFiles
-	return node, nil
-}
-
 func removeIndex(n []*Node, index int) ([]*Node, error) {
 	if index >= len(n) {
 		return nil, ErrIndexOutOfBounds

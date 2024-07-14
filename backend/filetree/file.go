@@ -75,6 +75,8 @@ func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName st
 		return err
 	}
 
+	// TODO: Renommer le fichier dans l'arbre en mémoire
+
 	return nil
 }
 

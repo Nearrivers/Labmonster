@@ -1,6 +1,7 @@
 package filetree
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -10,6 +11,10 @@ import (
 	"flow-poc/backend/config"
 
 	"github.com/wailsapp/wails/v2/pkg/logger"
+)
+
+var (
+	ErrPathMissing = errors.New("un chemin vers un fichier doit être donné")
 )
 
 type FileTreeExplorer struct {
@@ -54,22 +59,52 @@ func (ft *FileTreeExplorer) SetNodeFiles(pathFromLabRoot string, nodes []*Node) 
 		return nil
 	}
 
-	separator := string(filepath.Separator)
-	path := strings.Split(pathFromLabRoot, separator)
-	n := &ft.FileTree
-
-	for _, dir := range path {
-		SortNodes(n.Files)
-		node, _, err := searchFileOrDir(dir, n.Files)
-		if err != nil {
-			return err
-		}
-
-		n = node
+	n, _, err := ft.FindNodeWithPath(pathFromLabRoot)
+	if err != nil {
+		return err
 	}
 
 	n.Files = nodes
 	return nil
+}
+
+func (ft *FileTreeExplorer) RemoveNode(pathFromLabRoot string) error {
+	if pathFromLabRoot == "" {
+		return ErrPathMissing
+	}
+
+	n, i, err := ft.FindNodeWithPath(pathFromLabRoot)
+	if err != nil {
+		return err
+	}
+
+	newFiles, err := removeIndex(n.Files, i)
+	if err != nil {
+		return err
+	}
+
+	n.Files = newFiles
+	return nil
+}
+
+func (ft *FileTreeExplorer) FindNodeWithPath(pathFromLabRoot string) (*Node, int, error) {
+	separator := string(filepath.Separator)
+	path := strings.Split(pathFromLabRoot, separator)
+	n := &ft.FileTree
+	index := 0
+
+	for _, dir := range path {
+		SortNodes(n.Files)
+		node, i, err := searchFileOrDir(dir, n.Files)
+		if err != nil {
+			return nil, -1, err
+		}
+
+		n = node
+		index = i
+	}
+
+	return n, index, nil
 }
 
 func (ft *FileTreeExplorer) createNodesFromDirEntries(entries []fs.DirEntry) []*Node {
