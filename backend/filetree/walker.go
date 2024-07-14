@@ -7,7 +7,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/logger"
 )
 
-// Implemente l'interface sort
+// Implement the sort interface
 type NodeSequences []Node
 
 func (ns NodeSequences) Len() int {
@@ -18,7 +18,7 @@ func (ns NodeSequences) Swap(i, j int) {
 	ns[i], ns[j] = ns[j], ns[i]
 }
 
-// Les noeuds sont triés dans l'ordre alphabétique
+// Nodes are sorted in alphabetical order
 func (ns NodeSequences) Less(i, j int) bool {
 	return ns[i].Name < ns[j].Name
 }
@@ -48,7 +48,7 @@ func walkRecursively(node *Node, ch chan Node) {
 	}
 }
 
-// Permet de log l'arbre dans la console pour débugger
+// Print the tree for debugging purposes
 func PrintTree(fileTree Node) {
 	ch1 := make(chan Node)
 
@@ -56,11 +56,11 @@ func PrintTree(fileTree Node) {
 
 	for n1 := range ch1 {
 		logger := logger.NewDefaultLogger()
-		logger.Debug(fmt.Sprintf("Nom: %s, Type: %s", n1.Name, n1.Type))
+		logger.Debug(fmt.Sprintf("Name: %s, Type: %s", n1.Name, n1.Type))
 	}
 }
 
-// Fonction utilisée pour les tests. Permet de comparer 2 arbres et de retourner si oui ou non ils sont identiques
+// Used in tests (for now). Compare 2 trees and tells whether or not they are identicals
 func Same(fileTree, otherFileTree *Node) bool {
 	ch1 := make(chan Node)
 	ch2 := make(chan Node)

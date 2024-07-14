@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	ErrPathMissing = errors.New("un chemin vers un fichier doit être donné")
+	ErrPathMissing = errors.New("the path must be specified")
 )
 
 type FileTreeExplorer struct {
@@ -107,6 +107,8 @@ func (ft *FileTreeExplorer) FindNodeWithPath(pathFromLabRoot string) (*Node, int
 	return n, index, nil
 }
 
+// Takes an array of fs.DirEntry to create an array of type *Node and returns it
+// This function ignore any .labmonster directory as it might contain config files that are not relevant to the user
 func (ft *FileTreeExplorer) createNodesFromDirEntries(entries []fs.DirEntry) []*Node {
 	dirNames := make([]*Node, 0)
 	for _, entry := range entries {
@@ -130,6 +132,7 @@ func (ft *FileTreeExplorer) createNodesFromDirEntries(entries []fs.DirEntry) []*
 	return dirNames
 }
 
+// Not used anymore but was a fun exercice
 func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 	ft.FileTree = Node{
 		Name:  "Lab",
@@ -142,7 +145,6 @@ func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 	lastInsertedNode := &ft.FileTree
 	visited = append(visited, lastInsertedNode)
 
-	// TODO: Cette méthode peut très probablement être optimisée
 	err := filepath.WalkDir(ft.GetLabPath(), func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err

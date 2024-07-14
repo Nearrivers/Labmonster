@@ -10,7 +10,7 @@ func TestCheckConfigPresence(t *testing.T) {
 	ac := NewAppConfig()
 	wd, err := os.Getwd()
 	if err != nil {
-		t.Error("Impossible de récupérer le répertoire de travail")
+		t.Error("cannot retrieve working directory")
 	}
 
 	defer os.Remove(filepath.Join(wd, "config.toml"))
@@ -21,6 +21,6 @@ func TestCheckConfigPresence(t *testing.T) {
 	got := ac.CheckConfigPresenceAndLoadIt()
 
 	if got != want {
-		t.Error("La config n'a pas été trouvée alors qu'elle est créée")
+		t.Error("config was not found")
 	}
 }

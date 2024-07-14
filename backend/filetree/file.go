@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	ErrNoFileInThisLevel = errors.New("aucun fichier à ce niveau")
-	ErrNodeNotFound      = errors.New("le fichier n'a pas été trouvé")
-	ErrFileAreDifferent  = errors.New("les 2 fichiers ne sont pas égaux")
+	ErrNoFileInThisLevel = errors.New("no file at this level")
+	ErrNodeNotFound      = errors.New("file not found")
+	ErrFileAreDifferent  = errors.New("the 2 files are different")
 )
 
 // Fonction utilitaire qui permet de déterminer si un fichier existe au chemin indiqué
@@ -64,7 +64,7 @@ func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (string, err
 // Sauvegarde le fichier JSON du graph
 func (ft *FileTreeExplorer) SaveFile() {}
 
-// Renomme le fichier
+// Rename a file on the user's machine and inside the in-memory tree
 func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName string) error {
 	labPath := ft.GetLabPath()
 	oldPath := filepath.Join(labPath, pathFromRootOfTheLab, oldName)
@@ -80,7 +80,7 @@ func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName st
 	return nil
 }
 
-// Supprime le fichier
+// Deletes a file on the user's machine and from the in-memory tree
 func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
 	if !strings.Contains(string(pathFromRootOfTheLab), ".json") {
 		pathFromRootOfTheLab += ".json"
@@ -101,7 +101,8 @@ func (ft *FileTreeExplorer) MoveFile(oldPath, newPath string) {
 
 }
 
-// Créer un fichier xxxx n.json où n est un nombre afin d'éviter des noms en double
+// Create a file named after the fileName argument. If the file already exists, it will try
+// to add a number at the end to avoid duplicates
 func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, fileName string) (newFileName string, error error) {
 	labPath := ft.GetLabPath()
 	path := filepath.Join(labPath, pathToFileFromLabRoot)
@@ -144,7 +145,7 @@ func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, fileName string
 	return stat.Name(), nil
 }
 
-// Prend deux fichiers et copie le contenu du premier dans le second
+// Take two files and copy the content of the first into the second
 func copyFile(inputFile, outputFile *os.File) error {
 	_, err := io.Copy(outputFile, inputFile)
 	if err != nil {
@@ -154,8 +155,9 @@ func copyFile(inputFile, outputFile *os.File) error {
 	return nil
 }
 
-// Compare le contenu de 2 fichiers. Le but est d'échouer le plus vite possible
-// donc on lit les fichiers par morceaux de 2000 octets définis par la variable chunkSize
+// Function used in tests
+// Compare 2 files content. The goal is to fail asap
+// Read files by chunks defined by the chunkSize variable
 func fileContentCompare(ft *FileTreeExplorer, file1, file2 string) error {
 	const chunkSize = 2000
 	path1 := filepath.Join(ft.GetLabPath(), file1)
@@ -210,8 +212,8 @@ func fileContentCompare(ft *FileTreeExplorer, file1, file2 string) error {
 	}
 }
 
-// Implémente une recherche binaire du noeud via son nom
-// Les noms sont uniques et triés dans l'ordre alphabétique
+// Binary search of a node using its name
+// Node names are unique and they are sorted in alphabetical order
 func searchFileOrDir(name string, level []*Node) (*Node, int, error) {
 	if len(level) == 0 {
 		return nil, -1, ErrNoFileInThisLevel
