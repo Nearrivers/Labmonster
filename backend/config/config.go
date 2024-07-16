@@ -12,6 +12,8 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+const configFileName = "config.toml"
+
 type ConfigFile struct {
 	LabPath string `toml:"labpath"`
 }
@@ -64,7 +66,7 @@ func (ac *AppConfig) CreateAppConfig(configDirPath string) {
 	}
 
 	go func() {
-		// Création du dossier "Lab" s'il n'existe pas
+		// Creating the .labmonster config directory if it doesn't exists
 		err := os.MkdirAll(filepath.Join(configDirPath, ".labmonster"), os.ModePerm)
 		if err != nil {
 			ac.Logger.Error(err.Error())
@@ -77,7 +79,7 @@ func (ac *AppConfig) CreateAppConfig(configDirPath string) {
 		return
 	}
 
-	err = os.WriteFile("config.toml", data, os.ModePerm)
+	err = os.WriteFile(configFileName, data, os.ModePerm)
 	if err != nil {
 		ac.Logger.Error(err.Error())
 		return
@@ -88,7 +90,7 @@ func (ac *AppConfig) CreateAppConfig(configDirPath string) {
 
 // Vérifie la présence du fichie de configuration et le charge si c'est le cas
 func (ac *AppConfig) CheckConfigPresenceAndLoadIt() bool {
-	if _, err := os.Stat("config.toml"); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(configFileName); errors.Is(err, os.ErrNotExist) {
 		ac.Logger.Error(err.Error())
 		return false
 	}
@@ -98,7 +100,7 @@ func (ac *AppConfig) CheckConfigPresenceAndLoadIt() bool {
 
 // Charge le fichier de configuration
 func (ac *AppConfig) LoadConfigFile() {
-	f, err := os.Open("config.toml")
+	f, err := os.Open(configFileName)
 	if err != nil {
 		ac.Logger.Error(err.Error())
 		return

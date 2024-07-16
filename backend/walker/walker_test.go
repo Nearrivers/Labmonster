@@ -1,29 +1,32 @@
-package filetree
+package walker
 
-import "testing"
+import (
+	"flow-poc/backend/filetree"
+	"testing"
+)
 
-func getTestTree() Node {
-	return Node{
+func getTestTree() filetree.Node {
+	return filetree.Node{
 		Name: "Lab",
-		Type: DIR,
-		Files: []*Node{
+		Type: filetree.DIR,
+		Files: []*filetree.Node{
 			{
 				Name: "Training",
-				Type: DIR,
-				Files: []*Node{
+				Type: filetree.DIR,
+				Files: []*filetree.Node{
 					{
 						Name:  "Test.txt",
-						Type:  FILE,
-						Files: []*Node{},
+						Type:  filetree.FILE,
+						Files: []*filetree.Node{},
 					},
 					{
 						Name: "sous-lab",
-						Type: DIR,
-						Files: []*Node{
+						Type: filetree.DIR,
+						Files: []*filetree.Node{
 							{
 								Name:  "Test2.txt",
-								Type:  FILE,
-								Files: []*Node{},
+								Type:  filetree.FILE,
+								Files: []*filetree.Node{},
 							},
 						},
 					},
@@ -31,12 +34,12 @@ func getTestTree() Node {
 			},
 			{
 				Name: "Foo",
-				Type: DIR,
-				Files: []*Node{
+				Type: filetree.DIR,
+				Files: []*filetree.Node{
 					{
 						Name:  "Bar.txt",
-						Type:  FILE,
-						Files: []*Node{},
+						Type:  filetree.FILE,
+						Files: []*filetree.Node{},
 					},
 				},
 			},
@@ -56,18 +59,18 @@ func TestSame(t *testing.T) {
 	})
 
 	t.Run("Compared to a different tree", func(t *testing.T) {
-		otherTree := Node{
+		otherTree := filetree.Node{
 			Name: "Lab",
-			Type: DIR,
-			Files: []*Node{
+			Type: filetree.DIR,
+			Files: []*filetree.Node{
 				{
 					Name: "Training",
-					Type: DIR,
-					Files: []*Node{
+					Type: filetree.DIR,
+					Files: []*filetree.Node{
 						{
 							Name:  "Test.txt",
-							Type:  FILE,
-							Files: []*Node{},
+							Type:  filetree.FILE,
+							Files: []*filetree.Node{},
 						},
 					},
 				},

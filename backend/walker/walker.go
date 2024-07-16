@@ -1,6 +1,9 @@
-package filetree
+package walker
+
+// Package used for debugging or testing
 
 import (
+	"flow-poc/backend/filetree"
 	"fmt"
 	"sort"
 
@@ -8,25 +11,25 @@ import (
 )
 
 // Implement the sort interface
-type NodeSequences []Node
+type Nodes []filetree.Node
 
-func (ns NodeSequences) Len() int {
+func (ns Nodes) Len() int {
 	return len(ns)
 }
 
-func (ns NodeSequences) Swap(i, j int) {
+func (ns Nodes) Swap(i, j int) {
 	ns[i], ns[j] = ns[j], ns[i]
 }
 
 // Nodes are sorted in alphabetical order
-func (ns NodeSequences) Less(i, j int) bool {
+func (ns Nodes) Less(i, j int) bool {
 	return ns[i].Name < ns[j].Name
 }
 
-func Walk(root *Node, ch chan Node) {
+func Walk(root *filetree.Node, ch chan filetree.Node) {
 	defer close(ch)
 	if root != nil {
-		ch <- Node{
+		ch <- filetree.Node{
 			Name: root.Name,
 			Type: root.Type,
 		}
@@ -36,9 +39,9 @@ func Walk(root *Node, ch chan Node) {
 	}
 }
 
-func walkRecursively(node *Node, ch chan Node) {
+func walkRecursively(node *filetree.Node, ch chan filetree.Node) {
 	if node != nil {
-		ch <- Node{
+		ch <- filetree.Node{
 			Name: node.Name,
 			Type: node.Type,
 		}
@@ -49,8 +52,8 @@ func walkRecursively(node *Node, ch chan Node) {
 }
 
 // Print the tree for debugging purposes
-func PrintTree(fileTree Node) {
-	ch1 := make(chan Node)
+func PrintTree(fileTree filetree.Node) {
+	ch1 := make(chan filetree.Node)
 
 	go Walk(&fileTree, ch1)
 
@@ -61,12 +64,12 @@ func PrintTree(fileTree Node) {
 }
 
 // Used in tests (for now). Compare 2 trees and tells whether or not they are identicals
-func Same(fileTree, otherFileTree *Node) bool {
-	ch1 := make(chan Node)
-	ch2 := make(chan Node)
+func Same(fileTree, otherFileTree *filetree.Node) bool {
+	ch1 := make(chan filetree.Node)
+	ch2 := make(chan filetree.Node)
 
-	namesInR1 := NodeSequences{}
-	namesInR2 := NodeSequences{}
+	namesInR1 := Nodes{}
+	namesInR2 := Nodes{}
 
 	go Walk(fileTree, ch1)
 	go Walk(otherFileTree, ch2)

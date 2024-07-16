@@ -73,29 +73,28 @@ func (ft *FileTreeExplorer) RemoveNode(pathFromLabRoot string) error {
 		return ErrPathMissing
 	}
 
-	path := strings.Split(pathFromLabRoot, string(filepath.Separator))
+	separator := string(filepath.Separator)
+	path := strings.Split(pathFromLabRoot, separator)
 
 	if len(path) == 1 {
-		_, i, err := searchFileOrDir(pathFromLabRoot, ft.FileTree.Files)
+		f, err := ft.FindAndDeleteNode(pathFromLabRoot, ft.FileTree.Files)
 		if err != nil {
-			return err
+			return nil
 		}
 
-		newFiles, err := removeIndex(ft.FileTree.Files, i)
-		if err != nil {
-			return err
-		}
-
-		ft.FileTree.Files = newFiles
+		ft.FileTree.Files = f
 		return nil
 	}
 
-	n, i, err := ft.FindNodeWithPath(pathFromLabRoot)
+	pathToParentFolder := strings.Join(path[:len(path)-2], separator)
+	fileName := path[len(path)-1]
+
+	n, _, err := ft.FindNodeWithPath(pathToParentFolder)
 	if err != nil {
 		return err
 	}
 
-	newFiles, err := removeIndex(n.Files, i)
+	newFiles, err := ft.FindAndDeleteNode(fileName, n.Files)
 	if err != nil {
 		return err
 	}
@@ -104,6 +103,25 @@ func (ft *FileTreeExplorer) RemoveNode(pathFromLabRoot string) error {
 	return nil
 }
 
+// Given a node name and a node array that should contains it, deletes the node and returns
+// the node array without it
+func (ft *FileTreeExplorer) FindAndDeleteNode(nodeName string, files []*Node) ([]*Node, error) {
+	_, i, err := searchFileOrDir(nodeName, files)
+	if err != nil {
+		return nil, err
+	}
+
+	newFiles, err := removeIndex(files, i)
+	if err != nil {
+		return nil, err
+	}
+
+	return newFiles, nil
+}
+
+// Given a path starting from the lab root, return the corresponding node
+// by splitting the argument string by filepath.Separator and binary searching
+// each node by its name
 func (ft *FileTreeExplorer) FindNodeWithPath(pathFromLabRoot string) (*Node, int, error) {
 	separator := string(filepath.Separator)
 	path := strings.Split(pathFromLabRoot, separator)

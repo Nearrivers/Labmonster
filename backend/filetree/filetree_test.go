@@ -94,6 +94,68 @@ func TestGetSubDirAndFiles(t *testing.T) {
 	// implémentée
 }
 
-func TestSetNodeFiles(t *testing.T) {
+func TestFindAndDeleteNode(t *testing.T) {
+	t.Run("find and delete node at second depth", func(t *testing.T) {
+		ft := NewFileTree(config.NewAppConfig())
 
+		ft.FileTree.Files = []*Node{
+			{
+				Name: "testDir",
+				Type: DIR,
+				Files: []*Node{
+					{
+						Name: "nodeToDelete.json",
+						Type: FILE,
+					},
+				},
+			},
+		}
+
+		n, err := ft.FindAndDeleteNode("nodeToDelete.json", ft.FileTree.Files[0].Files)
+		if err != nil {
+			t.Errorf("got an error but should not have: %v", err)
+		}
+
+		if len(n) != 0 {
+			t.Error("the node was not deleted")
+		}
+	})
+
+	t.Run("find and delete node at first depth", func(t *testing.T) {
+		ft := NewFileTree(config.NewAppConfig())
+
+		ft.FileTree.Files = []*Node{
+			{
+				Name:  "testDir",
+				Type:  DIR,
+				Files: []*Node{},
+			},
+		}
+
+		n, err := ft.FindAndDeleteNode("testDir", ft.FileTree.Files)
+		if err != nil {
+			t.Errorf("got an error but should not have: %v", err)
+		}
+
+		if len(n) != 0 {
+			t.Error("the node was not deleted")
+		}
+	})
+
+	t.Run("trying to find a node that does not exists", func(t *testing.T) {
+		ft := NewFileTree(config.NewAppConfig())
+
+		ft.FileTree.Files = []*Node{
+			{
+				Name:  "testDir",
+				Type:  DIR,
+				Files: []*Node{},
+			},
+		}
+
+		_, err := ft.FindAndDeleteNode("testDir23", ft.FileTree.Files)
+		if err == nil {
+			t.Error("didn't get an error but should have")
+		}
+	})
 }

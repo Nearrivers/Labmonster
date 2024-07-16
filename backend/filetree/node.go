@@ -16,10 +16,13 @@ var (
 	ErrIndexOutOfBounds = errors.New("l'index donné est trop grand")
 )
 
+// A node is the in-memory representation of a file or a directory on the user's machine
 type Node struct {
 	Name  string   `json:"name"`
 	Type  NodeType `json:"type"`
 	Files []*Node  `json:"files"`
+	// A map keeping the indexes of the Files array. Used in order to find nodes fast
+	NameToIndex map[string]int
 }
 
 func SortNodes(files []*Node) {
