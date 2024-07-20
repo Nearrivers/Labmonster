@@ -14,7 +14,7 @@ func TestInsertNode(t *testing.T) {
 		}
 
 		wantedName := "nodetest"
-		newNode := InsertNode(false, &testNode, wantedName)
+		newNode := testNode.InsertNode(false, wantedName)
 		if newNode.Name != wantedName {
 			t.Errorf("got %s want %s", wantedName, newNode.Name)
 		}
@@ -27,18 +27,22 @@ func TestInsertNode(t *testing.T) {
 
 func TestRemoveIndex(t *testing.T) {
 	t.Run("Existing index deletion", func(t *testing.T) {
-		nodes := []*Node{
-			{
-				Name: "t1",
-				Type: FILE,
-			},
-			{
-				Name: "t2",
-				Type: FILE,
-			},
-			{
-				Name: "t3",
-				Type: FILE,
+		n := &Node{
+			Name: "test",
+			Type: DIR,
+			Files: []*Node{
+				{
+					Name: "t1",
+					Type: FILE,
+				},
+				{
+					Name: "t2",
+					Type: FILE,
+				},
+				{
+					Name: "t3",
+					Type: FILE,
+				},
 			},
 		}
 
@@ -53,33 +57,37 @@ func TestRemoveIndex(t *testing.T) {
 			},
 		}
 
-		got, err := removeIndex(nodes, 1)
+		err := n.removeIndex(1)
 		if err != nil {
 			t.Errorf("An error occured %v", err)
 		}
 
-		if !reflect.DeepEqual(got, want) {
-			t.Errorf("got %#v want %+v", got, want)
+		if !reflect.DeepEqual(n.Files, want) {
+			t.Errorf("got %#v want %+v", n.Files, want)
 		}
 	})
 
 	t.Run("Out of bounds index deletion", func(t *testing.T) {
-		nodes := []*Node{
-			{
-				Name: "t1",
-				Type: FILE,
-			},
-			{
-				Name: "t2",
-				Type: FILE,
-			},
-			{
-				Name: "t3",
-				Type: FILE,
+		n := &Node{
+			Name: "test",
+			Type: DIR,
+			Files: []*Node{
+				{
+					Name: "t1",
+					Type: FILE,
+				},
+				{
+					Name: "t2",
+					Type: FILE,
+				},
+				{
+					Name: "t3",
+					Type: FILE,
+				},
 			},
 		}
 
-		_, got := removeIndex(nodes, 99)
+		got := n.removeIndex(99)
 		if got == nil {
 			t.Error("An occured should've occured")
 		}
@@ -90,3 +98,5 @@ func TestRemoveIndex(t *testing.T) {
 		}
 	})
 }
+
+func TestSortNodes(t *testing.T) {}

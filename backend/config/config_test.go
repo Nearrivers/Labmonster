@@ -13,7 +13,7 @@ func TestCheckConfigPresence(t *testing.T) {
 		t.Error("cannot retrieve working directory")
 	}
 
-	defer os.Remove(filepath.Join(wd, "config.toml"))
+	defer os.Remove(filepath.Join(wd, configFileName))
 	defer os.Remove(filepath.Join(wd, ".labmonster"))
 
 	ac.CreateAppConfig(wd)

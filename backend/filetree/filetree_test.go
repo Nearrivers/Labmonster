@@ -111,12 +111,13 @@ func TestFindAndDeleteNode(t *testing.T) {
 			},
 		}
 
-		n, err := ft.FindAndDeleteNode("nodeToDelete.json", ft.FileTree.Files[0].Files)
+		err := ft.findAndDeleteNode("nodeToDelete.json", ft.FileTree.Files[0].Files)
 		if err != nil {
 			t.Errorf("got an error but should not have: %v", err)
 		}
 
-		if len(n) != 0 {
+		n := ft.FileTree.Files[0]
+		if len(n.Files) != 0 {
 			t.Error("the node was not deleted")
 		}
 	})
@@ -132,12 +133,13 @@ func TestFindAndDeleteNode(t *testing.T) {
 			},
 		}
 
-		n, err := ft.FindAndDeleteNode("testDir", ft.FileTree.Files)
+		err := ft.findAndDeleteNode("testDir", ft.FileTree.Files)
 		if err != nil {
 			t.Errorf("got an error but should not have: %v", err)
 		}
 
-		if len(n) != 0 {
+		n := ft.FileTree
+		if len(n.Files) != 0 {
 			t.Error("the node was not deleted")
 		}
 	})
@@ -153,9 +155,88 @@ func TestFindAndDeleteNode(t *testing.T) {
 			},
 		}
 
-		_, err := ft.FindAndDeleteNode("testDir23", ft.FileTree.Files)
+		err := ft.findAndDeleteNode("testDir23", ft.FileTree.Files)
 		if err == nil {
 			t.Error("didn't get an error but should have")
+		}
+	})
+
+	t.Run("sending empty path", func(t *testing.T) {
+		ft := NewFileTree(config.NewAppConfig())
+
+		ft.FileTree.Files = []*Node{
+			{
+				Name:  "testDir",
+				Type:  DIR,
+				Files: []*Node{},
+			},
+		}
+
+		err := ft.findAndDeleteNode("", ft.FileTree.Files)
+		if err == ErrPathMissing {
+			t.Errorf("got %v, want %v", err, ErrPathMissing)
+		}
+	})
+}
+
+func TestRenameNode(t *testing.T) {
+	t.Run("rename a node at second depth", func(t *testing.T) {
+		ft := NewFileTree(config.NewAppConfig())
+		newNodeName := "newNodeName"
+		oldNodeName := "nodeToRename"
+
+		ft.FileTree.Files = []*Node{
+			{
+				Name: "testDir",
+				Type: DIR,
+				Files: []*Node{
+					{
+						Name: oldNodeName + ".json",
+						Type: FILE,
+					},
+				},
+			},
+		}
+
+		err := ft.RenameNode("testDir", "nodeToRename", newNodeName)
+		if err != nil {
+			t.Errorf("got an error but didn't expect one: %v", err)
+		}
+
+		got := ft.FileTree.Files[0].Files[0].Name
+
+		if got != newNodeName+".json" {
+			t.Errorf("the name of the node didn't change, got %s, want %s", got, newNodeName+".json")
+		}
+	})
+
+	t.Run("rename a node at first depth", func(t *testing.T) {
+		ft := NewFileTree(config.NewAppConfig())
+		newNodeName := "newNodeName"
+		oldNodeName := "nodeToRename"
+
+		ft.FileTree.Files = []*Node{
+			{
+				Name:  "testDir",
+				Type:  DIR,
+				Files: []*Node{},
+			},
+
+			{
+				Name: oldNodeName + ".json",
+				Type: FILE,
+			},
+		}
+
+		err := ft.RenameNode("", "nodeToRename", newNodeName)
+		if err != nil {
+			t.Fatalf("got an error but didn't expect one: %v", err)
+		}
+
+		got := ft.FileTree.Files[0].Files[0].Name
+
+		if got != newNodeName+".json" {
+			t.Errorf("the name of the node didn't change, got %s, want %s", got, newNodeName+".json")
 		}
 	})
 }

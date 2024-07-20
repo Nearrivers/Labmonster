@@ -114,10 +114,11 @@ func TestSearchFile(t *testing.T) {
 			},
 		})
 
-		InsertNode(false, &ft.FileTree, "Test 1")
-		InsertNode(false, &ft.FileTree, "Test 2")
-		InsertNode(false, &ft.FileTree, "Test 3")
-		InsertNode(false, &ft.FileTree, "Test 4")
+		n := &ft.FileTree
+		n.InsertNode(false, "Test 1")
+		n.InsertNode(false, "Test 2")
+		n.InsertNode(false, "Test 3")
+		n.InsertNode(false, "Test 4")
 
 		want := "Test 3"
 		wantedIndex := 2
@@ -157,10 +158,11 @@ func TestSearchFile(t *testing.T) {
 			},
 		})
 
-		InsertNode(false, &ft.FileTree, "Test 1")
-		InsertNode(false, &ft.FileTree, "Test 2")
-		InsertNode(false, &ft.FileTree, "Test 3")
-		InsertNode(false, &ft.FileTree, "Test 4")
+		n := &ft.FileTree
+		n.InsertNode(false, "Test 1")
+		n.InsertNode(false, "Test 2")
+		n.InsertNode(false, "Test 3")
+		n.InsertNode(false, "Test 4")
 
 		want := ErrNodeNotFound
 		_, _, got := searchFileOrDir("Test 5", ft.FileTree.Files)

@@ -33,8 +33,7 @@ func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (string, err
 
 		defer f.Close()
 
-		newNode := InsertNode(false, &ft.FileTree, newFileName+".json")
-		SortNodes(ft.FileTree.Files)
+		newNode := ft.FileTree.InsertNode(false, newFileName+".json")
 		return newNode.Name, nil
 	}
 
@@ -55,8 +54,7 @@ func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (string, err
 
 		defer f.Close()
 
-		InsertNode(false, &ft.FileTree, name)
-		SortNodes(ft.FileTree.Files)
+		ft.FileTree.InsertNode(false, name)
 		return name, nil
 	}
 }
@@ -80,7 +78,10 @@ func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName st
 	return nil
 }
 
-// Deletes a file on the user's machine and from the in-memory tree
+// Given the path to a file starting from the lab root,
+// deletes a file on the user's machine and from the in-memory tree
+// The function will add the ".json" file extension if it's missing
+// from the path
 func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
 	if !strings.Contains(string(pathFromRootOfTheLab), ".json") {
 		pathFromRootOfTheLab += ".json"

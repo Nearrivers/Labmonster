@@ -31,12 +31,10 @@
       @contextmenu.prevent="onRightClick"
       @click="onLeftClick"
     >
-      <FileNode
-        v-for="(file, index) in files"
-        :node="file"
-        :key="index"
-        path=""
-      />
+      <template v-for="file in files" :key="file.name">
+        <FileNode v-if="file.type === 'FILE'" :node="file" path="" />
+        <DirNode v-if="file.type === 'DIR'" :node="file" path="" />
+      </template>
     </ul>
   </ScrollArea>
   <FileContextMenu
@@ -56,48 +54,38 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { CreateNewFile } from '$/filetree/FileTreeExplorer';
 import { filetree } from '$/models';
-import { ref, onMounted, nextTick, h } from 'vue';
-import { GetFirstDepth } from '$/filetree/FileTreeExplorer';
+import { ref, onMounted, nextTick } from 'vue';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileNode from '@/components/sidepanel/FileNode.vue';
+import DirNode from '@/components/sidepanel/DirNode.vue';
 import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
 import FolderContextMenu from '@/components/contextmenus/FolderContextMenu.vue';
 import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
-import { ToastAction, useToast } from '@/components/ui/toast';
+import {
+  CreateNewFileAtRoot,
+  GetSubDirAndFiles,
+} from '$/filetree/FileTreeExplorer';
+import { useSidePanel } from '@/composables/useSidePanel';
 
 const files = ref<filetree.Node[]>([]);
+const { sortNodes, showToast } = useSidePanel();
 const contextMenuX = ref(100);
 const contextMenuY = ref(100);
 const fileContextMenu = ref<InstanceType<typeof FileContextMenu> | null>(null);
 const selectedNode = ref<HTMLLIElement | null>(null);
-const { toast } = useToast();
 
 onMounted(async () => {
   try {
-    files.value = await GetFirstDepth();
+    files.value = await GetSubDirAndFiles('');
   } catch (error) {
-    toast({
-      description: 'Erreur lors du chargement des fichiers du lab',
-      variant: 'destructive',
-      action: h(
-        ToastAction,
-        {
-          altText: 'Réessayer',
-          onClick: () => location.reload(),
-        },
-        {
-          default: () => 'Réessayer',
-        },
-      ),
-    });
+    showToast('Erreur lors du chargement des fichiers du lab');
   }
 });
 
 async function createNewFileAtRoot() {
   try {
-    const newFileName = await CreateNewFile(NEW_FILE_NAME);
+    const newFileName = await CreateNewFileAtRoot(NEW_FILE_NAME);
     files.value.push(
       new filetree.Node({
         name: newFileName,
@@ -105,58 +93,15 @@ async function createNewFileAtRoot() {
         files: [],
       }),
     );
-    files.value.sort((f1, f2) => {
-      // Tri sur les types d'abord
-      if (f1.type === 'DIR' && f2.type == 'FILE') {
-        return 1;
-      }
-
-      if (f1.type === 'FILE' && f2.type == 'DIR') {
-        return 1;
-      }
-
-      // Si les types sont les même, on trie sur le nom.
-      // La fonction sort() sans fonction de comparaison custom trie les chaînes de caractères
-      // dans l'ordre ASCII des caractères ce qui n'est pas le cas de ma fonction de tri en Go.
-      // Cela causait une différence entre le tri réalisé par le backend et celui fait par le front
-      // d'où l'implémentation de cette fonction de sort()
-      if (f1.name < f2.name) {
-        return -1;
-      }
-
-      if (f1.name == f2.name) {
-        return 0;
-      }
-
-      if (f1.name > f2.name) {
-        return 1;
-      }
-
-      return 0;
-    });
+    files.value.sort(sortNodes);
   } catch (error) {
-    toast({
-      title: 'Impossible de créer le fichier',
-      description: String(error),
-      variant: 'destructive',
-      action: h(
-        ToastAction,
-        {
-          altText: 'Réessayer',
-          onClick: () => location.reload(),
-        },
-        {
-          default: () => 'Réessayer',
-        },
-      ),
-    });
+    showToast(String(error), 'Impossible de créer le fichier');
   }
 }
 
 async function onRightClick(event: MouseEvent) {
   contextMenuX.value = event.clientX;
   contextMenuY.value = event.clientY;
-  console.log((event.target as HTMLElement).closest('li'));
   selectedNode.value = (event.target as HTMLElement).closest('li');
   await nextTick();
   fileContextMenu.value?.showPopover();

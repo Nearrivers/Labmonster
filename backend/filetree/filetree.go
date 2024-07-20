@@ -34,6 +34,9 @@ func (ft *FileTreeExplorer) GetLabPath() string {
 	return ft.Cfg.ConfigFile.LabPath
 }
 
+// Given a path to a directory starting from the lab root, this function will read
+// its content using the os.ReadDir method, transforms those entries into Nodes
+// and return them
 func (ft *FileTreeExplorer) GetSubDirAndFiles(pathFromLabRoot string) ([]*Node, error) {
 	dirPath := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
 	entries, err := os.ReadDir(dirPath)
@@ -43,16 +46,19 @@ func (ft *FileTreeExplorer) GetSubDirAndFiles(pathFromLabRoot string) ([]*Node, 
 
 	nodes := ft.createNodesFromDirEntries(entries)
 
-	if len(nodes) > 0 {
-		err = ft.SetNodeFiles(pathFromLabRoot, nodes)
-		if err != nil {
-			return nil, err
-		}
-	}
+	// if len(nodes) > 0 {
+	// 	err = ft.SetNodeFiles(pathFromLabRoot, nodes)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
 	return nodes, nil
 }
 
+// Given a path to a directory starting from the lab root and an array of Nodes,
+// this function will find the node corresponding to the path and set its Files
+// attribute with the value of the nodes argument
 func (ft *FileTreeExplorer) SetNodeFiles(pathFromLabRoot string, nodes []*Node) error {
 	if pathFromLabRoot == "" {
 		ft.FileTree.Files = nodes
@@ -68,6 +74,8 @@ func (ft *FileTreeExplorer) SetNodeFiles(pathFromLabRoot string, nodes []*Node) 
 	return nil
 }
 
+// Given a path to a node starting from the lab root, this function will, first, find its
+// parent node to then delete it
 func (ft *FileTreeExplorer) RemoveNode(pathFromLabRoot string) error {
 	if pathFromLabRoot == "" {
 		return ErrPathMissing
@@ -77,12 +85,11 @@ func (ft *FileTreeExplorer) RemoveNode(pathFromLabRoot string) error {
 	path := strings.Split(pathFromLabRoot, separator)
 
 	if len(path) == 1 {
-		f, err := ft.FindAndDeleteNode(pathFromLabRoot, ft.FileTree.Files)
+		err := ft.findAndDeleteNode(pathFromLabRoot, ft.FileTree.Files)
 		if err != nil {
 			return nil
 		}
 
-		ft.FileTree.Files = f
 		return nil
 	}
 
@@ -94,29 +101,64 @@ func (ft *FileTreeExplorer) RemoveNode(pathFromLabRoot string) error {
 		return err
 	}
 
-	newFiles, err := ft.FindAndDeleteNode(fileName, n.Files)
+	err = ft.findAndDeleteNode(fileName, n.Files)
 	if err != nil {
 		return err
 	}
 
-	n.Files = newFiles
+	return nil
+}
+
+func (ft *FileTreeExplorer) RenameNode(pathFromLabRoot, oldName, newName string) error {
+	addJsonSuffix(&oldName)
+	addJsonSuffix(&newName)
+
+	if pathFromLabRoot == "" {
+		err := ft.findAndRenameNode(oldName, newName, ft.FileTree.Files)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	f, _, err := ft.FindNodeWithPath(pathFromLabRoot)
+	if err != nil {
+		return err
+	}
+
+	err = ft.findAndRenameNode(oldName, newName, f.Files)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 // Given a node name and a node array that should contains it, deletes the node and returns
 // the node array without it
-func (ft *FileTreeExplorer) FindAndDeleteNode(nodeName string, files []*Node) ([]*Node, error) {
-	_, i, err := searchFileOrDir(nodeName, files)
+func (ft *FileTreeExplorer) findAndDeleteNode(nodeName string, files []*Node) error {
+	n, i, err := searchFileOrDir(nodeName, files)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	newFiles, err := removeIndex(files, i)
+	err = n.removeIndex(i)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return newFiles, nil
+	return nil
+}
+
+func (ft *FileTreeExplorer) findAndRenameNode(oldName, newName string, f []*Node) error {
+	n, _, err := searchFileOrDir(oldName, f)
+	if err != nil {
+		return err
+	}
+
+	n.SetName(newName)
+	return nil
 }
 
 // Given a path starting from the lab root, return the corresponding node
@@ -129,7 +171,7 @@ func (ft *FileTreeExplorer) FindNodeWithPath(pathFromLabRoot string) (*Node, int
 	index := 0
 
 	for _, dir := range path {
-		SortNodes(n.Files)
+		n.SortNodes()
 		node, i, err := searchFileOrDir(dir, n.Files)
 		if err != nil {
 			return nil, -1, err
@@ -167,6 +209,12 @@ func (ft *FileTreeExplorer) createNodesFromDirEntries(entries []fs.DirEntry) []*
 	return dirNames
 }
 
+func addJsonSuffix(name *string) {
+	if !strings.HasSuffix(*name, ".json") {
+		*name += ".json"
+	}
+}
+
 // Not used anymore but was a fun exercice
 func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 	ft.FileTree = Node{
@@ -197,8 +245,9 @@ func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 
 		// Si on est allé à un noeud plus profond
 		if previousDepth < currentDepth {
+			n := visited[currentDepth-1]
 			// Ajout du nouveau noeud dans le tableau des noeuds visités
-			lastInsertedNode := InsertNode(d.IsDir(), visited[currentDepth-1], nodes[currentDepth-1])
+			lastInsertedNode := n.InsertNode(d.IsDir(), nodes[currentDepth-1])
 			visited = append(visited, lastInsertedNode)
 			previousDepth = currentDepth
 			return nil
@@ -206,10 +255,11 @@ func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 
 		// L'itération précédente était dans un noeud plus profond que l'actuelle.
 		if previousDepth > currentDepth {
+			n := visited[currentDepth-1]
 			// On trie les noeuds de la profondeur précédente avant de la quitter
-			SortNodes(visited[currentDepth-1].Files)
+			n.SortNodes()
 			// Création d'un nouveau noeud dans le noeud à la profondeur actuelle dans le tableau des noeuds visités
-			lastInsertedNode = InsertNode(d.IsDir(), visited[currentDepth-1], nodes[currentDepth-1])
+			lastInsertedNode = n.InsertNode(d.IsDir(), nodes[currentDepth-1])
 			previousDepth = currentDepth
 			// On modifie le tableau des noeuds visités pour supprimer les noeuds plus bas déjà visités
 			visited = visited[:currentDepth]
@@ -219,10 +269,11 @@ func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 
 		// Si on est au même niveau que la boucle précédente
 		if previousDepth == currentDepth {
+			n := visited[currentDepth-1]
 			// On trie les noeuds de la profondeur précédente avant de la quitter
-			SortNodes(visited[previousDepth-1].Files)
+			n.SortNodes()
 			// Insertion du noeud à la profondeur
-			lastInsertedNode = InsertNode(d.IsDir(), visited[currentDepth-1], nodes[currentDepth-1])
+			lastInsertedNode = n.InsertNode(d.IsDir(), nodes[currentDepth-1])
 			// On modifie le tableau des noeuds visités pour supprimer les noeuds plus bas déjà visités
 			visited = visited[:currentDepth]
 			visited = append(visited, lastInsertedNode)
@@ -237,6 +288,6 @@ func (ft *FileTreeExplorer) GetTheWholeTree() ([]*Node, error) {
 		return nil, err
 	}
 
-	SortNodes(ft.FileTree.Files)
+	ft.FileTree.SortNodes()
 	return ft.FileTree.Files, nil
 }

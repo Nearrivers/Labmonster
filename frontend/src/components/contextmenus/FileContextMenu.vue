@@ -3,7 +3,7 @@
     id="filepopover"
     popover
     ref="menu"
-    class="fixed z-10 w-56 rounded-md border border-border bg-background p-1.5 text-sm text-primary"
+    class="fixed z-10 rounded-md border border-border bg-background p-1.5 text-xs text-primary"
     :style="{ top: y + 'px', left: x + 'px' }"
   >
     <li
