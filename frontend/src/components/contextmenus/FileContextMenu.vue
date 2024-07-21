@@ -20,13 +20,14 @@
     </li>
     <li
       class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted hover:text-white"
+      @click="onRenameClick(props.selectedNode?.dataset.path!)"
     >
       <PencilLine :stroke-width="1.75" class="h-[16px] w-4" />
       Renommer
     </li>
     <li
       class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-red-500 hover:bg-muted"
-      @click="onDeleteClick()"
+      @click="onDeleteClick(props.selectedNode?.dataset.path!)"
     >
       <Trash2 :stroke-width="1.75" class="h-[16px] w-4" />
       Supprimer
@@ -34,44 +35,29 @@
     <DeleteFileDialog
       ref="deleteFileDialog"
       :path="props.selectedNode?.dataset.path"
-    ></DeleteFileDialog>
+    />
   </ul>
 </template>
 
 <script setup lang="ts">
 import { Files } from 'lucide-vue-next';
-import { FolderTree } from 'lucide-vue-next';
-import { PencilLine } from 'lucide-vue-next';
-import { Trash2 } from 'lucide-vue-next';
-import { nextTick, ref } from 'vue';
+import { FolderTree, Trash2, PencilLine } from 'lucide-vue-next';
+import { ref } from 'vue';
 import DeleteFileDialog from '../AlertDialog/DeleteFileDialog.vue';
+import { ContextMenuProps } from '@/types/props/ContextMenuProps';
+import { useNodeContextMenu } from '@/composables/ContextMenus/useNodeContextMenu';
 
-const props = defineProps<{
-  x: number;
-  y: number;
-  selectedNode: HTMLLIElement | null;
-}>();
+const props = defineProps<
+  ContextMenuProps & {
+    selectedNode: HTMLLIElement | null;
+  }
+>();
 
-const menu = ref<any | null>(null);
 const deleteFileDialog = ref<InstanceType<typeof DeleteFileDialog> | null>(
   null,
 );
-
-function showPopover() {
-  menu.value?.showPopover();
-}
-
-function hidePopover() {
-  menu.value?.hidePopover();
-}
-
-async function onDeleteClick() {
-  hidePopover();
-  await nextTick();
-  deleteFileDialog.value?.openDialog(props.selectedNode?.dataset.path!);
-}
-
-function onFileDelete() {}
+const { menu, showPopover, hidePopover, onRenameClick, onDeleteClick } =
+  useNodeContextMenu(deleteFileDialog);
 
 defineExpose({
   showPopover,

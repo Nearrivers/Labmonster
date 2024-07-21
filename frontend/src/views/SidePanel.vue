@@ -43,7 +43,7 @@
     :y="contextMenuY"
     :selected-node="selectedNode"
   />
-  <FolderContextMenu />
+  <DirContextMenu ref="dirContextMenu" :x="contextMenuX" :y="contextMenuY" />
 </template>
 
 <script setup lang="ts">
@@ -60,7 +60,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';
 import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
-import FolderContextMenu from '@/components/contextmenus/FolderContextMenu.vue';
+import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
 import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
 import {
   CreateNewFileAtRoot,
@@ -103,6 +103,7 @@ async function onRightClick(event: MouseEvent) {
   contextMenuX.value = event.clientX;
   contextMenuY.value = event.clientY;
   selectedNode.value = (event.target as HTMLElement).closest('li');
+  console.log(selectedNode.value);
   await nextTick();
   fileContextMenu.value?.showPopover();
 }

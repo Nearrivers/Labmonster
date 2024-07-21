@@ -10,7 +10,11 @@
             </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter class="items-center !justify-start">
+          <div class="mr-auto flex items-center gap-2">
+            <Checkbox id="never-ask" />
+            <label for="never-ask" class="text-sm">Ne pas redemander</label>
+          </div>
           <AlertDialogAction
             :class="'bg-red-600 text-white hover:bg-red-500'"
             @click="onDeleteFile"
@@ -40,6 +44,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { h, ref } from 'vue';
 import { ToastAction, useToast } from '../ui/toast';
+import Checkbox from '../ui/checkbox/Checkbox.vue';
 
 const props = defineProps<{
   path?: string;
@@ -61,7 +66,6 @@ function closeDialog() {
 async function onDeleteFile() {
   try {
     await DeleteFile(props.path!);
-    isDialogOpen.value = false;
     toast({
       description: `Fichier "${fileTitle.value}" supprimé avec succès`,
       duration: 5000,
@@ -76,17 +80,19 @@ async function onDeleteFile() {
         ToastAction,
         {
           altText: 'Réessayer',
-          onClick: () => location.reload(),
+          onClick: async () => await onDeleteFile(),
         },
         {
           default: () => 'Réessayer',
         },
       ),
     });
+  } finally {
+    isDialogOpen.value = false;
   }
 }
 
-// Suppression du fichier visuellement
+// Suppression du fichier du DOM
 function removeNode() {
   const nodeToRemove = document.querySelector(`[data-path="${props.path}"]`);
   if (nodeToRemove) {
