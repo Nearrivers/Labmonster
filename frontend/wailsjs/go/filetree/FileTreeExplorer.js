@@ -14,10 +14,6 @@ export function DuplicateFile(arg1, arg2) {
   return window['go']['filetree']['FileTreeExplorer']['DuplicateFile'](arg1, arg2);
 }
 
-export function FindNodeWithPath(arg1) {
-  return window['go']['filetree']['FileTreeExplorer']['FindNodeWithPath'](arg1);
-}
-
 export function GetLabPath() {
   return window['go']['filetree']['FileTreeExplorer']['GetLabPath']();
 }
@@ -26,30 +22,14 @@ export function GetSubDirAndFiles(arg1) {
   return window['go']['filetree']['FileTreeExplorer']['GetSubDirAndFiles'](arg1);
 }
 
-export function GetTheWholeTree() {
-  return window['go']['filetree']['FileTreeExplorer']['GetTheWholeTree']();
-}
-
 export function MoveFile(arg1, arg2) {
   return window['go']['filetree']['FileTreeExplorer']['MoveFile'](arg1, arg2);
-}
-
-export function RemoveNode(arg1) {
-  return window['go']['filetree']['FileTreeExplorer']['RemoveNode'](arg1);
 }
 
 export function RenameFile(arg1, arg2, arg3) {
   return window['go']['filetree']['FileTreeExplorer']['RenameFile'](arg1, arg2, arg3);
 }
 
-export function RenameNode(arg1, arg2, arg3) {
-  return window['go']['filetree']['FileTreeExplorer']['RenameNode'](arg1, arg2, arg3);
-}
-
 export function SaveFile() {
   return window['go']['filetree']['FileTreeExplorer']['SaveFile']();
-}
-
-export function SetNodeFiles(arg1, arg2) {
-  return window['go']['filetree']['FileTreeExplorer']['SetNodeFiles'](arg1, arg2);
 }

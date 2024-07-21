@@ -54,6 +54,7 @@ import { GetSubDirAndFiles } from '$/filetree/FileTreeExplorer';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';
 import { TooltipArrow } from 'radix-vue';
+import { useSidePanel } from '@/composables/useSidePanel';
 
 const props = defineProps<{
   node: filetree.Node;
@@ -66,6 +67,7 @@ const isFolder = computed(() => props.node.type === 'DIR');
 const nodePath = ref(
   props.path ? props.path + '/' + props.node.name : props.node.name,
 );
+const { showToast } = useSidePanel();
 
 async function toggle() {
   try {
@@ -73,7 +75,7 @@ async function toggle() {
       ? await GetSubDirAndFiles(props.path + '/' + props.node.name)
       : await GetSubDirAndFiles(props.node.name);
   } catch (error) {
-    console.log(error);
+    showToast(String(error));
   } finally {
     isOpen.value = !isOpen.value;
   }

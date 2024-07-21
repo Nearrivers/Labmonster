@@ -86,13 +86,7 @@ onMounted(async () => {
 async function createNewFileAtRoot() {
   try {
     const newFileName = await CreateNewFileAtRoot(NEW_FILE_NAME);
-    files.value.push(
-      new filetree.Node({
-        name: newFileName,
-        type: 'FILE',
-        files: [],
-      }),
-    );
+    files.value.push(newFileName);
     files.value.sort(sortNodes);
   } catch (error) {
     showToast(String(error), 'Impossible de créer le fichier');
@@ -103,7 +97,6 @@ async function onRightClick(event: MouseEvent) {
   contextMenuX.value = event.clientX;
   contextMenuY.value = event.clientY;
   selectedNode.value = (event.target as HTMLElement).closest('li');
-  console.log(selectedNode.value);
   await nextTick();
   fileContextMenu.value?.showPopover();
 }

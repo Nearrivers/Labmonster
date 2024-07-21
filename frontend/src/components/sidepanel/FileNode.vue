@@ -24,8 +24,11 @@
             />
           </div>
         </TooltipTrigger>
-        <TooltipContent as-child :side="'right'" :side-offset="30">
-          <p>Fichier</p>
+        <TooltipContent as-child :side="'right'" :side-offset="20">
+          <div>
+            <p class="text-xs">Dernière modification le: {{ createdAt }}</p>
+            <p class="text-center text-xs">Créé le: {{ createdAt }}</p>
+          </div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -44,6 +47,7 @@ import { computed, ref } from 'vue';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { RenameFile } from '$/filetree/FileTreeExplorer';
+import { useSidePanel } from '@/composables/useSidePanel';
 
 const props = defineProps<{
   node: filetree.Node;
@@ -55,10 +59,16 @@ const input = ref<HTMLInputElement | null>(null);
 const nodePath = ref(
   props.path ? props.path + '/' + props.node.name : props.node.name,
 );
+const { showToast } = useSidePanel();
 
 const nodePathWithoutSpaces = computed(() =>
   nodePath.value.replaceAll(' ', '-'),
 );
+
+const createdAt = computed(() => {
+  const date = new Date(props.node.createdAt);
+  return `${date.toLocaleDateString()} à ${date.toLocaleTimeString()}`;
+});
 
 async function onBlur() {
   if (input.value) {
@@ -67,11 +77,10 @@ async function onBlur() {
     input.value.classList.remove('cursor-text');
   }
 
-  console.log(props.path, fileName.value, props.node.name);
   try {
     await RenameFile(props.path, props.node.name, fileName.value);
   } catch (error) {
-    console.log(error);
+    showToast(String(error));
   }
 }
 </script>

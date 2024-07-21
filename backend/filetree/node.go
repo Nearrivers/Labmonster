@@ -4,6 +4,7 @@ import (
 	"errors"
 	"sort"
 	"strings"
+	"time"
 )
 
 type NodeType string
@@ -19,9 +20,22 @@ var (
 
 // A node is the in-memory representation of a file or a directory on the user's machine
 type Node struct {
-	Name  string   `json:"name"`
-	Type  NodeType `json:"type"`
-	Files []*Node  `json:"files"`
+	Name      string    `json:"name"`
+	Type      NodeType  `json:"type"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	Extension string    `json:"extension"`
+	Files     []*Node   `json:"files"`
+}
+
+func NewNode(name, extension string, nodeType NodeType) Node {
+	return Node{
+		Name:      name,
+		Type:      nodeType,
+		Extension: extension,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 }
 
 func (n *Node) SetName(newName string) {
@@ -63,16 +77,4 @@ func (n *Node) InsertNode(isDir bool, name string) *Node {
 	n.Files = append(n.Files, &newNode)
 	n.SortNodes()
 	return &newNode
-}
-
-func (n *Node) removeIndex(index int) error {
-	if index >= len(n.Files) {
-		return ErrIndexOutOfBounds
-	}
-
-	ret := make([]*Node, 0)
-	ret = append(ret, n.Files[:index]...)
-	n.Files = append(ret, n.Files[index+1:]...)
-
-	return nil
 }

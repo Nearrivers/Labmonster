@@ -22,19 +22,19 @@ func doesFileExist(path string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-// Create a file at lab root and adds it to the in-memory tree
-func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (string, error) {
+// Create a file at lab root
+func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (Node, error) {
 	// Création d'un fichier si ce dernier n'existe pas
 	if !doesFileExist(filepath.Join(ft.GetLabPath(), newFileName+".json")) {
 		f, err := os.Create(filepath.Join(ft.GetLabPath(), newFileName+".json"))
 		if err != nil {
-			return "", err
+			return Node{}, err
 		}
 
 		defer f.Close()
 
-		newNode := ft.FileTree.InsertNode(false, newFileName+".json")
-		return newNode.Name, nil
+		n := NewNode(newFileName, "json", FILE)
+		return n, nil
 	}
 
 	// Si un fichier avec le même nom existe déjà alors on va boucler avec un compteur afin de créer un
@@ -49,13 +49,13 @@ func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (string, err
 
 		f, err := os.Create(filepath.Join(ft.GetLabPath(), name))
 		if err != nil {
-			return "", err
+			return Node{}, err
 		}
 
 		defer f.Close()
 
-		ft.FileTree.InsertNode(false, name)
-		return name, nil
+		n := NewNode(name, "json", FILE)
+		return n, nil
 	}
 }
 
@@ -88,11 +88,6 @@ func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
 	}
 
 	err := os.Remove(filepath.Join(ft.GetLabPath(), pathFromRootOfTheLab))
-	if err != nil {
-		return err
-	}
-
-	err = ft.RemoveNode(pathFromRootOfTheLab)
 	if err != nil {
 		return err
 	}
@@ -214,40 +209,4 @@ func fileContentCompare(ft *FileTreeExplorer, file1, file2 string) error {
 			return ErrFileAreDifferent
 		}
 	}
-}
-
-// Binary search of a node using its name
-// Node names are unique and they are sorted in alphabetical order
-func searchFileOrDir(name string, level []*Node) (*Node, int, error) {
-	if len(level) == 0 {
-		return nil, -1, ErrNoFileInThisLevel
-	}
-
-	if len(level) == 1 {
-		if level[0].Name == name {
-			return level[0], 0, nil
-		} else {
-			return nil, -1, ErrNodeNotFound
-		}
-	}
-
-	low := 0
-	high := len(level) - 1
-
-	for low <= high {
-		median := (low + high) / 2
-		medianName := level[median]
-
-		if medianName.Name < name {
-			low = median + 1
-		} else {
-			high = median - 1
-		}
-	}
-
-	if low != len(level) && level[low].Name == name {
-		return level[low], low, nil
-	}
-
-	return nil, -1, ErrNodeNotFound
 }

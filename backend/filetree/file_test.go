@@ -38,10 +38,10 @@ func TestCreateNewFile(t *testing.T) {
 			t.Fatalf("An error occured while creating the file: %v", err.Error())
 		}
 
-		_, err = os.Stat(filepath.Join(ft.GetLabPath(), got))
+		_, err = os.Stat(filepath.Join(ft.GetLabPath(), got.Name+".json"))
 		if err != nil {
 			if errors.Is(err, os.ErrNotExist) {
-				t.Fatal("The file was not found after its supposed creation")
+				t.Fatalf("The file %s was not found after its supposed creation", got.Name)
 			}
 			t.Fatalf("An error occured while using os.Stat: %v", err.Error())
 		}
@@ -54,11 +54,11 @@ func TestCreateNewFile(t *testing.T) {
 
 		cpt := 0
 		for cpt < 3 {
-			newFileName, err := ft.CreateNewFileAtRoot(testFileName)
+			newFile, err := ft.CreateNewFileAtRoot(testFileName)
 			if err != nil {
 				t.Errorf("An error occured while creating the file: %s", err.Error())
 			}
-			defer ft.DeleteFile(newFileName)
+			defer ft.DeleteFile(newFile.Name)
 
 			if cpt > 0 {
 				_, err = os.Stat(filepath.Join(ft.GetLabPath(), fmt.Sprintf(testFileName+" %d.json", cpt)))
@@ -77,97 +77,6 @@ func TestCreateNewFile(t *testing.T) {
 		}
 	})
 
-	t.Run("Checking node presence inside in-memory tree", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
-
-		fileName := "in-memory test"
-		_, err := ft.CreateNewFileAtRoot(fileName)
-		if err != nil {
-			t.Errorf("An error occured while creating the file: %v", err)
-		}
-
-		defer ft.DeleteFile(fileName)
-
-		_, _, err = searchFileOrDir(fileName+".json", ft.FileTree.Files)
-		if err != nil {
-			t.Error("The node wasn't found inside the in-memory tree")
-		}
-	})
-}
-
-func TestSearchFile(t *testing.T) {
-	assertError := func(t testing.TB, got, want error) {
-		t.Helper()
-
-		if got == nil {
-			t.Error("An error should have occured")
-		}
-
-		if got != want {
-			t.Errorf("got %v want %v", got, want)
-		}
-	}
-	t.Run("Searching for existing node", func(t *testing.T) {
-		ft := NewFileTree(&config.AppConfig{
-			ConfigFile: config.ConfigFile{
-				LabPath: "D:\\Projets\\test\\Lab",
-			},
-		})
-
-		n := &ft.FileTree
-		n.InsertNode(false, "Test 1")
-		n.InsertNode(false, "Test 2")
-		n.InsertNode(false, "Test 3")
-		n.InsertNode(false, "Test 4")
-
-		want := "Test 3"
-		wantedIndex := 2
-		file, index, err := searchFileOrDir(want, ft.FileTree.Files)
-		if err != nil {
-			t.Error(err.Error())
-		}
-
-		got := file.Name
-		gotIndex := index
-
-		if got != want {
-			t.Errorf("got %s want %s", got, want)
-		}
-
-		if gotIndex != wantedIndex {
-			t.Errorf("Indexes are different: got %d, want %d", gotIndex, wantedIndex)
-		}
-	})
-
-	t.Run("Searching in an empty level", func(t *testing.T) {
-		ft := NewFileTree(&config.AppConfig{
-			ConfigFile: config.ConfigFile{
-				LabPath: "D:\\Projets\\test\\Lab",
-			},
-		})
-
-		want := ErrNoFileInThisLevel
-		_, _, got := searchFileOrDir("Test 3", ft.FileTree.Files)
-		assertError(t, got, want)
-	})
-
-	t.Run("Searching for a node that doesn't exist", func(t *testing.T) {
-		ft := NewFileTree(&config.AppConfig{
-			ConfigFile: config.ConfigFile{
-				LabPath: "D:\\Projets\\test\\Lab",
-			},
-		})
-
-		n := &ft.FileTree
-		n.InsertNode(false, "Test 1")
-		n.InsertNode(false, "Test 2")
-		n.InsertNode(false, "Test 3")
-		n.InsertNode(false, "Test 4")
-
-		want := ErrNodeNotFound
-		_, _, got := searchFileOrDir("Test 5", ft.FileTree.Files)
-		assertError(t, got, want)
-	})
 }
 
 func TestRenameFile(t *testing.T) {
@@ -245,9 +154,6 @@ func TestDeleteFile(t *testing.T) {
 	})
 }
 
-// TODO: Une fois la sauvegarde des fichiers implémentée, tester la duplication
-// avec des fichiers modifiés afin de voir pour de bon si le contenu des fichiers
-// est bel et bien dupliqué
 func TestDuplicateFile(t *testing.T) {
 	t.Run("File duplication at first level", func(t *testing.T) {
 		ft := getNewFileTreeExplorer()
