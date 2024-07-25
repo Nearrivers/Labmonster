@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -204,5 +205,130 @@ func TestDuplicateFile(t *testing.T) {
 		if err == nil {
 			t.Fatal("didn't get an error, but wanted one")
 		}
+	})
+}
+
+func createFileHelper(t testing.TB, tempDirPath, completeFileName string) {
+	t.Helper()
+
+	f, err := os.Create(filepath.Join(tempDirPath, completeFileName))
+	if err != nil {
+		t.Fatalf("could not create file: %v", err)
+	}
+	f.Close()
+}
+
+func assertFileExistence(t testing.TB, path ...string) {
+	t.Helper()
+
+	if !doesFileExist(strings.Join(path, string(filepath.Separator))) {
+		t.Error("the file was not moved")
+	}
+}
+
+func assertError(t testing.TB, got, want error) {
+	t.Helper()
+
+	if got == nil {
+		t.Error("wanted an error but didn't get one")
+	}
+
+	if got != want {
+		t.Errorf("wrong error, got %v, want %v", got, want)
+	}
+}
+
+func TestMoveFile(t *testing.T) {
+	t.Run("move a file from lab root to another directory", func(t *testing.T) {
+		subDir1 := "testDir1"
+		subFile1 := "testFile1"
+		dir, ft := createTempDir(t, "testMoveFromRoot", subFile1)
+		defer os.RemoveAll(dir)
+		createDirHelper(t, dir, subDir1)
+
+		subDir2 := "testSubDir"
+		createDirHelper(t, filepath.Join(dir, subDir1), subDir2)
+
+		fileName := subFile1 + ".json"
+		err := ft.MoveFileToExistingDir(fileName, "testDir1/testSubDir")
+		if err != nil {
+			t.Errorf("got error %v, but did not want one", err)
+		}
+
+		assertFileExistence(t, dir, subDir1, subDir2, fileName)
+	})
+
+	t.Run("move a file from a directory to the lab root", func(t *testing.T) {
+		subDir1 := "testDir1"
+		subFile1 := "testFile1"
+		dir, ft := createTempDir(t, "testMoveToRoot", subFile1)
+		defer os.RemoveAll(dir)
+		createDirHelper(t, dir, subDir1)
+		createFileHelper(t, dir, "testDir1/testMoveToRoot.json")
+
+		err := ft.MoveFileToExistingDir("testDir1/testMoveToRoot.json", "/")
+		if err != nil {
+			t.Errorf("got error %v, but did not want one", err)
+		}
+
+		assertFileExistence(t, dir)
+	})
+
+	t.Run("move a file from a directory to another but not in the lab root", func(t *testing.T) {
+		subDir1 := "testDir1"
+		subDir2 := "testSubDir"
+		subFile1 := "testFile1"
+		fileName := "testMoveToRoot.json"
+		oldPath := subDir1 + "/" + fileName
+		newPath := subDir1 + "/" + subDir2
+		dir, ft := createTempDir(t, "testMoveToDir", subFile1)
+		createDirHelper(t, dir, subDir1)
+		createFileHelper(t, dir, oldPath)
+		createDirHelper(t, filepath.Join(dir, subDir1), subDir2)
+		defer os.RemoveAll(dir)
+
+		err := ft.MoveFileToExistingDir(oldPath, newPath)
+		if err != nil {
+			t.Errorf("got error %v, but did not want one", err)
+		}
+
+		assertFileExistence(t, dir, subDir1, subDir2)
+	})
+
+	t.Run("get an error when paths are stricty identical", func(t *testing.T) {
+		subFile1 := "testFile1"
+		dir, ft := createTempDir(t, "testMoveToDir", subFile1)
+		defer os.RemoveAll(dir)
+
+		p := "/"
+		want := ErrEqualOldAndNewPath
+		err := ft.MoveFileToExistingDir(p, p)
+		assertError(t, err, want)
+	})
+
+	t.Run("get an error when we want to move a file from the lab root to the same location", func(t *testing.T) {
+		subFile1 := "testFile1"
+		dir, ft := createTempDir(t, "testMoveToDir", subFile1)
+		defer os.RemoveAll(dir)
+
+		f := subFile1 + ".json"
+		want := ErrEqualOldAndNewPath
+		err := ft.MoveFileToExistingDir(f, "/")
+		assertError(t, err, want)
+	})
+
+	t.Run("get an error when we want move a file from a directory, that is NOT the lab root, to the same directory", func(t *testing.T) {
+		subDir1 := "testDir1"
+		subFile1 := "testFile1"
+		fileName := "testMoveToRoot.json"
+		oldPath := subDir1 + "/" + fileName
+		newPath := subDir1
+		dir, ft := createTempDir(t, "testMoveToDir", subFile1)
+		createDirHelper(t, dir, subDir1)
+		createFileHelper(t, dir, oldPath)
+
+		want := ErrEqualOldAndNewPath
+		err := ft.MoveFileToExistingDir(oldPath, newPath)
+		assertError(t, err, want)
 	})
 }

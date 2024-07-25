@@ -11,7 +11,8 @@ import (
 )
 
 var (
-	ErrFileAreDifferent = errors.New("the 2 files are different")
+	ErrFileAreDifferent   = errors.New("the 2 files are different")
+	ErrEqualOldAndNewPath = errors.New("the old and paths must be different")
 )
 
 // Fonction utilitaire qui permet de déterminer si un fichier existe au chemin indiqué
@@ -91,9 +92,38 @@ func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
 	return nil
 }
 
-// Déplace le fichier
-func (ft *FileTreeExplorer) MoveFile(oldPath, newPath string) {
+// Given a path to a file starting from the lab root and an another path to a directory,
+// moves the file to the new directory.
+func (ft *FileTreeExplorer) MoveFileToExistingDir(oldPath, newPath string) error {
+	if oldPath == newPath {
+		return ErrEqualOldAndNewPath
+	}
 
+	labPath := ft.GetLabPath()
+	op := filepath.Join(labPath, oldPath)
+
+	// If the file we want to move is at the root of the lab
+	// that means oldPath = filename + file extension
+	if !strings.Contains(oldPath, "/") {
+		if newPath == "/" {
+			// If we're here that means the old path is the root of the lab.
+			// That also means that if newPath == "/", the old and new paths are equal
+			return ErrEqualOldAndNewPath
+		}
+
+		return os.Rename(op, filepath.Join(labPath, newPath, oldPath))
+	}
+
+	fileName := oldPath[strings.LastIndex(oldPath, "/")+1:]
+	if oldPath == newPath+"/"+fileName {
+		return ErrEqualOldAndNewPath
+	}
+
+	if newPath == "/" {
+		return os.Rename(op, filepath.Join(labPath, fileName))
+	}
+
+	return os.Rename(op, filepath.Join(labPath, newPath, fileName))
 }
 
 // Create a file named after the fileName argument. If the file already exists, it will try
