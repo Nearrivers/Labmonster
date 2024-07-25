@@ -5,11 +5,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"flow-poc/backend/config"
-
-	"github.com/wailsapp/wails/v2/pkg/logger"
 )
 
 var (
@@ -17,19 +16,27 @@ var (
 )
 
 type FileTreeExplorer struct {
-	Logger logger.Logger     `json:"logger"`
-	Cfg    *config.AppConfig `json:"cfg"`
+	Cfg         *config.AppConfig
+	Directories []string `json:"directories"`
 }
 
 func NewFileTree(cfg *config.AppConfig) *FileTreeExplorer {
-	return &FileTreeExplorer{
-		Logger: logger.NewDefaultLogger(),
-		Cfg:    cfg,
+	ft := &FileTreeExplorer{
+		Cfg: cfg,
 	}
+
+	ft.GetLabDirs()
+
+	return ft
 }
 
 func (ft *FileTreeExplorer) GetLabPath() string {
 	return ft.Cfg.ConfigFile.LabPath
+}
+
+func (ft *FileTreeExplorer) GetDirectories() []string {
+	ft.GetLabDirs()
+	return ft.Directories
 }
 
 // Given a path to a directory starting from the lab root, this function will read
@@ -55,7 +62,7 @@ func (ft *FileTreeExplorer) GetSubDirAndFiles(pathFromLabRoot string) ([]*Node, 
 func (ft *FileTreeExplorer) createNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
 	dirNames := make([]*Node, 0)
 	for _, entry := range entries {
-		if entry.Name() == ".labmonster" && entry.IsDir() {
+		if entry.Name() == filepath.Ext(entry.Name()) {
 			continue
 		}
 
@@ -65,8 +72,8 @@ func (ft *FileTreeExplorer) createNodesFromDirEntries(entries []fs.DirEntry) ([]
 		}
 
 		newNode := Node{
-			Name:      entry.Name(),
-			Files:     make([]*Node, 0),
+			Name:      strings.TrimSuffix(entry.Name(), filepath.Ext(entry.Name())),
+			Extension: filepath.Ext(entry.Name()),
 			CreatedAt: time.Now(),
 			UpdatedAt: info.ModTime(),
 		}
@@ -80,4 +87,27 @@ func (ft *FileTreeExplorer) createNodesFromDirEntries(entries []fs.DirEntry) ([]
 		dirNames = append(dirNames, &newNode)
 	}
 	return dirNames, nil
+}
+
+// Get every directory name inside the lab and set the Directories
+// of the FileTreeExplorer struct
+func (ft *FileTreeExplorer) GetLabDirs() error {
+	ft.Directories = make([]string, 0)
+
+	ft.Directories = append(ft.Directories, "/")
+	err := filepath.WalkDir(ft.GetLabPath(), func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !d.IsDir() || d.Name() == ".labmonster" || path == ft.GetLabPath() {
+			return nil
+		}
+
+		n := strings.TrimPrefix(path, ft.GetLabPath())
+		ft.Directories = append(ft.Directories, strings.ReplaceAll(n[1:], string(filepath.Separator), "/"))
+		return nil
+	})
+
+	return err
 }

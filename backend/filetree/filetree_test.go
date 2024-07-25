@@ -3,6 +3,7 @@ package filetree
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"flow-poc/backend/config"
@@ -86,4 +87,26 @@ func TestGetSubDirAndFiles(t *testing.T) {
 
 	// TODO: Ajouter d'autres tests dans d'autres profondeurs lorsque la fonction de création sera
 	// implémentée
+}
+
+func TestGetLabDirs(t *testing.T) {
+	t.Run("get every directory of the lab", func(t *testing.T) {
+		subDir1 := "testDir1"
+		subFile1 := "testFile1"
+		dir, ft := createTempDir(t, "testNextLevel", subFile1)
+		defer os.RemoveAll(dir)
+		createDirAndFile(t, dir, subDir1)
+
+		subDir2 := "testSubDir"
+		createDirAndFile(t, filepath.Join(dir, subDir1), subDir2)
+
+		err := ft.GetLabDirs()
+		if err != nil {
+			t.Fatalf("couldn't get first tree depth: %v", err)
+		}
+
+		if len(ft.Directories) != 3 {
+			t.Errorf("want 3 directories, got %d with %s", len(ft.Directories), strings.Join(ft.Directories, ", "))
+		}
+	})
 }

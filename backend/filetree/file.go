@@ -11,9 +11,7 @@ import (
 )
 
 var (
-	ErrNoFileInThisLevel = errors.New("no file at this level")
-	ErrNodeNotFound      = errors.New("file not found")
-	ErrFileAreDifferent  = errors.New("the 2 files are different")
+	ErrFileAreDifferent = errors.New("the 2 files are different")
 )
 
 // Fonction utilitaire qui permet de déterminer si un fichier existe au chemin indiqué
@@ -72,8 +70,6 @@ func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName st
 	if err != nil {
 		return err
 	}
-
-	// TODO: Renommer le fichier dans l'arbre en mémoire
 
 	return nil
 }
