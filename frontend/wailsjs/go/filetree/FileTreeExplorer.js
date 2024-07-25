@@ -14,6 +14,14 @@ export function DuplicateFile(arg1, arg2) {
   return window['go']['filetree']['FileTreeExplorer']['DuplicateFile'](arg1, arg2);
 }
 
+export function GetDirectories() {
+  return window['go']['filetree']['FileTreeExplorer']['GetDirectories']();
+}
+
+export function GetLabDirs() {
+  return window['go']['filetree']['FileTreeExplorer']['GetLabDirs']();
+}
+
 export function GetLabPath() {
   return window['go']['filetree']['FileTreeExplorer']['GetLabPath']();
 }

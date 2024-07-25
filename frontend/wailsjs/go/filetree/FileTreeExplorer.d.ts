@@ -8,6 +8,10 @@ export function DeleteFile(arg1:string):Promise<void>;
 
 export function DuplicateFile(arg1:string,arg2:string):Promise<string>;
 
+export function GetDirectories():Promise<Array<string>>;
+
+export function GetLabDirs():Promise<void>;
+
 export function GetLabPath():Promise<string>;
 
 export function GetSubDirAndFiles(arg1:string):Promise<Array<filetree.Node>>;

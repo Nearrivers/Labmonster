@@ -67,21 +67,40 @@ import {
   GetSubDirAndFiles,
 } from '$/filetree/FileTreeExplorer';
 import { useSidePanel } from '@/composables/useSidePanel';
+import { useShowErrorToast } from '@/composables/useShowErrorToast';
+import { CheckConfigPresenceAndLoadIt } from '$/config/AppConfig';
+import { useEventListener } from '@/composables/useEventListener';
+import { configFileLoaded } from '@/events/ReloadFileExplorer';
+import { CONFIG_FILE_LOADED } from '@/constants/event-names/CONFIG_FILE_LOADED';
 
 const files = ref<filetree.Node[]>([]);
-const { sortNodes, showToast } = useSidePanel();
+const { sortNodes } = useSidePanel();
+const { showToast } = useShowErrorToast();
 const contextMenuX = ref(100);
 const contextMenuY = ref(100);
 const fileContextMenu = ref<InstanceType<typeof FileContextMenu> | null>(null);
 const selectedNode = ref<HTMLLIElement | null>(null);
+useEventListener(configFileLoaded, CONFIG_FILE_LOADED, loadLabFiles);
 
 onMounted(async () => {
   try {
-    files.value = await GetSubDirAndFiles('');
+    const isConfigFilePresent = await CheckConfigPresenceAndLoadIt();
+
+    if (isConfigFilePresent) {
+      await loadLabFiles();
+    }
   } catch (error) {
-    showToast('Erreur lors du chargement des fichiers du lab');
+    showToast(String(error));
   }
 });
+
+async function loadLabFiles() {
+  try {
+    files.value = await GetSubDirAndFiles('');
+  } catch (error) {
+    showToast(String(error), 'Impossible de charger les fichiers');
+  }
+}
 
 async function createNewFileAtRoot() {
   try {

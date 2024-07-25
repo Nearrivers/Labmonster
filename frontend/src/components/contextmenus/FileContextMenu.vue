@@ -14,6 +14,7 @@
     </li>
     <li
       class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted hover:text-white"
+      @click="onMoveClick"
     >
       <FolderTree :stroke-width="1.75" class="h-[16px] w-4" />
       Déplacer le fichier vers...
@@ -32,6 +33,11 @@
       <Trash2 :stroke-width="1.75" class="h-[16px] w-4" />
       Supprimer
     </li>
+    <MoveFileCommand
+      ref="moveFileCommand"
+      :oldPath="props.selectedNode?.dataset.path"
+      :extension="props.selectedNode?.dataset.extension"
+    />
     <DeleteFileDialog
       ref="deleteFileDialog"
       :path="props.selectedNode?.dataset.path"
@@ -46,6 +52,7 @@ import { ref } from 'vue';
 import DeleteFileDialog from '../AlertDialog/DeleteFileDialog.vue';
 import { ContextMenuProps } from '@/types/props/ContextMenuProps';
 import { useNodeContextMenu } from '@/composables/ContextMenus/useNodeContextMenu';
+import MoveFileCommand from '../commands/MoveFileCommand.vue';
 
 const props = defineProps<
   ContextMenuProps & {
@@ -56,8 +63,15 @@ const props = defineProps<
 const deleteFileDialog = ref<InstanceType<typeof DeleteFileDialog> | null>(
   null,
 );
+const moveFileCommand = ref<InstanceType<typeof MoveFileCommand> | null>(null);
+const open = ref(false);
 const { menu, showPopover, hidePopover, onRenameClick, onDeleteClick } =
   useNodeContextMenu(deleteFileDialog);
+
+function onMoveClick() {
+  moveFileCommand.value?.showModal();
+  hidePopover();
+}
 
 defineExpose({
   showPopover,

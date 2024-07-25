@@ -7,6 +7,8 @@ export function CheckConfigPresenceAndLoadIt():Promise<boolean>;
 
 export function CreateAppConfig(arg1:string):Promise<void>;
 
+export function GetLabPath():Promise<string>;
+
 export function LoadConfigFile():Promise<void>;
 
 export function OpenCreateLabDialog():Promise<string>;

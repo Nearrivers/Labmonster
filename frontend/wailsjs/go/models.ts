@@ -8,7 +8,6 @@ export namespace filetree {
 	    // Go type: time
 	    updatedAt: any;
 	    extension: string;
-	    files: Node[];
 	
 	    static createFrom(source: any = {}) {
 	        return new Node(source);
@@ -21,7 +20,6 @@ export namespace filetree {
 	        this.createdAt = this.convertValues(source["createdAt"], null);
 	        this.updatedAt = this.convertValues(source["updatedAt"], null);
 	        this.extension = source["extension"];
-	        this.files = this.convertValues(source["files"], Node);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

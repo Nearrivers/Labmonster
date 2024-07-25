@@ -1,5 +1,10 @@
 <template>
-  <li class="w-full" :data-path="nodePath" data-type="file">
+  <li
+    class="w-full"
+    :data-path="nodePath"
+    data-type="file"
+    :data-extension="node.extension"
+  >
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
@@ -47,19 +52,19 @@ import { computed, ref } from 'vue';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { RenameFile } from '$/filetree/FileTreeExplorer';
-import { useSidePanel } from '@/composables/useSidePanel';
+import { useShowErrorToast } from '@/composables/useShowErrorToast';
 
 const props = defineProps<{
   node: filetree.Node;
   path: string;
 }>();
 
+const { showToast } = useShowErrorToast();
 const fileName = ref(props.node.name);
 const input = ref<HTMLInputElement | null>(null);
 const nodePath = ref(
   props.path ? props.path + '/' + props.node.name : props.node.name,
 );
-const { showToast } = useSidePanel();
 
 const nodePathWithoutSpaces = computed(() =>
   nodePath.value.replaceAll(' ', '-'),

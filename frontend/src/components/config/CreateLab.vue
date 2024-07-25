@@ -45,20 +45,28 @@ import {
 import { CreateAppConfig } from '$/config/AppConfig';
 import { ref } from 'vue';
 import { OpenCreateLabDialog } from '$/config/AppConfig';
+import { useShowErrorToast } from '@/composables/useShowErrorToast';
+import { configFileLoaded } from '@/events/ReloadFileExplorer';
 
 const dir = ref('');
-
+const { showToast } = useShowErrorToast();
 const isDialogOpen = ref(true);
+
 async function getLabDirectory() {
   try {
     dir.value = await OpenCreateLabDialog();
-  } catch (error) {}
+  } catch (error) {
+    showToast(String(error));
+  }
 }
 
 async function createConfigFile(path: string) {
   try {
     await CreateAppConfig(path);
     isDialogOpen.value = false;
-  } catch (error) {}
+    configFileLoaded.configFileLoaded();
+  } catch (error) {
+    showToast(String(error));
+  }
 }
 </script>
