@@ -66,8 +66,9 @@ func (ac *AppConfig) CreateAppConfig(configDirPath string) {
 	}
 
 	go func() {
+		p := filepath.Join(configDirPath, ".labmonster")
 		// Creating the .labmonster config directory if it doesn't exists
-		err := os.MkdirAll(filepath.Join(configDirPath, ".labmonster"), os.ModePerm)
+		err := os.MkdirAll(p, os.ModePerm)
 		if err != nil {
 			ac.Logger.Error(err.Error())
 		}
@@ -94,7 +95,7 @@ func (ac *AppConfig) CheckConfigPresenceAndLoadIt() bool {
 		ac.Logger.Error(err.Error())
 		return false
 	}
-	go ac.LoadConfigFile()
+	ac.LoadConfigFile()
 	return true
 }
 
