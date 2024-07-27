@@ -76,7 +76,7 @@ async function toggle() {
       ? await GetSubDirAndFiles(props.path + '/' + props.node.name)
       : await GetSubDirAndFiles(props.node.name);
   } catch (error) {
-    showToast(String(error));
+    showToast(error);
   } finally {
     isOpen.value = !isOpen.value;
   }

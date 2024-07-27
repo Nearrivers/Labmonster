@@ -4,7 +4,13 @@ import { h } from "vue";
 export function useShowErrorToast() {
   const { toast } = useToast()
 
-  function showToast(description: string, title?: string) {
+  function showToast(error: unknown, title?: string) {
+    let description = String(error)
+
+    if (error instanceof Error) {
+      description = error.message
+    }
+
     toast({
       title,
       description,

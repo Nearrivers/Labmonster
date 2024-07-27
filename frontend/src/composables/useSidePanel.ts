@@ -46,7 +46,7 @@ export function useSidePanel() {
     try {
       files.value = await GetSubDirAndFiles('');
     } catch (error) {
-      showToast(String(error), 'Impossible de charger les fichiers');
+      showToast(error, 'Impossible de charger les fichiers');
     }
   }
 
@@ -56,7 +56,7 @@ export function useSidePanel() {
       files.value.push(newFileName);
       files.value.sort(sortNodes);
     } catch (error) {
-      showToast(String(error), 'Impossible de créer le fichier');
+      showToast(error, 'Impossible de créer le fichier');
     }
   }
 

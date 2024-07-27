@@ -25,7 +25,7 @@ export function useMoveFile(selectedNode: HTMLLIElement | null, activeDir: Ref<n
       directories.value = await GetDirectories();
       fuse = new Fuse(directories.value, { threshold: 0.35 });
     } catch (error) {
-      showToast(String(error));
+      showToast(error);
     }
   });
 
@@ -89,7 +89,7 @@ export function useMoveFile(selectedNode: HTMLLIElement | null, activeDir: Ref<n
         moveDOMNode(oldPath);
         hideModalCb();
       } catch (error) {
-        showToast(String(error));
+        showToast(error);
       }
     }
   }

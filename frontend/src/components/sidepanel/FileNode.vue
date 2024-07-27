@@ -85,7 +85,7 @@ async function onBlur() {
   try {
     await RenameFile(props.path, props.node.name, fileName.value);
   } catch (error) {
-    showToast(String(error));
+    showToast(error);
   }
 }
 </script>

@@ -56,7 +56,7 @@ async function getLabDirectory() {
   try {
     dir.value = await OpenCreateLabDialog();
   } catch (error) {
-    showToast(String(error));
+    showToast(error);
   }
 }
 
@@ -66,7 +66,7 @@ async function createConfigFile(path: string) {
     isDialogOpen.value = false;
     configFileLoaded.configFileLoaded();
   } catch (error) {
-    showToast(String(error));
+    showToast(error);
   }
 }
 </script>
