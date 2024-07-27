@@ -1,11 +1,11 @@
 <template>
   <ResizablePanelGroup direction="horizontal">
     <ResizablePanel :default-size="15" :min-size="10" collapsible>
-      <SidePanel></SidePanel>
+      <SidePanel />
     </ResizablePanel>
     <ResizableHandle />
     <ResizablePanel>
-      <GraphPanel></GraphPanel>
+      <GraphPanel />
     </ResizablePanel>
   </ResizablePanelGroup>
 </template>

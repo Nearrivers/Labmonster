@@ -24,7 +24,7 @@
       </Tooltip>
     </TooltipProvider>
   </header>
-  <ScrollArea class="h-[95svh] pb-4">
+  <ScrollArea class="h-[95svh] pb-4" data-path="/">
     <ul
       class="w-full px-2 text-sm text-muted-foreground"
       v-if="files.length > 0"
@@ -47,40 +47,34 @@
 </template>
 
 <script setup lang="ts">
-import { FilePlus2, FolderPlus } from 'lucide-vue-next';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { filetree } from '$/models';
-import { ref, onMounted, nextTick } from 'vue';
+import { onMounted } from 'vue';
+import { FilePlus2, FolderPlus } from 'lucide-vue-next';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';
+import { useSidePanel } from '@/composables/useSidePanel';
+import { CheckConfigPresenceAndLoadIt } from '$/config/AppConfig';
 import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
 import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
-import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
-import {
-  CreateNewFileAtRoot,
-  GetSubDirAndFiles,
-} from '$/filetree/FileTreeExplorer';
-import { useSidePanel } from '@/composables/useSidePanel';
-import { useShowErrorToast } from '@/composables/useShowErrorToast';
-import { CheckConfigPresenceAndLoadIt } from '$/config/AppConfig';
-import { useEventListener } from '@/composables/useEventListener';
-import { configFileLoaded } from '@/events/ReloadFileExplorer';
-import { CONFIG_FILE_LOADED } from '@/constants/event-names/CONFIG_FILE_LOADED';
 
-const files = ref<filetree.Node[]>([]);
-const { sortNodes } = useSidePanel();
-const { showToast } = useShowErrorToast();
-const contextMenuX = ref(100);
-const contextMenuY = ref(100);
-const fileContextMenu = ref<InstanceType<typeof FileContextMenu> | null>(null);
-const selectedNode = ref<HTMLLIElement | null>(null);
-useEventListener(configFileLoaded, CONFIG_FILE_LOADED, loadLabFiles);
+const {
+  files,
+  contextMenuX,
+  contextMenuY,
+  fileContextMenu,
+  selectedNode,
+  loadLabFiles,
+  onRightClick,
+  createNewFileAtRoot,
+  showToast,
+  onLeftClick,
+} = useSidePanel();
 
 onMounted(async () => {
   try {
@@ -93,32 +87,4 @@ onMounted(async () => {
     showToast(String(error));
   }
 });
-
-async function loadLabFiles() {
-  try {
-    files.value = await GetSubDirAndFiles('');
-  } catch (error) {
-    showToast(String(error), 'Impossible de charger les fichiers');
-  }
-}
-
-async function createNewFileAtRoot() {
-  try {
-    const newFileName = await CreateNewFileAtRoot(NEW_FILE_NAME);
-    files.value.push(newFileName);
-    files.value.sort(sortNodes);
-  } catch (error) {
-    showToast(String(error), 'Impossible de créer le fichier');
-  }
-}
-
-async function onRightClick(event: MouseEvent) {
-  contextMenuX.value = event.clientX;
-  contextMenuY.value = event.clientY;
-  selectedNode.value = (event.target as HTMLElement).closest('li');
-  await nextTick();
-  fileContextMenu.value?.showPopover();
-}
-
-function onLeftClick(event: MouseEvent) {}
 </script>

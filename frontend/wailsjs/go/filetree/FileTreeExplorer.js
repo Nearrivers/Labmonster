@@ -30,8 +30,8 @@ export function GetSubDirAndFiles(arg1) {
   return window['go']['filetree']['FileTreeExplorer']['GetSubDirAndFiles'](arg1);
 }
 
-export function MoveFile(arg1, arg2) {
-  return window['go']['filetree']['FileTreeExplorer']['MoveFile'](arg1, arg2);
+export function MoveFileToExistingDir(arg1, arg2) {
+  return window['go']['filetree']['FileTreeExplorer']['MoveFileToExistingDir'](arg1, arg2);
 }
 
 export function RenameFile(arg1, arg2, arg3) {

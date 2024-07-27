@@ -10,10 +10,6 @@ export function CreateAppConfig(arg1) {
   return window['go']['config']['AppConfig']['CreateAppConfig'](arg1);
 }
 
-export function GetLabPath() {
-  return window['go']['config']['AppConfig']['GetLabPath']();
-}
-
 export function LoadConfigFile() {
   return window['go']['config']['AppConfig']['LoadConfigFile']();
 }

@@ -1,8 +1,8 @@
-import { ref } from "vue";
+import { ComputedRef, Ref, ref } from "vue";
 
 // Used with dialog elements.
 // The dialog needs to have a ref="dialog" attribute
-export function useCommand() {
+export function useCommand(activeLine: Ref<number>, computedList: ComputedRef<string[]>) {
   const dialog = ref<HTMLDialogElement | null>(null);
 
   function showModal() {
@@ -22,9 +22,30 @@ export function useCommand() {
     dialog.value?.removeEventListener('animationend', onAnimationFinish);
   }
 
+  function onKeyDown() {
+    if (activeLine.value < computedList.value.length - 1) {
+      activeLine.value++;
+      return;
+    }
+
+    activeLine.value = 0;
+  }
+
+  function onKeyUp() {
+    if (activeLine.value > 0) {
+      activeLine.value--;
+      return;
+    }
+
+    activeLine.value = computedList.value.length - 1;
+  }
+
   return {
     dialog,
+    activeLine,
     showModal,
-    hideModal
+    hideModal,
+    onKeyDown,
+    onKeyUp
   }
 }

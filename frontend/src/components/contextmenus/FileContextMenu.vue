@@ -7,20 +7,20 @@
     :style="{ top: y + 'px', left: x + 'px' }"
   >
     <li
-      class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted hover:text-white"
+      class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
     >
       <Files :stroke-width="1.75" class="h-[16px] w-4" />
       <p>Dupliquer</p>
     </li>
     <li
-      class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted hover:text-white"
+      class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
       @click="onMoveClick"
     >
       <FolderTree :stroke-width="1.75" class="h-[16px] w-4" />
       Déplacer le fichier vers...
     </li>
     <li
-      class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted hover:text-white"
+      class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
       @click="onRenameClick(props.selectedNode?.dataset.path!)"
     >
       <PencilLine :stroke-width="1.75" class="h-[16px] w-4" />
@@ -35,8 +35,8 @@
     </li>
     <MoveFileCommand
       ref="moveFileCommand"
-      :oldPath="props.selectedNode?.dataset.path"
-      :extension="props.selectedNode?.dataset.extension"
+      :key="props.x"
+      :selected-node="selectedNode"
     />
     <DeleteFileDialog
       ref="deleteFileDialog"
@@ -64,7 +64,6 @@ const deleteFileDialog = ref<InstanceType<typeof DeleteFileDialog> | null>(
   null,
 );
 const moveFileCommand = ref<InstanceType<typeof MoveFileCommand> | null>(null);
-const open = ref(false);
 const { menu, showPopover, hidePopover, onRenameClick, onDeleteClick } =
   useNodeContextMenu(deleteFileDialog);
 

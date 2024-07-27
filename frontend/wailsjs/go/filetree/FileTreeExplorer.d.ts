@@ -16,7 +16,7 @@ export function GetLabPath():Promise<string>;
 
 export function GetSubDirAndFiles(arg1:string):Promise<Array<filetree.Node>>;
 
-export function MoveFile(arg1:string,arg2:string):Promise<void>;
+export function MoveFileToExistingDir(arg1:string,arg2:string):Promise<void>;
 
 export function RenameFile(arg1:string,arg2:string,arg3:string):Promise<void>;
 

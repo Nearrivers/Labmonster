@@ -29,7 +29,7 @@
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-    <ul v-if="isOpen" class="w-full pl-[18.5px]">
+    <ul v-show="isOpen" class="w-full pl-[18.5px]">
       <template v-for="child in files" :key="child.name">
         <FileNode v-if="child.type == 'FILE'" :node="child" :path="nodePath" />
         <DirNode v-else :node="child" :path="nodePath" />
@@ -51,10 +51,10 @@ import { ChevronRight } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { GetSubDirAndFiles } from '$/filetree/FileTreeExplorer';
-import FileNode from '@/components/sidepanel/FileNode.vue';
-import DirNode from '@/components/sidepanel/DirNode.vue';
 import { TooltipArrow } from 'radix-vue';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
+import FileNode from '@/components/sidepanel/FileNode.vue';
+import DirNode from '@/components/sidepanel/DirNode.vue';
 
 const props = defineProps<{
   node: filetree.Node;
@@ -64,10 +64,11 @@ const props = defineProps<{
 const files = ref<filetree.Node[]>([]);
 const isOpen = ref(false);
 const isFolder = computed(() => props.node.type === 'DIR');
-const nodePath = ref(
+const { showToast } = useShowErrorToast();
+
+const nodePath = computed(() =>
   props.path ? props.path + '/' + props.node.name : props.node.name,
 );
-const { showToast } = useShowErrorToast();
 
 async function toggle() {
   try {
