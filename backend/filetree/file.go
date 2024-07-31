@@ -15,10 +15,39 @@ var (
 	ErrEqualOldAndNewPath = errors.New("the old and paths must be different")
 )
 
-// Fonction utilitaire qui permet de déterminer si un fichier existe au chemin indiqué
+// Short function that, given an absolute path to a file, tells wheter or not the file exists
 func doesFileExist(path string) bool {
 	_, err := os.Stat(path)
 	return !errors.Is(err, os.ErrNotExist)
+}
+
+func (ft *FileTreeExplorer) CreateFile(pathFromLabRoot string) (Node, error) {
+	p := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
+
+	if !doesFileExist(p) {
+		f, err := os.Create(p)
+		if err != nil {
+			return Node{}, nil
+		}
+		defer f.Close()
+
+		stat, err := f.Stat()
+		if err != nil {
+			return Node{}, nil
+		}
+
+		n := NewNode(stat.Name(), "json", FILE)
+		return n, nil
+	}
+
+	f, name, err := createNonDuplicateFile(p)
+	if err != nil {
+		return Node{}, nil
+	}
+
+	defer f.Close()
+	n := NewNode(name, "json", FILE)
+	return n, nil
 }
 
 // Create a file at lab root
@@ -65,7 +94,7 @@ func (ft *FileTreeExplorer) SaveFile() {}
 func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName string) error {
 	labPath := ft.GetLabPath()
 	oldPath := filepath.Join(labPath, pathFromRootOfTheLab, oldName)
-	newPath := filepath.Join(labPath, pathFromRootOfTheLab, newName+".json")
+	newPath := filepath.Join(labPath, pathFromRootOfTheLab, newName)
 
 	err := os.Rename(oldPath, newPath)
 	if err != nil {
@@ -80,10 +109,6 @@ func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName st
 // The function will add the ".json" file extension if it's missing
 // from the path
 func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
-	if !strings.Contains(string(pathFromRootOfTheLab), ".json") {
-		pathFromRootOfTheLab += ".json"
-	}
-
 	err := os.Remove(filepath.Join(ft.GetLabPath(), pathFromRootOfTheLab))
 	if err != nil {
 		return err
@@ -94,9 +119,9 @@ func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
 
 // Given a path to a file starting from the lab root and an another path to a directory,
 // moves the file to the new directory.
-func (ft *FileTreeExplorer) MoveFileToExistingDir(oldPath, newPath string) error {
+func (ft *FileTreeExplorer) MoveFileToExistingDir(oldPath, newPath string) (string, error) {
 	if oldPath == newPath {
-		return ErrEqualOldAndNewPath
+		return "", ErrEqualOldAndNewPath
 	}
 
 	labPath := ft.GetLabPath()
@@ -107,23 +132,27 @@ func (ft *FileTreeExplorer) MoveFileToExistingDir(oldPath, newPath string) error
 	if !strings.Contains(oldPath, "/") {
 		if newPath == "/" {
 			// If we're here that means the old path is the root of the lab.
-			// That also means that if newPath == "/", the old and new paths are equal
-			return ErrEqualOldAndNewPath
+			// That also means that if newPath == "/" and "/" being equivalent to root of the lab,
+			// the old and new paths are equal
+			return "", ErrEqualOldAndNewPath
 		}
 
-		return os.Rename(op, filepath.Join(labPath, newPath, oldPath))
+		np := filepath.Join(labPath, newPath, oldPath)
+		return moveFile(op, np)
 	}
 
 	fileName := oldPath[strings.LastIndex(oldPath, "/")+1:]
 	if oldPath == newPath+"/"+fileName {
-		return ErrEqualOldAndNewPath
+		return "", ErrEqualOldAndNewPath
 	}
 
 	if newPath == "/" {
-		return os.Rename(op, filepath.Join(labPath, fileName))
+		np := filepath.Join(labPath, fileName)
+		return fileName, os.Rename(op, np)
 	}
 
-	return os.Rename(op, filepath.Join(labPath, newPath, fileName))
+	np := filepath.Join(labPath, newPath, fileName)
+	return moveFile(op, np)
 }
 
 // Create a file named after the fileName argument. If the file already exists, it will try
@@ -145,7 +174,7 @@ func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, extension strin
 	defer f.Close()
 	defer f2.Close()
 
-	err = copyFile(f, f2)
+	_, err = io.Copy(f, f2)
 	if err != nil {
 		return "", err
 	}
@@ -153,14 +182,34 @@ func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, extension strin
 	return name, nil
 }
 
-// Take two files and copy the content of the first into the second
-func copyFile(inputFile, outputFile *os.File) error {
-	_, err := io.Copy(outputFile, inputFile)
-	if err != nil {
-		return err
+func moveFile(oldPath, newPath string) (string, error) {
+	if !doesFileExist(newPath) {
+		err := os.Rename(oldPath, newPath)
+		if err != nil {
+			return "", nil
+		}
+
+		info, err := os.Stat(newPath)
+		if err != nil {
+			return "", err
+		}
+		return info.Name(), nil
 	}
 
-	return nil
+	oldFile, err := os.Open(oldPath)
+	if err != nil {
+		return "", err
+	}
+	defer oldFile.Close()
+
+	newFile, name, err := createNonDuplicateFile(newPath)
+	if err != nil {
+		return "", err
+	}
+	defer newFile.Close()
+
+	_, err = io.Copy(oldFile, newFile)
+	return name, err
 }
 
 // Given an absolute path to a file we're trying to create. Before calling this function, we know that this file
@@ -186,26 +235,6 @@ func createNonDuplicateFile(absPath string) (*os.File, string, error) {
 
 		return f, name, nil
 	}
-}
-
-func extractFolderPath(pathFromLabRoot string) string {
-	if !strings.Contains(pathFromLabRoot, "/") {
-		return ""
-	}
-
-	if pathFromLabRoot == "/" {
-		return pathFromLabRoot
-	}
-
-	return pathFromLabRoot[:strings.LastIndex(pathFromLabRoot, "/")]
-}
-
-func extractFileName(pathFromLabRoot string) string {
-	if !strings.Contains(pathFromLabRoot, "/") {
-		return pathFromLabRoot[strings.LastIndex(pathFromLabRoot, ".")+1:]
-	}
-
-	return pathFromLabRoot[strings.LastIndex(pathFromLabRoot, "/")+1 : strings.LastIndex(pathFromLabRoot, ".")]
 }
 
 // Function used in tests

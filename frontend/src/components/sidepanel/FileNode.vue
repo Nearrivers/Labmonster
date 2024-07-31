@@ -24,7 +24,7 @@
               class="cursor-pointer bg-transparent"
               disabled
               :id="nodePathWithoutSpaces"
-              @blur="onBlur"
+              @blur.stop="onBlur"
               autocomplete="off"
             />
           </div>
@@ -82,7 +82,11 @@ async function onBlur() {
   }
 
   try {
-    await RenameFile(props.path, props.node.name, fileName.value);
+    await RenameFile(
+      props.path,
+      props.node.name + props.node.extension,
+      fileName.value + props.node.extension,
+    );
   } catch (error) {
     showToast(error);
   }

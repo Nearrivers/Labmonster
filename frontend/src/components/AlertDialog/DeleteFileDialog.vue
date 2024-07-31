@@ -48,6 +48,7 @@ import Checkbox from '../ui/checkbox/Checkbox.vue';
 
 const props = defineProps<{
   path?: string;
+  extension?: string;
 }>();
 
 const isDialogOpen = ref(false);
@@ -65,7 +66,7 @@ function closeDialog() {
 
 async function onDeleteFile() {
   try {
-    await DeleteFile(props.path!);
+    await DeleteFile(props.path + props.extension!);
     toast({
       description: `Fichier "${fileTitle.value}" supprimé avec succès`,
       duration: 5000,

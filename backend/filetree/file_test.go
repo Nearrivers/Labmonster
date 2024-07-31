@@ -89,15 +89,17 @@ func TestRenameFile(t *testing.T) {
 		defer os.RemoveAll(dir)
 
 		oldName := "test rename"
-		newName := "test rename 2"
+		newName := "test rename 1.json"
 
 		createFileBeforeTest(t, ft, oldName)
 		defer ft.DeleteFile(newName)
 
 		err := ft.RenameFile("", oldName+".json", newName)
 		if err != nil {
-			t.Errorf("got an error %v", err)
+			t.Fatalf("got an error %v", err)
 		}
+	
+		assertFileExistence(t, ft.GetLabPath(), newName)
 	})
 
 	t.Run("Non existant file rename at first level", func(t *testing.T) {
@@ -125,7 +127,7 @@ func TestDeleteFile(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
 
-		fileName := "test delete"
+		fileName := "test delete.json"
 
 		createFileBeforeTest(t, ft, fileName)
 
@@ -135,7 +137,7 @@ func TestDeleteFile(t *testing.T) {
 		}
 
 		want := false
-		got := doesFileExist(filepath.Join(ft.GetLabPath(), fileName+".json"))
+		got := doesFileExist(filepath.Join(ft.GetLabPath(), fileName))
 
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
@@ -270,27 +272,35 @@ func TestMoveFile(t *testing.T) {
 		createDirHelper(t, filepath.Join(dir, subDir1), subDir2)
 
 		fileName := subFile1 + ".json"
-		err := ft.MoveFileToExistingDir(fileName, "testDir1/testSubDir")
+		f, err := ft.MoveFileToExistingDir(fileName, "testDir1/testSubDir")
 		if err != nil {
 			t.Errorf("got error %v, but did not want one", err)
 		}
 
+		if fileName != f {
+			t.Errorf("wrong file name returned, got %s, want %s", fileName, f)
+		}
 		assertFileExistence(t, dir, subDir1, subDir2, fileName)
 	})
 
 	t.Run("move a file from a directory to the lab root", func(t *testing.T) {
 		subDir1 := "testDir1"
 		subFile1 := "testFile1"
+		fileName := "testMoveToRoot.json"
+		oldpath :=  subDir1+"/"+fileName
 		dir, ft := createTempDir(t, "testMoveToRoot", subFile1)
 		defer os.RemoveAll(dir)
 		createDirHelper(t, dir, subDir1)
-		createFileHelper(t, dir, "testDir1/testMoveToRoot.json")
+		createFileHelper(t, dir, oldpath)
 
-		err := ft.MoveFileToExistingDir("testDir1/testMoveToRoot.json", "/")
+		f, err := ft.MoveFileToExistingDir(oldpath, "/")
 		if err != nil {
 			t.Errorf("got error %v, but did not want one", err)
 		}
 
+		if fileName != f {
+			t.Errorf("wrong file name returned, got %s, want %s", fileName, f)
+		}
 		assertFileExistence(t, dir)
 	})
 
@@ -307,9 +317,13 @@ func TestMoveFile(t *testing.T) {
 		createDirHelper(t, filepath.Join(dir, subDir1), subDir2)
 		defer os.RemoveAll(dir)
 
-		err := ft.MoveFileToExistingDir(oldPath, newPath)
+		f, err := ft.MoveFileToExistingDir(oldPath, newPath)
 		if err != nil {
 			t.Errorf("got error %v, but did not want one", err)
+		}
+
+		if fileName != f {
+			t.Errorf("wrong file name returned, got %s, want %s", fileName, f)
 		}
 
 		assertFileExistence(t, dir, subDir1, subDir2)
@@ -322,7 +336,7 @@ func TestMoveFile(t *testing.T) {
 
 		p := "/"
 		want := ErrEqualOldAndNewPath
-		err := ft.MoveFileToExistingDir(p, p)
+		_, err := ft.MoveFileToExistingDir(p, p)
 		assertError(t, err, want)
 	})
 
@@ -333,7 +347,7 @@ func TestMoveFile(t *testing.T) {
 
 		f := subFile1 + ".json"
 		want := ErrEqualOldAndNewPath
-		err := ft.MoveFileToExistingDir(f, "/")
+		_, err := ft.MoveFileToExistingDir(f, "/")
 		assertError(t, err, want)
 	})
 
@@ -348,7 +362,7 @@ func TestMoveFile(t *testing.T) {
 		createFileHelper(t, dir, oldPath)
 
 		want := ErrEqualOldAndNewPath
-		err := ft.MoveFileToExistingDir(oldPath, newPath)
+		_, err := ft.MoveFileToExistingDir(oldPath, newPath)
 		assertError(t, err, want)
 	})
 }
