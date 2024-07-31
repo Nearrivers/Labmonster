@@ -10,12 +10,13 @@ import (
 	"testing"
 )
 
-func getNewFileTreeExplorer() *FileTreeExplorer {
+func getNewFileTreeExplorer() (*FileTreeExplorer, string) {
+	dir, _ := os.MkdirTemp("", "testFt")
 	return NewFileTree(&config.AppConfig{
 		ConfigFile: config.ConfigFile{
-			LabPath: "D:\\Projets\\test",
+			LabPath: dir,
 		},
-	})
+	}), dir
 }
 
 func createFileBeforeTest(t testing.TB, ft *FileTreeExplorer, fileName string) {
@@ -29,7 +30,8 @@ func createFileBeforeTest(t testing.TB, ft *FileTreeExplorer, fileName string) {
 
 func TestCreateNewFile(t *testing.T) {
 	t.Run("Creating one file", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
 
 		testFileName := "happyPath test"
 		defer ft.DeleteFile(testFileName)
@@ -49,7 +51,8 @@ func TestCreateNewFile(t *testing.T) {
 	})
 
 	t.Run("Creating multiple files in a row", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
 
 		testFileName := "Multiple test"
 
@@ -82,7 +85,9 @@ func TestCreateNewFile(t *testing.T) {
 
 func TestRenameFile(t *testing.T) {
 	t.Run("Existing file rename at first level", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
+
 		oldName := "test rename"
 		newName := "test rename 2"
 
@@ -96,7 +101,8 @@ func TestRenameFile(t *testing.T) {
 	})
 
 	t.Run("Non existant file rename at first level", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
 		fakeName := "test fake rename"
 		oldName := "test bad rename"
 		newName := "test fake rename 2"
@@ -116,7 +122,9 @@ func TestRenameFile(t *testing.T) {
 
 func TestDeleteFile(t *testing.T) {
 	t.Run("Existing file deletion at first level", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
+
 		fileName := "test delete"
 
 		createFileBeforeTest(t, ft, fileName)
@@ -135,7 +143,8 @@ func TestDeleteFile(t *testing.T) {
 	})
 
 	t.Run("Non existant file deletion at first level", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
 		fileName := "test non existant"
 
 		createFileBeforeTest(t, ft, "non-existant")
@@ -155,9 +164,22 @@ func TestDeleteFile(t *testing.T) {
 	})
 }
 
+func assertSameFiles(t testing.TB, ft *FileTreeExplorer, file1, file2 string) {
+	t.Helper()
+
+	if err := ft.fileContentCompare(file1, file2); err != nil {
+		if err == ErrFileAreDifferent {
+			t.Fatalf("the two files are different: %v", err)
+		}
+
+		t.Errorf("an error occured before comparing the two files: %v", err)
+	}
+}
+
 func TestDuplicateFile(t *testing.T) {
 	t.Run("File duplication at first level", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
 		fileName := "duplication test"
 		createFileBeforeTest(t, ft, fileName)
 		defer ft.DeleteFile(fileName)
@@ -168,17 +190,12 @@ func TestDuplicateFile(t *testing.T) {
 		}
 		defer ft.DeleteFile(duplicatedFile)
 
-		if err = fileContentCompare(ft, fileName+".json", duplicatedFile); err != nil {
-			if err == ErrFileAreDifferent {
-				t.Fatalf("the two files are different: %v", err)
-			}
-
-			t.Errorf("an error occured before comparing the two files: %v", err)
-		}
+		assertSameFiles(t, ft, fileName+".json", duplicatedFile)
 	})
 
 	t.Run("Running multiple file duplications in a row", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
 		fileName := "multiple duplication test"
 		createFileBeforeTest(t, ft, fileName)
 		defer ft.DeleteFile(fileName)
@@ -187,18 +204,21 @@ func TestDuplicateFile(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
+		defer ft.DeleteFile(duplicatedFile1)
 
 		duplicatedFile2, err := ft.DuplicateFile(fileName, ".json")
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
+		defer ft.DeleteFile(duplicatedFile2)
 
-		ft.DeleteFile(duplicatedFile1)
-		ft.DeleteFile(duplicatedFile2)
+		assertSameFiles(t, ft, fileName+".json", duplicatedFile1)
+		assertSameFiles(t, ft, fileName+".json", duplicatedFile2)
 	})
 
 	t.Run("Trying to duplicate a file that doesn't exists", func(t *testing.T) {
-		ft := getNewFileTreeExplorer()
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
 		fileName := "fake duplication test"
 
 		_, err := ft.DuplicateFile(fileName, ".json")
@@ -332,5 +352,3 @@ func TestMoveFile(t *testing.T) {
 		assertError(t, err, want)
 	})
 }
-
-func TestRenameIfDuplicate(t *testing.T) {}

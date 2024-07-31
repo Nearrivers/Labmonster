@@ -137,44 +137,20 @@ func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, extension strin
 		return "", fmt.Errorf("can't open file: %v", err)
 	}
 
+	f2, name, err := createNonDuplicateFile(path)
+	if err != nil {
+		return "", err
+	}
+
 	defer f.Close()
-
-	var f2 *os.File
-	var newFile string
-	var fileName string
-
-	if !strings.Contains(pathToFileFromLabRoot, "/") {
-		fileName = pathToFileFromLabRoot + extension
-	} else {
-		fileName = pathToFileFromLabRoot[:strings.LastIndex(pathToFileFromLabRoot, "/")+1] + extension
-	}
-
-	for i := 1; ; i++ {
-		newFile = filepath.Join(path, fmt.Sprintf("%s %d%s", fileName, i, extension))
-		if doesFileExist(newFile) {
-			continue
-		}
-
-		f2, err = os.Create(newFile)
-		if err != nil {
-			return "", err
-		}
-
-		defer f2.Close()
-		break
-	}
+	defer f2.Close()
 
 	err = copyFile(f, f2)
 	if err != nil {
 		return "", err
 	}
 
-	stat, err := f2.Stat()
-	if err != nil {
-		return "", err
-	}
-
-	return stat.Name(), nil
+	return name, nil
 }
 
 // Take two files and copy the content of the first into the second
@@ -187,16 +163,23 @@ func copyFile(inputFile, outputFile *os.File) error {
 	return nil
 }
 
-func createNonDuplicateFile(path string) (*os.File, string, error) {
+// Given an absolute path to a file we're trying to create. Before calling this function, we know that this file
+// already exists. This function will try to create the same file but with a number appended to its name in order to avoid duplicates.
+// It will continue to increment the appended number as long as the function finds a file with the same name. After succeeding in creating the file,
+// it will return an os.File pointer to it that the caller will have to close, the actual name of the file to avoid f.Stat() boilerplate and an error
+func createNonDuplicateFile(absPath string) (*os.File, string, error) {
+	p := absPath[:strings.LastIndex(absPath, string(filepath.Separator))+1]
+	newFileName := absPath[strings.LastIndex(absPath, string(filepath.Separator))+1:strings.LastIndex(absPath, ".")]
+	ext := filepath.Ext(absPath)
 
 	for i := 1; ; i++ {
-		name := fmt.Sprintf("%s %d", newFileName, i)
-		if doesFileExist(filepath.Join(path, name)) {
+		name := fmt.Sprintf("%s %d%s", newFileName, i, ext)
+		if doesFileExist(filepath.Join(p, name)) {
 			i++
 			continue
 		}
 
-		f, err := os.Create(filepath.Join(path, name))
+		f, err := os.Create(filepath.Join(p, name))
 		if err != nil {
 			return nil, "", err
 		}
@@ -228,7 +211,7 @@ func extractFileName(pathFromLabRoot string) string {
 // Function used in tests
 // Compare 2 files content. The goal is to fail asap
 // Read files by chunks defined by the chunkSize variable
-func fileContentCompare(ft *FileTreeExplorer, file1, file2 string) error {
+func (ft *FileTreeExplorer) fileContentCompare(file1, file2 string) error {
 	const chunkSize = 2000
 	path1 := filepath.Join(ft.GetLabPath(), file1)
 	path2 := filepath.Join(ft.GetLabPath(), file2)
