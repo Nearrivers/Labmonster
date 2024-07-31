@@ -3,41 +3,49 @@
     id="filepopover"
     popover
     ref="menu"
-    class="fixed z-10 min-w-52 rounded-md border border-border bg-background p-1.5 text-xs text-primary"
+    class="fixed z-10 min-w-52 rounded-lg border border-border bg-background text-xs text-primary"
     :style="{ top: y + 'px', left: x + 'px' }"
   >
-    <li
-      class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
-      @click="onDuplicateClick(selectedNode?.dataset.path!, extension)"
-    >
-      <Files :stroke-width="1.75" class="h-[16px] w-4" />
-      <p>Dupliquer</p>
+    <li>
+      <ul class="border-b border-b-border p-1.5">
+        <li
+          class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
+          @click="onDuplicateClick(selectedNode?.dataset.path!, extension)"
+        >
+          <Files :stroke-width="1.75" class="h-[16px] w-4" />
+          <p>Dupliquer</p>
+        </li>
+        <li
+          class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
+          @click="onMoveClick"
+        >
+          <FolderTree :stroke-width="1.75" class="h-[16px] w-4" />
+          Déplacer le fichier vers...
+        </li>
+      </ul>
     </li>
-    <li
-      class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
-      @click="onMoveClick"
-    >
-      <FolderTree :stroke-width="1.75" class="h-[16px] w-4" />
-      Déplacer le fichier vers...
-    </li>
-    <li
-      class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
-      @click="onRenameClick(selectedNode?.dataset.path!)"
-    >
-      <PencilLine :stroke-width="1.75" class="h-[16px] w-4" />
-      Renommer
-    </li>
-    <li
-      class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-red-500 hover:bg-muted"
-      @click="
-        onDeleteClick(
-          selectedNode?.dataset.path!,
-          selectedNode?.dataset.extension!,
-        )
-      "
-    >
-      <Trash2 :stroke-width="1.75" class="h-[16px] w-4" />
-      Supprimer
+    <li>
+      <ul class="p-1.5">
+        <li
+          class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
+          @click="onRenameClick(selectedNode?.dataset.path!)"
+        >
+          <PencilLine :stroke-width="1.75" class="h-[16px] w-4" />
+          Renommer
+        </li>
+        <li
+          class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-red-500 hover:bg-muted"
+          @click="
+            onDeleteClick(
+              selectedNode?.dataset.path!,
+              selectedNode?.dataset.extension!,
+            )
+          "
+        >
+          <Trash2 :stroke-width="1.75" class="h-[16px] w-4" />
+          Supprimer
+        </li>
+      </ul>
     </li>
     <MoveFileCommand
       ref="moveFileCommand"

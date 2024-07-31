@@ -68,6 +68,7 @@ const {
   contextMenuX,
   contextMenuY,
   fileContextMenu,
+  dirContextMenu,
   selectedNode,
   loadLabFiles,
   onRightClick,

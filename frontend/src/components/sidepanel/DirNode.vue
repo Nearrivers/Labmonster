@@ -25,7 +25,6 @@
         </TooltipTrigger>
         <TooltipContent :side="'right'" :side-offset="30">
           <p>Dossier</p>
-          <TooltipArrow />
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -51,7 +50,6 @@ import { ChevronRight } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { GetSubDirAndFiles } from '$/filetree/FileTreeExplorer';
-import { TooltipArrow } from 'radix-vue';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';

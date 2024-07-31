@@ -1,20 +1,27 @@
-import { GetSubDirAndFiles, CreateNewFileAtRoot } from "$/filetree/FileTreeExplorer";
-import { filetree } from "$/models";
-import { NEW_FILE_NAME } from "@/constants/NEW_FILE_NAME";
-import { nextTick, ref } from "vue";
-import { useShowErrorToast } from "./useShowErrorToast";
+import {
+  GetSubDirAndFiles,
+  CreateNewFileAtRoot,
+} from '$/filetree/FileTreeExplorer';
+import { filetree } from '$/models';
+import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
+import { nextTick, ref } from 'vue';
+import { useShowErrorToast } from './useShowErrorToast';
 import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
-import { CONFIG_FILE_LOADED } from "@/constants/event-names/CONFIG_FILE_LOADED";
-import { configFileLoaded } from "@/events/ReloadFileExplorer";
-import { useEventListener } from "@vueuse/core";
+import { CONFIG_FILE_LOADED } from '@/constants/event-names/CONFIG_FILE_LOADED';
+import { configFileLoaded } from '@/events/ReloadFileExplorer';
+import { useEventListener } from '@vueuse/core';
+import DirContextMenu from '../components/contextmenus/DirContextMenu.vue';
 
 export function useSidePanel() {
   const files = ref<filetree.Node[]>([]);
-  const { showToast } = useShowErrorToast()
+  const { showToast } = useShowErrorToast();
   const contextMenuX = ref(100);
   const contextMenuY = ref(100);
   const selectedNode = ref<HTMLLIElement | null>(null);
-  const fileContextMenu = ref<InstanceType<typeof FileContextMenu> | null>(null);
+  const fileContextMenu = ref<InstanceType<typeof FileContextMenu> | null>(
+    null,
+  );
+  const dirContextMenu = ref<InstanceType<typeof DirContextMenu> | null>(null);
   useEventListener(configFileLoaded, CONFIG_FILE_LOADED, loadLabFiles);
 
   function sortNodes(f1: filetree.Node, f2: filetree.Node) {
@@ -65,21 +72,28 @@ export function useSidePanel() {
     contextMenuY.value = event.clientY;
     selectedNode.value = (event.target as HTMLElement).closest('li');
     await nextTick();
-    fileContextMenu.value?.showPopover();
+
+    if (selectedNode.value?.dataset.type === 'file') {
+      fileContextMenu.value?.showPopover();
+      return;
+    }
+
+    dirContextMenu.value?.showPopover();
   }
 
   function onLeftClick(event: MouseEvent) {}
 
   return {
     files,
-    loadLabFiles,
     contextMenuX,
     contextMenuY,
     fileContextMenu,
+    dirContextMenu,
     selectedNode,
+    loadLabFiles,
     createNewFileAtRoot,
     onRightClick,
     onLeftClick,
-    showToast
-  }
+    showToast,
+  };
 }

@@ -12,7 +12,7 @@ import { CheckConfigPresenceAndLoadIt } from '$/config/AppConfig';
 import { Toaster } from '@/components/ui/toast';
 
 const isConfigFilePresent = ref(false);
-// const mode = useColorMode();
+const mode = useColorMode();
 
 onMounted(async () => {
   try {
