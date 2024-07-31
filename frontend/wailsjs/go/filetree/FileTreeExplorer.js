@@ -10,8 +10,8 @@ export function DeleteFile(arg1) {
   return window['go']['filetree']['FileTreeExplorer']['DeleteFile'](arg1);
 }
 
-export function DuplicateFile(arg1, arg2) {
-  return window['go']['filetree']['FileTreeExplorer']['DuplicateFile'](arg1, arg2);
+export function DuplicateFile(arg1, arg2, arg3) {
+  return window['go']['filetree']['FileTreeExplorer']['DuplicateFile'](arg1, arg2, arg3);
 }
 
 export function GetDirectories() {

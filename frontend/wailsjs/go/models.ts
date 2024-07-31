@@ -4,8 +4,6 @@ export namespace filetree {
 	    name: string;
 	    type: string;
 	    // Go type: time
-	    createdAt: any;
-	    // Go type: time
 	    updatedAt: any;
 	    extension: string;
 	
@@ -17,7 +15,6 @@ export namespace filetree {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.type = source["type"];
-	        this.createdAt = this.convertValues(source["createdAt"], null);
 	        this.updatedAt = this.convertValues(source["updatedAt"], null);
 	        this.extension = source["extension"];
 	    }

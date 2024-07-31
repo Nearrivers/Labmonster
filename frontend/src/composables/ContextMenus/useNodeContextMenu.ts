@@ -1,8 +1,11 @@
+import { DuplicateFile } from "$/filetree/FileTreeExplorer";
 import { AppDialog } from "@/types/AppDialog";
 import { nextTick, Ref, ref } from "vue";
+import { useShowErrorToast } from "../useShowErrorToast";
 
 export function useNodeContextMenu(deleteDialog: Ref<AppDialog | null>) {
   const menu = ref<any | null>(null);
+  const { showToast } = useShowErrorToast()
 
   function showPopover() {
     menu.value?.showPopover();
@@ -26,6 +29,16 @@ export function useNodeContextMenu(deleteDialog: Ref<AppDialog | null>) {
     }
   }
 
+  async function onDuplicateClick(filepath: string, fileName: string, extension: string) {
+    hidePopover()
+    try {
+      const file = await DuplicateFile(filepath, fileName, extension)
+      console.log(file)
+    } catch (error) {
+      showToast(error)
+    }
+  }
+
   async function onDeleteClick(filePath: string) {
     hidePopover();
     await nextTick();
@@ -37,6 +50,7 @@ export function useNodeContextMenu(deleteDialog: Ref<AppDialog | null>) {
     showPopover,
     hidePopover,
     onRenameClick,
-    onDeleteClick
+    onDeleteClick,
+    onDuplicateClick
   }
 }

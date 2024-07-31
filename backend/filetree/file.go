@@ -128,12 +128,11 @@ func (ft *FileTreeExplorer) MoveFileToExistingDir(oldPath, newPath string) error
 
 // Create a file named after the fileName argument. If the file already exists, it will try
 // to add a number at the end to avoid duplicates
-func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, fileName string) (newFileName string, error error) {
+func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, extension string) (newFileName string, error error) {
 	labPath := ft.GetLabPath()
-	path := filepath.Join(labPath, pathToFileFromLabRoot)
-	old := filepath.Join(path, fileName+".json")
+	path := filepath.Join(labPath, pathToFileFromLabRoot+extension)
 
-	f, err := os.Open(old)
+	f, err := os.Open(path)
 	if err != nil {
 		return "", fmt.Errorf("can't open file: %v", err)
 	}
@@ -142,19 +141,27 @@ func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, fileName string
 
 	var f2 *os.File
 	var newFile string
+	var fileName string
+
+	if !strings.Contains(pathToFileFromLabRoot, "/") {
+		fileName = pathToFileFromLabRoot + extension
+	} else {
+		fileName = pathToFileFromLabRoot[:strings.LastIndex(pathToFileFromLabRoot, "/")+1] + extension
+	}
 
 	for i := 1; ; i++ {
-		newFile = filepath.Join(path, fmt.Sprintf("%s %d.json", fileName, i))
-		if !doesFileExist(newFile) {
-			f2, err = os.Create(newFile)
-			if err != nil {
-				return "", err
-			}
-
-			defer f2.Close()
-
-			break
+		newFile = filepath.Join(path, fmt.Sprintf("%s %d%s", fileName, i, extension))
+		if doesFileExist(newFile) {
+			continue
 		}
+
+		f2, err = os.Create(newFile)
+		if err != nil {
+			return "", err
+		}
+
+		defer f2.Close()
+		break
 	}
 
 	err = copyFile(f, f2)
@@ -178,6 +185,44 @@ func copyFile(inputFile, outputFile *os.File) error {
 	}
 
 	return nil
+}
+
+func createNonDuplicateFile(path string) (*os.File, string, error) {
+
+	for i := 1; ; i++ {
+		name := fmt.Sprintf("%s %d", newFileName, i)
+		if doesFileExist(filepath.Join(path, name)) {
+			i++
+			continue
+		}
+
+		f, err := os.Create(filepath.Join(path, name))
+		if err != nil {
+			return nil, "", err
+		}
+
+		return f, name, nil
+	}
+}
+
+func extractFolderPath(pathFromLabRoot string) string {
+	if !strings.Contains(pathFromLabRoot, "/") {
+		return ""
+	}
+
+	if pathFromLabRoot == "/" {
+		return pathFromLabRoot
+	}
+
+	return pathFromLabRoot[:strings.LastIndex(pathFromLabRoot, "/")]
+}
+
+func extractFileName(pathFromLabRoot string) string {
+	if !strings.Contains(pathFromLabRoot, "/") {
+		return pathFromLabRoot[strings.LastIndex(pathFromLabRoot, ".")+1:]
+	}
+
+	return pathFromLabRoot[strings.LastIndex(pathFromLabRoot, "/")+1 : strings.LastIndex(pathFromLabRoot, ".")]
 }
 
 // Function used in tests
@@ -205,7 +250,7 @@ func fileContentCompare(ft *FileTreeExplorer, file1, file2 string) error {
 		return fmt.Errorf("couldn't get the first file info: %v", err)
 	}
 
-	statf2, err := f1.Stat()
+	statf2, err := f2.Stat()
 	if err != nil {
 		return fmt.Errorf("couldn't get the second file info: %v", err)
 	}

@@ -162,7 +162,7 @@ func TestDuplicateFile(t *testing.T) {
 		createFileBeforeTest(t, ft, fileName)
 		defer ft.DeleteFile(fileName)
 
-		duplicatedFile, err := ft.DuplicateFile("", fileName)
+		duplicatedFile, err := ft.DuplicateFile(fileName, ".json")
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
@@ -183,12 +183,12 @@ func TestDuplicateFile(t *testing.T) {
 		createFileBeforeTest(t, ft, fileName)
 		defer ft.DeleteFile(fileName)
 
-		duplicatedFile1, err := ft.DuplicateFile("", fileName)
+		duplicatedFile1, err := ft.DuplicateFile(fileName, ".json")
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
 
-		duplicatedFile2, err := ft.DuplicateFile("", fileName)
+		duplicatedFile2, err := ft.DuplicateFile(fileName, ".json")
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
@@ -201,7 +201,7 @@ func TestDuplicateFile(t *testing.T) {
 		ft := getNewFileTreeExplorer()
 		fileName := "fake duplication test"
 
-		_, err := ft.DuplicateFile("", fileName)
+		_, err := ft.DuplicateFile(fileName, ".json")
 		if err == nil {
 			t.Fatal("didn't get an error, but wanted one")
 		}
@@ -332,3 +332,5 @@ func TestMoveFile(t *testing.T) {
 		assertError(t, err, want)
 	})
 }
+
+func TestRenameIfDuplicate(t *testing.T) {}

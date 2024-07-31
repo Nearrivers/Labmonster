@@ -8,6 +8,13 @@
   >
     <li
       class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
+      @click="
+        onDuplicateClick(
+          selectedNode?.dataset.path!,
+          fileName,
+          selectedNode?.dataset.extension!,
+        )
+      "
     >
       <Files :stroke-width="1.75" class="h-[16px] w-4" />
       <p>Dupliquer</p>
@@ -21,14 +28,14 @@
     </li>
     <li
       class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
-      @click="onRenameClick(props.selectedNode?.dataset.path!)"
+      @click="onRenameClick(selectedNode?.dataset.path!)"
     >
       <PencilLine :stroke-width="1.75" class="h-[16px] w-4" />
       Renommer
     </li>
     <li
       class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-red-500 hover:bg-muted"
-      @click="onDeleteClick(props.selectedNode?.dataset.path!)"
+      @click="onDeleteClick(selectedNode?.dataset.path!)"
     >
       <Trash2 :stroke-width="1.75" class="h-[16px] w-4" />
       Supprimer
@@ -40,7 +47,7 @@
     />
     <DeleteFileDialog
       ref="deleteFileDialog"
-      :path="props.selectedNode?.dataset.path"
+      :path="selectedNode?.dataset.path"
     />
   </ul>
 </template>
@@ -48,7 +55,7 @@
 <script setup lang="ts">
 import { Files } from 'lucide-vue-next';
 import { FolderTree, Trash2, PencilLine } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import DeleteFileDialog from '../AlertDialog/DeleteFileDialog.vue';
 import { ContextMenuProps } from '@/types/props/ContextMenuProps';
 import { useNodeContextMenu } from '@/composables/ContextMenus/useNodeContextMenu';
@@ -60,12 +67,25 @@ const props = defineProps<
   }
 >();
 
+const fileName = computed(
+  () =>
+    props.selectedNode?.dataset.path?.slice(
+      props.selectedNode.dataset.path.lastIndexOf('/') + 1,
+    ) || '',
+);
+
 const deleteFileDialog = ref<InstanceType<typeof DeleteFileDialog> | null>(
   null,
 );
 const moveFileCommand = ref<InstanceType<typeof MoveFileCommand> | null>(null);
-const { menu, showPopover, hidePopover, onRenameClick, onDeleteClick } =
-  useNodeContextMenu(deleteFileDialog);
+const {
+  menu,
+  showPopover,
+  hidePopover,
+  onRenameClick,
+  onDeleteClick,
+  onDuplicateClick,
+} = useNodeContextMenu(deleteFileDialog);
 
 function onMoveClick() {
   moveFileCommand.value?.showModal();

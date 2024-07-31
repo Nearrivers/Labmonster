@@ -31,8 +31,7 @@
         </TooltipTrigger>
         <TooltipContent as-child :side="'right'" :side-offset="20">
           <div>
-            <p class="text-xs">Dernière modification le: {{ createdAt }}</p>
-            <p class="text-center text-xs">Créé le: {{ createdAt }}</p>
+            <p class="text-xs">Dernière modification le: {{ updatedAt }}</p>
           </div>
         </TooltipContent>
       </Tooltip>
@@ -70,8 +69,8 @@ const nodePathWithoutSpaces = computed(() =>
   nodePath.value.replaceAll(' ', '-'),
 );
 
-const createdAt = computed(() => {
-  const date = new Date(props.node.createdAt);
+const updatedAt = computed(() => {
+  const date = new Date(props.node.updatedAt);
   return `${date.toLocaleDateString()} à ${date.toLocaleTimeString()}`;
 });
 

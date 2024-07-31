@@ -6,7 +6,7 @@ export function CreateNewFileAtRoot(arg1:string):Promise<filetree.Node>;
 
 export function DeleteFile(arg1:string):Promise<void>;
 
-export function DuplicateFile(arg1:string,arg2:string):Promise<string>;
+export function DuplicateFile(arg1:string,arg2:string,arg3:string):Promise<string>;
 
 export function GetDirectories():Promise<Array<string>>;
 
