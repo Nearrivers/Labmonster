@@ -1,36 +1,28 @@
+<template>
+  <VueFlow :nodes="nodes" class="h-full">
+    <!-- :default-viewport="{ zoom: 0.5 }" -->
+    <TopMenu @add-node="addNode" @zoom-in="zoomIn" @zoom-out="zoomOut" />
+    <Background :gap="30" />
+  </VueFlow>
+</template>
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import type { Node } from '@vue-flow/core';
-import { VueFlow, Panel } from '@vue-flow/core';
+import { VueFlow } from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
+import { useTopMenuActions } from '@/composables/Flowchart/useTopMenuActions';
+import TopMenu from './flowchart/TopMenu.vue';
 
 const nodes = ref<Node[]>([
   {
     id: '1',
     position: { x: 25, y: 90 },
     data: { label: 'Test' },
+    class:
+      'dark:bg-secondary border border-border dark:border-zinc-700 text-primary rounded-lg shadow-md',
   },
 ]);
 
-function addNode() {
-  const id = Date.now().toString();
-
-  nodes.value.push({
-    id,
-    position: { x: 150, y: 50 },
-    data: { label: `Node ${id}` },
-    style: {
-      background: 'red',
-    },
-  });
-}
+const { addNode, zoomIn, zoomOut } = useTopMenuActions(nodes);
 </script>
-
-<template>
-  <VueFlow :nodes="nodes" class="h-full">
-    <Background />
-    <Panel :position="'top-left'">
-      <button type="button" @click="addNode">Add a node</button>
-    </Panel>
-  </VueFlow>
-</template>

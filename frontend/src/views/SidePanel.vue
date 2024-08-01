@@ -3,7 +3,7 @@
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
-          class="rounded-md p-1.5 hover:bg-zinc-700"
+          class="rounded-md p-1.5 hover:bg-zinc-700 hover:text-primary"
           @click="createNewFileAtRoot"
         >
           <FilePlus2 :stroke-width="1.75" class="h-[18px] w-[18px]" />
@@ -15,7 +15,9 @@
     </TooltipProvider>
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger class="rounded-md p-1.5 hover:bg-zinc-700">
+        <TooltipTrigger
+          class="rounded-md p-1.5 hover:bg-zinc-700 hover:text-primary"
+        >
           <FolderPlus :stroke-width="1.75" class="h-[18px] w-[18px]" />
         </TooltipTrigger>
         <TooltipContent>
