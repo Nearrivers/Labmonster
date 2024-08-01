@@ -19,12 +19,15 @@ function addNode() {
     id,
     position: { x: 150, y: 50 },
     data: { label: `Node ${id}` },
+    style: {
+      background: 'red',
+    },
   });
 }
 </script>
 
 <template>
-  <VueFlow :nodes="nodes" class="h-48">
+  <VueFlow :nodes="nodes" class="h-full">
     <Background />
     <Panel :position="'top-left'">
       <button type="button" @click="addNode">Add a node</button>
