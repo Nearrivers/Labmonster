@@ -1,8 +1,8 @@
-import { Node, useVueFlow } from "@vue-flow/core";
-import { Ref } from "vue";
+import { Node, useVueFlow } from '@vue-flow/core';
+import { Ref } from 'vue';
 
 export function useTopMenuActions(nodes: Ref<Node[]>) {
-  const { zoomIn, zoomOut } = useVueFlow()
+  const { zoomIn, zoomOut } = useVueFlow();
 
   function addNode() {
     const id = Date.now().toString();
@@ -13,11 +13,12 @@ export function useTopMenuActions(nodes: Ref<Node[]>) {
       data: { label: `Node ${id}` },
       class: 'bg-primary border border-border',
     });
+    console.log(nodes.value);
   }
 
   return {
     addNode,
     zoomIn,
-    zoomOut
-  }
+    zoomOut,
+  };
 }

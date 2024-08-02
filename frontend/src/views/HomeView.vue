@@ -1,4 +1,5 @@
 <template>
+  <AppHeader />
   <ResizablePanelGroup direction="horizontal">
     <ResizablePanel :default-size="15" :min-size="10" collapsible>
       <SidePanel />
@@ -18,4 +19,5 @@ import {
 } from '@/components/ui/resizable';
 import SidePanel from './SidePanel.vue';
 import GraphPanel from './GraphPanel.vue';
+import AppHeader from '@/components/AppHeader.vue';
 </script>

@@ -2,7 +2,10 @@
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger as-child>
-        <button class="p-2 hover:bg-secondary dark:hover:bg-zinc-700">
+        <button
+          class="p-2 hover:bg-secondary dark:hover:bg-zinc-700"
+          @click="emit('click')"
+        >
           <slot />
         </button>
       </TooltipTrigger>
@@ -21,7 +24,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-defineOptions({
-  inheritAttrs: false,
-});
+const emit = defineEmits<{
+  (e: 'click'): void;
+}>();
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <Panel :position="'top-left'">
+  <Panel :position="'top-left'" class="flex gap-2">
     <section
       class="flex overflow-hidden rounded-md border bg-background shadow-md dark:border-zinc-600 dark:bg-secondary"
     >
@@ -16,12 +16,28 @@
         <template #tooltip> Dézoomer </template>
       </ControlButton>
     </section>
+    <section
+      class="flex overflow-hidden rounded-md border bg-background shadow-md dark:border-zinc-600 dark:bg-secondary"
+    >
+      <ControlButton>
+        <CircleHelp :stroke-width="1.75" class="h-4 w-4" />
+        <template #tooltip> Aide </template>
+      </ControlButton>
+    </section>
+    <section
+      class="flex overflow-hidden rounded-md border bg-background shadow-md dark:border-zinc-600 dark:bg-secondary"
+    >
+      <ControlButton>
+        <Settings :stroke-width="1.75" class="h-4 w-4" />
+        <template #tooltip> Paramètres du setup </template>
+      </ControlButton>
+    </section>
   </Panel>
 </template>
 
 <script setup lang="ts">
 import { Panel } from '@vue-flow/core';
-import { Plus, ZoomIn, ZoomOut } from 'lucide-vue-next';
+import { CircleHelp, Plus, Settings, ZoomIn, ZoomOut } from 'lucide-vue-next';
 import ControlButton from './TopMenu/ControlButton.vue';
 
 const emit = defineEmits<{
