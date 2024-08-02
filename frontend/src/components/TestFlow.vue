@@ -1,5 +1,5 @@
 <template>
-  <VueFlow :nodes="nodes" class="h-full">
+  <VueFlow :nodes="nodes" class="h-[calc(100%-33px)]">
     <!-- :default-viewport="{ zoom: 0.5 }" -->
     <TopMenu @add-node="addNode" @zoom-in="zoomIn" @zoom-out="zoomOut" />
     <Background :gap="30" />

@@ -1,5 +1,5 @@
 <template>
-  <header class="flex border-b border-b-border">
+  <header class="flex border-b border-b-border" style="--wails-draggable: drag">
     <SysButtons />
   </header>
 </template>
