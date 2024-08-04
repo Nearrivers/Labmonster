@@ -11,6 +11,8 @@ import { CONFIG_FILE_LOADED } from '@/constants/event-names/CONFIG_FILE_LOADED';
 import { configFileLoaded } from '@/events/ReloadFileExplorer';
 import { useEventListener } from '@vueuse/core';
 import DirContextMenu from '../components/contextmenus/DirContextMenu.vue';
+import { sidePanelToggled } from '@/events/ToggleSidePanel';
+import { SIDE_PANEL_TOGGLED } from '@/constants/event-names/SIDE_PANEL_TOGGLED';
 
 export function useSidePanel() {
   const files = ref<filetree.Node[]>([]);

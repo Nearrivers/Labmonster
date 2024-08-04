@@ -1,9 +1,9 @@
 <template>
   <AppHeader />
-  <TestFlow></TestFlow>
+  <FlowChart />
 </template>
 
 <script setup lang="ts">
 import AppHeader from '@/components/AppHeader.vue';
-import TestFlow from '@/components/TestFlow.vue';
+import FlowChart from '@/components/FlowChart.vue';
 </script>

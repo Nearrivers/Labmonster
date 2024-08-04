@@ -2,13 +2,13 @@
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger
-        class="rounded-md p-1.5 hover:bg-zinc-700 hover:text-primary"
+        class="rounded-sm p-2 hover:bg-secondary hover:text-primary"
         :class="class"
         @click="emit('click')"
       >
         <slot name="icon" />
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent :side-offset="15">
         <p><slot name="tooltip" /></p>
       </TooltipContent>
     </Tooltip>

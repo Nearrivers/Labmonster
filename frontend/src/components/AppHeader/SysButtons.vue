@@ -1,20 +1,23 @@
 <template>
   <section class="ml-auto" style="--wails-draggable: no-drag">
-    <button
-      class="p-2 hover:bg-secondary dark:hover:bg-zinc-700"
-      @click="MinimiseWindow"
-    >
-      <Minus class="h-4 w-6" />
-    </button>
-    <button
-      class="p-2 hover:bg-secondary dark:hover:bg-zinc-700"
-      @click="onChangeSizeClick"
-    >
-      <Maximize class="h-4 w-6" />
-    </button>
-    <button class="p-2 hover:bg-red-500" @click="QuitApp">
-      <X class="h-4 w-6" />
-    </button>
+    <TopButton class="rounded-none" @click="MinimiseWindow">
+      <template #icon>
+        <Minus class="h-full w-7 p-1" />
+      </template>
+      <template #tooltip>Minimiser</template>
+    </TopButton>
+    <TopButton class="rounded-none" @click="onChangeSizeClick">
+      <template #icon>
+        <Maximize class="h-full w-7 p-1" />
+      </template>
+      <template #tooltip>Restaurer</template>
+    </TopButton>
+    <TopButton class="rounded-none hover:!bg-red-600" @click="QuitApp">
+      <template #icon>
+        <X class="h-full w-7 p-1" />
+      </template>
+      <template #tooltip>Fermer</template>
+    </TopButton>
   </section>
 </template>
 
@@ -26,6 +29,7 @@ import {
   QuitApp,
 } from '$/topmenu/TopMenu';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
+import TopButton from '../ui/TopButton.vue';
 
 const { showToast } = useShowErrorToast();
 

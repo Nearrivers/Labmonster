@@ -33,7 +33,6 @@ export function useNodeContextMenu(deleteDialog: Ref<AppDialog | null>) {
     hidePopover();
     try {
       const file = await DuplicateFile(filepath, extension);
-      console.log(file);
     } catch (error) {
       showToast(error);
     }

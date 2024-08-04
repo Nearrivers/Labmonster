@@ -4,20 +4,20 @@ import { Ref } from 'vue';
 export function useTopMenuActions(nodes: Ref<Node[]>) {
   const { zoomIn, zoomOut } = useVueFlow();
 
-  function addNode() {
+  function createNewNode() {
     const id = Date.now().toString();
-
-    nodes.value.push({
+    const newNode = {
       id,
       position: { x: 150, y: 50 },
-      data: { label: `Node ${id}` },
-      class: 'bg-primary border border-border',
-    });
-    console.log(nodes.value);
+      data: { hello: `Node ${id}` },
+      type: 'custom',
+    }
+
+    return newNode
   }
 
   return {
-    addNode,
+    createNewNode,
     zoomIn,
     zoomOut,
   };

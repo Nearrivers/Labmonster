@@ -3,13 +3,13 @@
     <Tooltip>
       <TooltipTrigger as-child>
         <button
-          class="p-2 hover:bg-secondary dark:hover:bg-zinc-700"
+          class="block p-2 hover:bg-secondary dark:hover:bg-zinc-700"
           @click="emit('click')"
         >
           <slot />
         </button>
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent :side="'left'">
         <p><slot name="tooltip" /></p>
       </TooltipContent>
     </Tooltip>
