@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"flow-poc/backend/config"
+	"flow-poc/backend/graph"
 )
 
 // Creates dir by joining the last 2 args with filepath.Join. The first
@@ -123,7 +124,6 @@ func TestGetLabDirs(t *testing.T) {
 	})
 }
 
-
 func getNewFileTreeExplorer() (*FileTreeExplorer, string) {
 	dir, _ := os.MkdirTemp("", "testFt")
 	return NewFileTree(&config.AppConfig{
@@ -193,7 +193,7 @@ func TestCreateNewFile(t *testing.T) {
 		}
 		defer ft.DeleteFile(newFile.Name)
 
-		assertFileExistence(t, ft.GetLabPath(),"create", "test", newFile.Name)
+		assertFileExistence(t, ft.GetLabPath(), "create", "test", newFile.Name)
 	})
 }
 
@@ -212,7 +212,7 @@ func TestRenameFile(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got an error %v", err)
 		}
-	
+
 		assertFileExistence(t, ft.GetLabPath(), newName)
 	})
 
@@ -245,7 +245,7 @@ func TestDeleteFile(t *testing.T) {
 
 		createFileBeforeTest(t, ft, fileName)
 
-		err := ft.DeleteFile(fileName+".json")
+		err := ft.DeleteFile(fileName + ".json")
 		if err != nil {
 			t.Errorf("An error occured while deleting the file: %v", err)
 		}
@@ -401,7 +401,7 @@ func TestMoveFile(t *testing.T) {
 		subDir1 := "testDir1"
 		subFile1 := "testFile1"
 		fileName := "testMoveToRoot.json"
-		oldpath :=  subDir1+"/"+fileName
+		oldpath := subDir1 + "/" + fileName
 		dir, ft := createTempDir(t, "testMoveToRoot", subFile1)
 		defer os.RemoveAll(dir)
 		createDirHelper(t, dir, subDir1)
@@ -478,6 +478,60 @@ func TestMoveFile(t *testing.T) {
 		want := ErrEqualOldAndNewPath
 		_, err := ft.MoveFileToExistingDir(oldPath, newPath)
 		assertError(t, err, want)
+	})
+}
+
+func TestSaveFile(t *testing.T) {
+	t.Run("saving a graph", func(t *testing.T) {
+		g := graph.Graph{
+			Nodes: []graph.GraphNode{
+				{
+					Id:          "1",
+					Initialized: false,
+					Position: graph.GraphNodePosition{
+						X: 25,
+						Y: 90,
+					},
+					NodeType: "custom",
+				},
+				{
+					Id:          "2",
+					Initialized: false,
+					Position: graph.GraphNodePosition{
+						X: 125,
+						Y: 290,
+					},
+					NodeType: "custom",
+				},
+			},
+			Edges: []graph.GraphEdge{
+				{
+					Id:    "1->2",
+					Label: "test",
+					MarkerEnd: graph.EdgeMarker{
+						Color:    "#52525",
+						Height:   10,
+						Width:    10,
+						EdgeType: "arrowClosed",
+					},
+				},
+			},
+			Viewport: graph.GraphViewport{
+				Zoom: 1,
+				X:    0,
+				Y:    0,
+			},
+		}
+
+		fileName := "saveTest.json"
+		ft, dir := getNewFileTreeExplorer()
+		defer os.RemoveAll(dir)
+
+		err := ft.SaveFile(fileName, g)
+		if err != nil {
+			t.Fatalf("got an error but didn't want one: %v", err)
+		}
+		assertFileExistence(t, dir, fileName)
 	})
 }
 

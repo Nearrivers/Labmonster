@@ -45,7 +45,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { MarkerType, NodeChange, useVueFlow, VueFlow } from '@vue-flow/core';
+import {
+  Edge,
+  MarkerType,
+  NodeChange,
+  useVueFlow,
+  VueFlow,
+  VueFlowStore,
+} from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
 import { useTopMenuActions } from '@/composables/Flowchart/useTopMenuActions';
 import FlowchartButtons from './flowchart/FlowchartControls.vue';
@@ -67,17 +74,26 @@ const nodes = ref([
     data: { hello: 'autre test' },
   },
 ]);
-const edges = ref([]);
-const { addNodes, onNodesChange } = useVueFlow();
+const edges = ref<Edge[]>([
+  {
+    id: '1->2',
+    source: '1',
+    target: '2',
+    type: 'custom',
+  },
+]);
+const { addNodes, onNodesChange, onInit, toObject } = useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions(nodes);
 
 function onAddNode() {
   addNodes(createNewNode());
 }
 
-onNodesChange((param: NodeChange[]) => {
-  console.log(param);
+onInit((param: VueFlowStore) => {
+  console.log(toObject());
 });
+
+onNodesChange((param: NodeChange[]) => {});
 </script>
 
 <style scoped>

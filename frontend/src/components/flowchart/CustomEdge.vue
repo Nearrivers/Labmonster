@@ -26,8 +26,4 @@ import {
 const { onEdgeMouseEnter, onEdgeClick, updateEdge } = useVueFlow();
 
 defineProps<EdgeProps>();
-
-onEdgeMouseEnter((param: EdgeMouseEvent) => {
-  console.log(param);
-});
 </script>

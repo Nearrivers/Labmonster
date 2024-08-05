@@ -1,6 +1,7 @@
 package filetree
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -10,13 +11,13 @@ import (
 	"strings"
 
 	"flow-poc/backend/config"
+	"flow-poc/backend/graph"
 )
 
 var (
 	ErrFileAreDifferent   = errors.New("the 2 files are different")
 	ErrEqualOldAndNewPath = errors.New("the old and paths must be different")
 )
-
 
 type FileTreeExplorer struct {
 	Cfg         *config.AppConfig
@@ -158,7 +159,22 @@ func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (Node, error
 }
 
 // Sauvegarde le fichier JSON du graph
-func (ft *FileTreeExplorer) SaveFile() {}
+func (ft *FileTreeExplorer) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) error {
+	path := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	b, err := json.Marshal(graphToSave)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.Write(b)
+	return err
+}
 
 // Rename a file on the user's machine and inside the in-memory tree
 func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName string) error {
@@ -289,7 +305,7 @@ func moveFile(oldPath, newPath string) (string, error) {
 // it will return an os.File pointer to it that the caller will have to close, the actual name of the file to avoid f.Stat() boilerplate and an error
 func createNonDuplicateFile(absPath string) (*os.File, string, error) {
 	p := absPath[:strings.LastIndex(absPath, string(filepath.Separator))+1]
-	newFileName := absPath[strings.LastIndex(absPath, string(filepath.Separator))+1:strings.LastIndex(absPath, ".")]
+	newFileName := absPath[strings.LastIndex(absPath, string(filepath.Separator))+1 : strings.LastIndex(absPath, ".")]
 	ext := filepath.Ext(absPath)
 
 	for i := 1; ; i++ {
@@ -307,8 +323,6 @@ func createNonDuplicateFile(absPath string) (*os.File, string, error) {
 		return f, name, nil
 	}
 }
-
-
 
 func createNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
 	dirNames := make([]*Node, 0)
