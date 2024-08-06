@@ -1,6 +1,6 @@
 <template>
   <div
-    class="absolute -top-20 left-1/2 flex -translate-x-1/2 rounded-md border bg-background p-1"
+    class="absolute -top-20 left-1/2 flex -translate-x-1/2 scale-100 rounded-md border bg-background p-1"
   >
     <ToolbarButton @click="removeNodes(nodeId)">
       <template #icon>
@@ -16,11 +16,15 @@
       <template #icon><SquarePen class="h-5 w-5" /> </template>
       <template #tooltip> Modifier </template>
     </ToolbarButton>
+    <ToolbarButton @click="emit('edit')">
+      <template #icon><Blocks class="h-5 w-5" /> </template>
+      <template #tooltip> Ajouter une section </template>
+    </ToolbarButton>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ScanSearch, SquarePen, Trash2 } from 'lucide-vue-next';
+import { Blocks, ScanSearch, SquarePen, Trash2 } from 'lucide-vue-next';
 import ToolbarButton from './ToolbarButton.vue';
 import { useVueFlow } from '@vue-flow/core';
 

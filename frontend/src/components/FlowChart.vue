@@ -33,10 +33,6 @@
       <CustomNode :id="props.id" :data="props.data" />
     </template>
 
-    <template #node-selection="props">
-      <SelectionNode v-bind="props" />
-    </template>
-
     <template #edge-custom="props">
       <CustomEdge v-bind="props" />
     </template>
@@ -59,7 +55,6 @@ import { useTopMenuActions } from '@/composables/Flowchart/useTopMenuActions';
 import FlowchartButtons from './flowchart/FlowchartControls.vue';
 import CustomNode from './flowchart/CustomNode.vue';
 import CustomEdge from './flowchart/CustomEdge.vue';
-import SelectionNode from './flowchart/SelectionNode.vue';
 
 const nodes = ref([
   {

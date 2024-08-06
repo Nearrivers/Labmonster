@@ -1,12 +1,12 @@
 <template>
   <div
-    class="relative min-w-40 rounded-lg bg-background px-2 py-4 text-primary shadow-md ring-2 ring-zinc-400 transition-all dark:bg-secondary dark:shadow-none dark:ring-zinc-700"
+    class="relative min-w-40 rounded-lg bg-background text-primary shadow-md ring-2 ring-border transition-all dark:shadow-none dark:ring-border"
     :class="{ '!ring-primary': isNodeSelected }"
   >
     <input
       ref="input"
       :id="props.id"
-      class="bg-transparent py-2 outline-none"
+      class="bg-transparent px-2 py-4 outline-none"
       :class="{ 'cursor-grab': !isNodeSelected }"
       v-model="nodeText"
       @input="handleUpdate"
@@ -15,6 +15,7 @@
       autocomplete="off"
       disabled
     />
+    <FrameData />
     <Transition
       enter-active-class="transition-all duration-200-"
       leave-active-class="transition-all duration-200"
@@ -38,6 +39,7 @@
 import { Handle, Position, useVueFlow } from '@vue-flow/core';
 import { computed, ref } from 'vue';
 import NodeToolbar from './NodeToolbar.vue';
+import FrameData from './FrameData.vue';
 
 const props = defineProps<{
   id: string;

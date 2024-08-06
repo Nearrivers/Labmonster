@@ -6,12 +6,13 @@
     :target-y="targetY"
     :source-position="sourcePosition"
     :target-position="targetPosition"
-    class="stroke-zinc-600 stroke-[3] ring-border hover:ring-2"
+    class="border-2 stroke-zinc-600 stroke-[3] ring-border hover:ring-2"
+    :class="{ '!stroke-primary': isEdgeSelected }"
     :curvature="0.7"
     :interaction-width="20"
     :marker-end="markerEnd"
+    :updatable="true"
   />
-  <div>test</div>
 </template>
 
 <script setup lang="ts">
@@ -19,11 +20,19 @@ import {
   BezierEdge,
   EdgeMouseEvent,
   EdgeProps,
-  useEdge,
   useVueFlow,
 } from '@vue-flow/core';
+import { computed } from 'vue';
 
-const { onEdgeMouseEnter, onEdgeClick, updateEdge } = useVueFlow();
+const props = defineProps<EdgeProps>();
+const { onEdgeMouseEnter, getSelectedEdges, onEdgeClick, updateEdge } =
+  useVueFlow();
 
-defineProps<EdgeProps>();
+onEdgeClick((param: EdgeMouseEvent) => {
+  console.log(props.id, isEdgeSelected.value);
+});
+
+const isEdgeSelected = computed(() =>
+  getSelectedEdges.value.some((e) => e.id === props.id),
+);
 </script>

@@ -2,7 +2,7 @@
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger
-        class="rounded-md p-1.5 hover:bg-zinc-700 hover:text-primary"
+        class="rounded-md p-1.5 hover:bg-secondary hover:bg-zinc-700 hover:text-primary"
         :class="class"
         @click="emit('click')"
       >
