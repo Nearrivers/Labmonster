@@ -158,6 +158,22 @@ func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (Node, error
 	}
 }
 
+func (ft *FileTreeExplorer) OpenFile(pathFromLabRoot string) (graph.Graph, error) {
+	path := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
+	f, err := os.ReadFile(path)
+	if err != nil {
+		return graph.Graph{}, err
+	}
+
+	var g graph.Graph
+	err = json.Unmarshal(f, &g)
+	if err != nil {
+		return graph.Graph{}, err
+	}
+
+	return g, nil
+}
+
 // Sauvegarde le fichier JSON du graph
 func (ft *FileTreeExplorer) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) error {
 	path := filepath.Join(ft.GetLabPath(), pathFromLabRoot)

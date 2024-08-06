@@ -47,6 +47,7 @@
 import { ref } from 'vue';
 import {
   Edge,
+  EdgeChange,
   MarkerType,
   NodeChange,
   useVueFlow,
@@ -82,7 +83,8 @@ const edges = ref<Edge[]>([
     type: 'custom',
   },
 ]);
-const { addNodes, onNodesChange, onInit, toObject } = useVueFlow();
+const { addNodes, onNodesChange, onEdgesChange, onInit, toObject } =
+  useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions(nodes);
 
 function onAddNode() {
@@ -94,6 +96,7 @@ onInit((param: VueFlowStore) => {
 });
 
 onNodesChange((param: NodeChange[]) => {});
+onEdgesChange((param: EdgeChange[]) => {});
 </script>
 
 <style scoped>

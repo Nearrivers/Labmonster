@@ -38,10 +38,14 @@ export function MoveFileToExistingDir(arg1, arg2) {
   return window['go']['filetree']['FileTreeExplorer']['MoveFileToExistingDir'](arg1, arg2);
 }
 
+export function OpenFile(arg1) {
+  return window['go']['filetree']['FileTreeExplorer']['OpenFile'](arg1);
+}
+
 export function RenameFile(arg1, arg2, arg3) {
   return window['go']['filetree']['FileTreeExplorer']['RenameFile'](arg1, arg2, arg3);
 }
 
-export function SaveFile() {
-  return window['go']['filetree']['FileTreeExplorer']['SaveFile']();
+export function SaveFile(arg1, arg2) {
+  return window['go']['filetree']['FileTreeExplorer']['SaveFile'](arg1, arg2);
 }

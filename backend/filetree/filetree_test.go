@@ -481,9 +481,8 @@ func TestMoveFile(t *testing.T) {
 	})
 }
 
-func TestSaveFile(t *testing.T) {
-	t.Run("saving a graph", func(t *testing.T) {
-		g := graph.Graph{
+func getNewTestGraph() graph.Graph {
+	return graph.Graph{
 			Nodes: []graph.GraphNode{
 				{
 					Id:          "1",
@@ -522,7 +521,11 @@ func TestSaveFile(t *testing.T) {
 				Y:    0,
 			},
 		}
+}
 
+func TestSaveFile(t *testing.T) {
+	t.Run("saving a graph", func(t *testing.T) {
+		g := getNewTestGraph()
 		fileName := "saveTest.json"
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
