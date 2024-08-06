@@ -11,6 +11,11 @@ type GraphViewport struct {
 	Zoom float32 `json:"zoom"`
 }
 
+type GraphNodeData struct {
+	Title     string `json:"title"`
+	FrameData int    `json:"frameDate"`
+}
+
 type GraphNode struct {
 	Data        interface{}       `json:"data"`
 	Id          string            `json:"id"`

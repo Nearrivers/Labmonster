@@ -45,6 +45,7 @@ import {
   Edge,
   EdgeChange,
   MarkerType,
+  Node,
   NodeChange,
   useVueFlow,
   VueFlow,
@@ -55,19 +56,20 @@ import { useTopMenuActions } from '@/composables/Flowchart/useTopMenuActions';
 import FlowchartButtons from './flowchart/FlowchartControls.vue';
 import CustomNode from './flowchart/CustomNode.vue';
 import CustomEdge from './flowchart/CustomEdge.vue';
+import { CustomNodeData } from '@/types/CustomNodeData';
 
-const nodes = ref([
+const nodes = ref<Node<CustomNodeData>[]>([
   {
     id: '1',
     position: { x: 25, y: 90 },
     type: 'custom',
-    data: { hello: 'test' },
+    data: { title: 'test', hasFrameDataSection: false },
   },
   {
     id: '2',
     position: { x: 45, y: 200 },
     type: 'custom',
-    data: { hello: 'autre test' },
+    data: { title: 'autre test', hasFrameDataSection: true },
   },
 ]);
 const edges = ref<Edge[]>([

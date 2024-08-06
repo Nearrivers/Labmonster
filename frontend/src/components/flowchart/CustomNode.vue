@@ -10,12 +10,10 @@
       :class="{ 'cursor-grab': !isNodeSelected }"
       v-model="nodeText"
       @input="handleUpdate"
-      @blur="onBlur"
       @keypress.enter="input?.blur()"
       autocomplete="off"
-      disabled
     />
-    <FrameData />
+    <FrameData v-if="data.hasFrameDataSection" />
     <Transition
       enter-active-class="transition-all duration-200-"
       leave-active-class="transition-all duration-200"
@@ -40,10 +38,11 @@ import { Handle, Position, useVueFlow } from '@vue-flow/core';
 import { computed, ref } from 'vue';
 import NodeToolbar from './NodeToolbar.vue';
 import FrameData from './FrameData.vue';
+import { CustomNodeData } from '@/types/CustomNodeData';
 
 const props = defineProps<{
   id: string;
-  data: object;
+  data: CustomNodeData;
 }>();
 const input = ref<HTMLInputElement | null>(null);
 const isDragging = ref(false);
@@ -64,21 +63,17 @@ onNodeDragStop((_) => {
 });
 
 function handleUpdate() {
-  updateNode(props.id, {
-    data: { label: nodeText.value },
+  updateNode<Partial<CustomNodeData>>(props.id, {
+    data: {
+      title: nodeText.value,
+      hasFrameDataSection: props.data.hasFrameDataSection,
+    },
   });
 }
 
 function onEdit() {
   if (input.value) {
-    input.value.disabled = false;
     input.value.focus();
-  }
-}
-
-function onBlur() {
-  if (input.value) {
-    input.value.disabled = true;
   }
 }
 </script>
