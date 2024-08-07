@@ -44,11 +44,13 @@ const props = defineProps<{
   id: string;
   data: CustomNodeData;
 }>();
+
+const nodeText = defineModel<string>('text');
+
 const input = ref<HTMLInputElement | null>(null);
 const isDragging = ref(false);
 const { updateNode, getSelectedNodes, onNodeDragStart, onNodeDragStop } =
   useVueFlow();
-const nodeText = ref('');
 
 const isNodeSelected = computed(() =>
   getSelectedNodes.value.some((n) => n.id === props.id),
@@ -65,7 +67,7 @@ onNodeDragStop((_) => {
 function handleUpdate() {
   updateNode<Partial<CustomNodeData>>(props.id, {
     data: {
-      title: nodeText.value,
+      text: nodeText.value,
       hasFrameDataSection: props.data.hasFrameDataSection,
     },
   });

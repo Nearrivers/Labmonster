@@ -12,25 +12,28 @@
     :interaction-width="20"
     :marker-end="markerEnd"
     :updatable="true"
+    :selectable="true"
   />
+  <EdgeLabelRenderer>
+    <EdgeLabel :edge-id="id" :path="path" />
+  </EdgeLabelRenderer>
 </template>
 
 <script setup lang="ts">
 import {
   BezierEdge,
+  EdgeLabelRenderer,
   EdgeMouseEvent,
   EdgeProps,
+  getBezierPath,
   useVueFlow,
 } from '@vue-flow/core';
 import { computed } from 'vue';
+import EdgeLabel from './EdgeLabel.vue';
 
 const props = defineProps<EdgeProps>();
-const { onEdgeMouseEnter, getSelectedEdges, onEdgeClick, updateEdge } =
-  useVueFlow();
-
-onEdgeClick((param: EdgeMouseEvent) => {
-  console.log(props.id, isEdgeSelected.value);
-});
+const path = computed(() => getBezierPath(props));
+const { getSelectedEdges } = useVueFlow();
 
 const isEdgeSelected = computed(() =>
   getSelectedEdges.value.some((e) => e.id === props.id),

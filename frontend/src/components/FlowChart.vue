@@ -30,7 +30,11 @@
     <Background :gap="30" />
 
     <template #node-custom="props">
-      <CustomNode :id="props.id" :data="props.data" />
+      <CustomNode
+        :id="props.id"
+        :data="props.data"
+        v-model:text="props.data.text"
+      />
     </template>
 
     <template #edge-custom="props">
@@ -44,10 +48,12 @@ import { ref } from 'vue';
 import {
   Edge,
   EdgeChange,
+  EdgeUpdateEvent,
   MarkerType,
   Node,
   NodeChange,
   useVueFlow,
+  ViewportTransform,
   VueFlow,
   VueFlowStore,
 } from '@vue-flow/core';
@@ -63,13 +69,13 @@ const nodes = ref<Node<CustomNodeData>[]>([
     id: '1',
     position: { x: 25, y: 90 },
     type: 'custom',
-    data: { title: 'test', hasFrameDataSection: false },
+    data: { text: 'test', hasFrameDataSection: false },
   },
   {
     id: '2',
     position: { x: 45, y: 200 },
     type: 'custom',
-    data: { title: 'autre test', hasFrameDataSection: true },
+    data: { text: 'autre test', hasFrameDataSection: true },
   },
 ]);
 const edges = ref<Edge[]>([
@@ -80,7 +86,7 @@ const edges = ref<Edge[]>([
     type: 'custom',
   },
 ]);
-const { addNodes, onNodesChange, onEdgesChange, onInit, toObject } =
+const { addNodes, onNodesChange, onEdgeUpdate, onInit, toObject } =
   useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions(nodes);
 
@@ -93,11 +99,7 @@ onInit((param: VueFlowStore) => {
 });
 
 onNodesChange((param: NodeChange[]) => {});
-onEdgesChange((param: EdgeChange[]) => {});
+onEdgeUpdate((param: EdgeUpdateEvent) => {
+  console.log('test', param);
+});
 </script>
-
-<style scoped>
-.vue-flow__node-custom.selected {
-  background-color: red !important;
-}
-</style>
