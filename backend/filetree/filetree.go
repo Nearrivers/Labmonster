@@ -17,7 +17,7 @@ import (
 var (
 	ErrFileAreDifferent   = errors.New("the 2 files are different")
 	ErrEqualOldAndNewPath = errors.New("the old and paths must be different")
-	ErrGetSubDirAndFile = errors.New("can't build file tree")
+	ErrGetSubDirAndFile   = errors.New("can't build file tree")
 )
 
 type FileTreeExplorer struct {
@@ -192,9 +192,9 @@ func (ft *FileTreeExplorer) OpenFile(pathFromLabRoot string) (graph.Graph, error
 }
 
 // Sauvegarde le fichier JSON du graph
-func (ft *FileTreeExplorer) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) *SaveFileError {
+func (ft *FileTreeExplorer) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) error {
 	path := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
-	// Create truncates the file if it already exists 
+	// Create truncates the file if it already exists
 	f, err := os.Create(path)
 	if err != nil {
 		return &SaveFileError{path, err}

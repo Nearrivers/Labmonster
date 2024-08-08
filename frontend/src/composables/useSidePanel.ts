@@ -62,8 +62,10 @@ export function useSidePanel() {
 
   async function createNewFileAtRoot() {
     try {
-      const newFileName = await CreateFile(NEW_FILE_NAME);
-      files.value.push(newFileName);
+      const file = await CreateFile(NEW_FILE_NAME);
+      // removing .json from the file name
+      file.name = file.name.slice(0, file.name.indexOf('.'))
+      files.value.push(file);
       files.value.sort(sortNodes);
     } catch (error) {
       showToast(error, 'Impossible de créer le fichier');

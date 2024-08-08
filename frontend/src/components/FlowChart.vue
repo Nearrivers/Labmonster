@@ -40,21 +40,19 @@
     <template #edge-custom="props">
       <CustomEdge v-bind="props" />
     </template>
+    <FilePanel />
   </VueFlow>
 </template>
 
 <script setup lang="ts">
-import { onActivated, onMounted, ref, watch } from 'vue';
+import { onActivated, ref, watch } from 'vue';
 import {
   Edge,
-  EdgeUpdateEvent,
   FlowExportObject,
   MarkerType,
   Node,
-  NodeChange,
   useVueFlow,
   VueFlow,
-  VueFlowStore,
 } from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
 import { useTopMenuActions } from '@/composables/Flowchart/useTopMenuActions';
@@ -65,19 +63,18 @@ import { CustomNodeData } from '@/types/CustomNodeData';
 import { OpenFile } from '$/filetree/FileTreeExplorer';
 import { useRoute } from 'vue-router';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
+import FilePanel from './flowchart/FilePanel.vue';
+import { useHandleFlowchartChanges } from '@/composables/Flowchart/useHandleFlowchartChanges';
 
 const { showToast } = useShowErrorToast();
 const route = useRoute();
 const nodes = ref<Node<CustomNodeData>[]>([]);
 const edges = ref<Edge[]>([]);
-const { addNodes, onNodesChange, onEdgeUpdate, fromObject } = useVueFlow();
+const { addNodes, fromObject } = useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions(nodes);
+useHandleFlowchartChanges(route.params.path as string);
 
 watch(() => route.params.path, loadGraph, { immediate: true });
-
-onActivated(() => {
-  showToast('bonjour');
-});
 
 function onAddNode() {
   addNodes(createNewNode());
@@ -86,16 +83,10 @@ function onAddNode() {
 async function loadGraph() {
   try {
     const path = route.params.path as string;
-    console.log(path);
     const graph = await OpenFile(path);
     fromObject(graph as unknown as FlowExportObject);
   } catch (error) {
-    console.log(error);
+    showToast(error);
   }
 }
-
-onNodesChange((param: NodeChange[]) => {});
-onEdgeUpdate((param: EdgeUpdateEvent) => {
-  console.log('test', param);
-});
 </script>

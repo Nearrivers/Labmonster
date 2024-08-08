@@ -1,20 +1,3 @@
-export namespace config {
-	
-	export class ConfigFile {
-	
-	
-	    static createFrom(source: any = {}) {
-	        return new ConfigFile(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	
-	    }
-	}
-
-}
-
 export namespace filetree {
 	
 	export class Node {
@@ -53,18 +36,6 @@ export namespace filetree {
 		    }
 		    return a;
 		}
-	}
-	export class SaveFileError {
-	
-	
-	    static createFrom(source: any = {}) {
-	        return new SaveFileError(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	
-	    }
 	}
 
 }
