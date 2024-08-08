@@ -1,6 +1,7 @@
 import {
   GetSubDirAndFiles,
   CreateNewFileAtRoot,
+  CreateFile,
 } from '$/filetree/FileTreeExplorer';
 import { filetree } from '$/models';
 import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
@@ -11,11 +12,11 @@ import { CONFIG_FILE_LOADED } from '@/constants/event-names/CONFIG_FILE_LOADED';
 import { configFileLoaded } from '@/events/ReloadFileExplorer';
 import { useEventListener } from '@vueuse/core';
 import DirContextMenu from '../components/contextmenus/DirContextMenu.vue';
-import { sidePanelToggled } from '@/events/ToggleSidePanel';
-import { SIDE_PANEL_TOGGLED } from '@/constants/event-names/SIDE_PANEL_TOGGLED';
+import { useRouter } from 'vue-router';
 
 export function useSidePanel() {
   const files = ref<filetree.Node[]>([]);
+  const router = useRouter();
   const { showToast } = useShowErrorToast();
   const contextMenuX = ref(100);
   const contextMenuY = ref(100);
@@ -61,7 +62,7 @@ export function useSidePanel() {
 
   async function createNewFileAtRoot() {
     try {
-      const newFileName = await CreateNewFileAtRoot(NEW_FILE_NAME);
+      const newFileName = await CreateFile(NEW_FILE_NAME);
       files.value.push(newFileName);
       files.value.sort(sortNodes);
     } catch (error) {
@@ -83,7 +84,21 @@ export function useSidePanel() {
     dirContextMenu.value?.showPopover();
   }
 
-  function onLeftClick(event: MouseEvent) {}
+  function onLeftClick(event: MouseEvent) {
+    const node = (event.target as HTMLElement).closest('li');
+
+    if (!node) {
+      return;
+    }
+
+    if (node.dataset.type === 'file') {
+      const { path, extension } = node.dataset;
+      router.push({
+        name: 'flowchart',
+        params: { path: path?.includes('.json') ? path! : path! + extension },
+      });
+    }
+  }
 
   return {
     files,

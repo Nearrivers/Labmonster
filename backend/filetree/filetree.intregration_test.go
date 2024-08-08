@@ -18,8 +18,8 @@ func TestSaveAndOpenFile(t *testing.T) {
 			t.Fatalf("got an error while saving the file but didn't want one: %v", err)
 		}
 
-		got, err := ft.OpenFile(fileName)
-		if err != nil {
+		got, openErr := ft.OpenFile(fileName)
+		if openErr != nil {
 			t.Fatalf("got an error while opening the file but didn't want one: %v", err)
 		}
 

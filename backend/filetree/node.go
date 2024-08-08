@@ -1,7 +1,6 @@
 package filetree
 
 import (
-	"errors"
 	"time"
 )
 
@@ -12,9 +11,6 @@ const (
 	DIR  NodeType = "DIR"
 )
 
-var (
-	ErrIndexOutOfBounds = errors.New("l'index donné est trop grand")
-)
 
 // A node is the in-memory representation of a file or a directory on the user's machine
 type Node struct {

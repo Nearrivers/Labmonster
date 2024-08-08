@@ -98,6 +98,22 @@ func TestGetSubDirAndFiles(t *testing.T) {
 		}
 	})
 
+	t.Run("reading somewhere gets deleted before reading starts", func(t *testing.T) {
+		dir, ft := createTempDir(t, "testNoExist", "none.json")
+		subDir1 := "noexistsDir"
+		os.RemoveAll(dir)
+
+		_, got := ft.GetSubDirAndFiles(subDir1)
+		if got == nil {
+			t.Fatalf("didn't get an error but wanted one: %v", got)
+		}
+
+		want := &GetSubDirAndFilesError{}
+		if !errors.As(got, &want) {
+			t.Errorf("got %v, want %v", got, want)
+		}
+	})
+
 	// TODO: Ajouter d'autres tests dans d'autres profondeurs lorsque la fonction de création sera
 	// implémentée
 }

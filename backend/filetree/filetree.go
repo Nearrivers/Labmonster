@@ -17,6 +17,7 @@ import (
 var (
 	ErrFileAreDifferent   = errors.New("the 2 files are different")
 	ErrEqualOldAndNewPath = errors.New("the old and paths must be different")
+	ErrGetSubDirAndFile = errors.New("can't build file tree")
 )
 
 type FileTreeExplorer struct {
@@ -50,12 +51,12 @@ func (ft *FileTreeExplorer) GetSubDirAndFiles(pathFromLabRoot string) ([]*Node, 
 	dirPath := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
-		return nil, err
+		return nil, &GetSubDirAndFilesError{err}
 	}
 
 	nodes, err := createNodesFromDirEntries(entries)
 	if err != nil {
-		return nil, err
+		return nil, &GetSubDirAndFilesError{err}
 	}
 
 	return nodes, nil
@@ -84,7 +85,11 @@ func (ft *FileTreeExplorer) GetLabDirs() error {
 		return nil
 	})
 
-	return err
+	if err != nil {
+		return &GetLabDirsError{err}
+	}
+
+	return nil
 }
 
 func doesFileExist(path string) bool {
@@ -94,6 +99,7 @@ func doesFileExist(path string) bool {
 
 func (ft *FileTreeExplorer) CreateFile(pathFromLabRoot string) (Node, error) {
 	p := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
+	g := graph.GetInitGraph()
 
 	if !doesFileExist(p) {
 		f, err := os.Create(p)
@@ -103,6 +109,11 @@ func (ft *FileTreeExplorer) CreateFile(pathFromLabRoot string) (Node, error) {
 		defer f.Close()
 
 		stat, err := f.Stat()
+		if err != nil {
+			return Node{}, err
+		}
+
+		err = writeFile(g, f)
 		if err != nil {
 			return Node{}, err
 		}
@@ -117,6 +128,12 @@ func (ft *FileTreeExplorer) CreateFile(pathFromLabRoot string) (Node, error) {
 	}
 
 	defer f.Close()
+
+	err = writeFile(g, f)
+	if err != nil {
+		return Node{}, err
+	}
+
 	n := NewNode(name, ".json", FILE)
 	return n, nil
 }
@@ -175,21 +192,21 @@ func (ft *FileTreeExplorer) OpenFile(pathFromLabRoot string) (graph.Graph, error
 }
 
 // Sauvegarde le fichier JSON du graph
-func (ft *FileTreeExplorer) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) error {
+func (ft *FileTreeExplorer) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) *SaveFileError {
 	path := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
+	// Create truncates the file if it already exists 
 	f, err := os.Create(path)
 	if err != nil {
-		return err
+		return &SaveFileError{path, err}
 	}
 	defer f.Close()
 
-	b, err := json.Marshal(graphToSave)
+	err = writeFile(graphToSave, f)
 	if err != nil {
-		return err
+		return &SaveFileError{path, err}
 	}
 
-	_, err = f.Write(b)
-	return err
+	return nil
 }
 
 // Rename a file on the user's machine and inside the in-memory tree
@@ -283,6 +300,20 @@ func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, extension strin
 	}
 
 	return name, nil
+}
+
+func writeFile(g graph.Graph, f *os.File) error {
+	b, err := json.Marshal(g)
+	if err != nil {
+		return &WriteFileError{f.Name(), err}
+	}
+
+	_, err = f.Write(b)
+	if err != nil {
+		return &WriteFileError{f.Name(), err}
+	}
+
+	return nil
 }
 
 func moveFile(oldPath, newPath string) (string, error) {

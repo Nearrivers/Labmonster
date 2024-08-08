@@ -5,7 +5,6 @@
       position: 'absolute',
       transform: `translate(-50%, -100%) translate(${path[1]}px,${path[2]}px)`,
     }"
-    class="z-[1000]"
   >
     <textarea
       ref="input"

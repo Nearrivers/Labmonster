@@ -44,16 +44,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onActivated, onMounted, ref, watch } from 'vue';
 import {
   Edge,
-  EdgeChange,
   EdgeUpdateEvent,
+  FlowExportObject,
   MarkerType,
   Node,
   NodeChange,
   useVueFlow,
-  ViewportTransform,
   VueFlow,
   VueFlowStore,
 } from '@vue-flow/core';
@@ -63,40 +62,37 @@ import FlowchartButtons from './flowchart/FlowchartControls.vue';
 import CustomNode from './flowchart/CustomNode.vue';
 import CustomEdge from './flowchart/CustomEdge.vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
+import { OpenFile } from '$/filetree/FileTreeExplorer';
+import { useRoute } from 'vue-router';
+import { useShowErrorToast } from '@/composables/useShowErrorToast';
 
-const nodes = ref<Node<CustomNodeData>[]>([
-  {
-    id: '1',
-    position: { x: 25, y: 90 },
-    type: 'custom',
-    data: { text: 'test', hasFrameDataSection: false },
-  },
-  {
-    id: '2',
-    position: { x: 45, y: 200 },
-    type: 'custom',
-    data: { text: 'autre test', hasFrameDataSection: true },
-  },
-]);
-const edges = ref<Edge[]>([
-  {
-    id: '1->2',
-    source: '1',
-    target: '2',
-    type: 'custom',
-  },
-]);
-const { addNodes, onNodesChange, onEdgeUpdate, onInit, toObject } =
-  useVueFlow();
+const { showToast } = useShowErrorToast();
+const route = useRoute();
+const nodes = ref<Node<CustomNodeData>[]>([]);
+const edges = ref<Edge[]>([]);
+const { addNodes, onNodesChange, onEdgeUpdate, fromObject } = useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions(nodes);
+
+watch(() => route.params.path, loadGraph, { immediate: true });
+
+onActivated(() => {
+  showToast('bonjour');
+});
 
 function onAddNode() {
   addNodes(createNewNode());
 }
 
-onInit((param: VueFlowStore) => {
-  console.log(toObject());
-});
+async function loadGraph() {
+  try {
+    const path = route.params.path as string;
+    console.log(path);
+    const graph = await OpenFile(path);
+    fromObject(graph as unknown as FlowExportObject);
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 onNodesChange((param: NodeChange[]) => {});
 onEdgeUpdate((param: EdgeUpdateEvent) => {

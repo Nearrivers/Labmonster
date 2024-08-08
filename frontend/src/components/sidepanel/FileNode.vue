@@ -17,16 +17,18 @@
         >
           <div class="flex items-center gap-x-1 font-normal">
             <p class="w-[14px]"></p>
-            <input
+            <div
+              role="textbox"
               ref="input"
-              type="text"
-              v-model="fileName"
-              class="cursor-pointer bg-transparent"
-              disabled
+              class="cursor-pointer overflow-hidden whitespace-nowrap bg-transparent [&_br]:hidden"
               :id="nodePathWithoutSpaces"
+              @key.enter="input?.blur()"
               @blur.stop="onBlur"
+              spellcheck="false"
               autocomplete="off"
-            />
+            >
+              {{ fileName }}
+            </div>
           </div>
         </TooltipTrigger>
         <TooltipContent as-child :side="'right'" :side-offset="20">
@@ -60,7 +62,7 @@ const props = defineProps<{
 
 const { showToast } = useShowErrorToast();
 const fileName = ref(props.node.name);
-const input = ref<HTMLInputElement | null>(null);
+const input = ref<HTMLDivElement | null>(null);
 const nodePath = ref(
   props.path ? props.path + '/' + props.node.name : props.node.name,
 );
@@ -75,11 +77,15 @@ const updatedAt = computed(() => {
 });
 
 async function onBlur() {
-  if (input.value) {
-    input.value.toggleAttribute('disabled');
-    input.value.classList.add('cursor-pointer');
-    input.value.classList.remove('cursor-text');
+  if (!input.value) {
+    showToast('Input introuvable');
+    return;
   }
+
+  input.value.toggleAttribute('contenteditable');
+  input.value.classList.add('cursor-pointer');
+  input.value.classList.remove('cursor-text');
+  fileName.value = input.value.innerText.trim();
 
   try {
     await RenameFile(

@@ -54,6 +54,18 @@ export namespace filetree {
 		    return a;
 		}
 	}
+	export class SaveFileError {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new SaveFileError(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
 
 }
 
@@ -161,8 +173,22 @@ export namespace graph {
 	        this.y = source["y"];
 	    }
 	}
+	export class GraphNodeData {
+	    text: string;
+	    hasFrameDataSection: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new GraphNodeData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.text = source["text"];
+	        this.hasFrameDataSection = source["hasFrameDataSection"];
+	    }
+	}
 	export class GraphNode {
-	    data: any;
+	    data: GraphNodeData;
 	    id: string;
 	    initialized: boolean;
 	    position: GraphNodePosition;
@@ -174,7 +200,7 @@ export namespace graph {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.data = source["data"];
+	        this.data = this.convertValues(source["data"], GraphNodeData);
 	        this.id = source["id"];
 	        this.initialized = source["initialized"];
 	        this.position = this.convertValues(source["position"], GraphNodePosition);
@@ -233,6 +259,7 @@ export namespace graph {
 		    return a;
 		}
 	}
+	
 	
 	
 	

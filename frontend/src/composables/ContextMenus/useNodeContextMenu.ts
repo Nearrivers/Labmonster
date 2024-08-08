@@ -18,14 +18,13 @@ export function useNodeContextMenu(deleteDialog: Ref<AppDialog | null>) {
   async function onRenameClick(filePath: string) {
     hidePopover();
     const inputPath = filePath.replaceAll(' ', '-');
-    const fileInput = document.getElementById(inputPath) as HTMLInputElement;
+    const fileInput = document.getElementById(inputPath) as HTMLDivElement;
 
     if (fileInput) {
-      fileInput.toggleAttribute('disabled');
+      fileInput.toggleAttribute('contenteditable');
       fileInput.classList.remove('cursor-pointer');
       fileInput.classList.add('cursor-text');
       fileInput.focus();
-      fileInput.select();
     }
   }
 

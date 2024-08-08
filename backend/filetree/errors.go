@@ -1,0 +1,53 @@
+package filetree
+
+import "fmt"
+
+type GetSubDirAndFilesError struct {
+	err error
+}
+
+func (g *GetSubDirAndFilesError) Error() string {
+	return fmt.Sprintf("couldn't build filetree: %v", g.err)
+}
+
+func (g *GetSubDirAndFilesError) Unwrap() error {
+	return g.err
+}
+
+type GetLabDirsError struct {
+	err error
+}
+
+func (g *GetLabDirsError) Error() string {
+	return fmt.Sprintf("couldn't get every directory inside the lab: %v", g.err)
+}
+
+func (g *GetLabDirsError) Unwrap() error {
+	return g.err
+}
+
+type SaveFileError struct {
+	path string
+	err error
+}
+
+func (s *SaveFileError) Error() string {
+	return fmt.Sprintf("couldn't save file %s: %v", s.path, s.err)
+}
+
+func (s *SaveFileError) Unwrap() error {
+	return s.err
+}
+
+type WriteFileError struct {
+	fileName string
+	err error
+}
+
+func (w *WriteFileError) Error() string {
+	return fmt.Sprintf("could't write to file %s: %v", w.fileName, w.err)
+}
+
+func (w *WriteFileError) Unwrap() error {
+	return w.err
+}

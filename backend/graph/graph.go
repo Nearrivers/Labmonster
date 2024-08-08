@@ -12,12 +12,12 @@ type GraphViewport struct {
 }
 
 type GraphNodeData struct {
-	Title     string `json:"title"`
-	FrameData int    `json:"frameDate"`
+	Text                string `json:"text"`
+	HasFrameDataSection bool   `json:"hasFrameDataSection"`
 }
 
 type GraphNode struct {
-	Data        interface{}       `json:"data"`
+	Data        GraphNodeData     `json:"data"`
 	Id          string            `json:"id"`
 	Initialized bool              `json:"initialized"`
 	Position    GraphNodePosition `json:"position"`
@@ -51,4 +51,32 @@ type Graph struct {
 	Nodes    []GraphNode   `json:"nodes"`
 	Edges    []GraphEdge   `json:"edges"`
 	Viewport GraphViewport `json:"viewport"`
+}
+
+// Returns a JSON marshaled graph. This graph is the starting point of all new files
+func GetInitGraph() Graph {
+	return Graph{
+		Nodes: []GraphNode{
+			{
+				Id:          "1",
+				Initialized: false,
+				Position: GraphNodePosition{
+					X: 25,
+					Y: 90,
+				},
+				NodeType: "custom",
+				Data: GraphNodeData{
+					Text:                "Nouveau noeud",
+					HasFrameDataSection: false,
+				},
+			},
+		},
+		Edges: []GraphEdge{},
+		Viewport: GraphViewport{
+			Zoom: 1,
+			X:    0,
+			Y:    0,
+		},
+	}
+
 }

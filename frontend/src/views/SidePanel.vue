@@ -6,8 +6,8 @@
     <ul
       class="w-full px-2 text-sm text-muted-foreground"
       v-if="files.length > 0"
-      @contextmenu.prevent="onRightClick"
-      @click="onLeftClick"
+      @click.right.prevent="onRightClick"
+      @click.left="onLeftClick"
     >
       <template v-for="file in files" :key="file.name">
         <FileNode v-if="file.type === 'FILE'" :node="file" path="" />
