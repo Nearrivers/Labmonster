@@ -31,7 +31,7 @@ func createDirHelper(t testing.TB, tempDirPath, dirName string) {
 // Returns the path to the temporary dir and the filetree that resulted.
 // The function os.RemoveAll(dir) should be called with the defer keyword
 // to clean up after tests that use this helper function
-func createTempDir(t testing.TB, testDirName, testFileName string) (string, *FileTreeExplorer) {
+func createTempDir(t testing.TB, testDirName, testFileName string) (string, *FileTree) {
 	t.Helper()
 
 	tempDir := os.TempDir()
@@ -140,7 +140,7 @@ func TestGetLabDirs(t *testing.T) {
 	})
 }
 
-func getNewFileTreeExplorer() (*FileTreeExplorer, string) {
+func getNewFileTreeExplorer() (*FileTree, string) {
 	dir, _ := os.MkdirTemp("", "testFt")
 	return NewFileTree(&config.AppConfig{
 		ConfigFile: config.ConfigFile{
@@ -149,7 +149,7 @@ func getNewFileTreeExplorer() (*FileTreeExplorer, string) {
 	}), dir
 }
 
-func createFileBeforeTest(t testing.TB, ft *FileTreeExplorer, fileName string) {
+func createFileBeforeTest(t testing.TB, ft *FileTree, fileName string) {
 	t.Helper()
 
 	_, err := ft.CreateNewFileAtRoot(fileName)
@@ -296,7 +296,7 @@ func TestDeleteFile(t *testing.T) {
 	})
 }
 
-func assertSameFiles(t testing.TB, ft *FileTreeExplorer, file1, file2 string) {
+func assertSameFiles(t testing.TB, ft *FileTree, file1, file2 string) {
 	t.Helper()
 
 	if err := fileContentCompare(ft.GetLabPath(), file1, file2); err != nil {

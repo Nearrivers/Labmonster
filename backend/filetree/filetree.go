@@ -20,13 +20,13 @@ var (
 	ErrGetSubDirAndFile   = errors.New("can't build file tree")
 )
 
-type FileTreeExplorer struct {
+type FileTree struct {
 	Cfg         *config.AppConfig
 	Directories []string `json:"directories"`
 }
 
-func NewFileTree(cfg *config.AppConfig) *FileTreeExplorer {
-	ft := &FileTreeExplorer{
+func NewFileTree(cfg *config.AppConfig) *FileTree {
+	ft := &FileTree{
 		Cfg: cfg,
 	}
 
@@ -35,11 +35,11 @@ func NewFileTree(cfg *config.AppConfig) *FileTreeExplorer {
 	return ft
 }
 
-func (ft *FileTreeExplorer) GetLabPath() string {
+func (ft *FileTree) GetLabPath() string {
 	return ft.Cfg.ConfigFile.LabPath
 }
 
-func (ft *FileTreeExplorer) GetDirectories() []string {
+func (ft *FileTree) GetDirectories() []string {
 	ft.GetLabDirs()
 	return ft.Directories
 }
@@ -47,7 +47,7 @@ func (ft *FileTreeExplorer) GetDirectories() []string {
 // Given a path to a directory starting from the lab root, this function will read
 // its content using the os.ReadDir method, transforms those entries into Nodes
 // and return them
-func (ft *FileTreeExplorer) GetSubDirAndFiles(pathFromLabRoot string) ([]*Node, error) {
+func (ft *FileTree) GetSubDirAndFiles(pathFromLabRoot string) ([]*Node, error) {
 	dirPath := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
@@ -67,7 +67,7 @@ func (ft *FileTreeExplorer) GetSubDirAndFiles(pathFromLabRoot string) ([]*Node, 
 
 // Get every directory name inside the lab and set the Directories
 // of the FileTreeExplorer struct
-func (ft *FileTreeExplorer) GetLabDirs() error {
+func (ft *FileTree) GetLabDirs() error {
 	ft.Directories = make([]string, 0)
 
 	ft.Directories = append(ft.Directories, "/")
@@ -97,7 +97,7 @@ func doesFileExist(path string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-func (ft *FileTreeExplorer) CreateFile(pathFromLabRoot string) (Node, error) {
+func (ft *FileTree) CreateFile(pathFromLabRoot string) (Node, error) {
 	p := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
 	g := graph.GetInitGraph()
 
@@ -139,7 +139,7 @@ func (ft *FileTreeExplorer) CreateFile(pathFromLabRoot string) (Node, error) {
 }
 
 // Create a file at lab root
-func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (Node, error) {
+func (ft *FileTree) CreateNewFileAtRoot(newFileName string) (Node, error) {
 	// Création d'un fichier si ce dernier n'existe pas
 	if !doesFileExist(filepath.Join(ft.GetLabPath(), newFileName+".json")) {
 		f, err := os.Create(filepath.Join(ft.GetLabPath(), newFileName+".json"))
@@ -175,7 +175,7 @@ func (ft *FileTreeExplorer) CreateNewFileAtRoot(newFileName string) (Node, error
 	}
 }
 
-func (ft *FileTreeExplorer) OpenFile(pathFromLabRoot string) (graph.Graph, error) {
+func (ft *FileTree) OpenFile(pathFromLabRoot string) (graph.Graph, error) {
 	path := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
 	f, err := os.ReadFile(path)
 	if err != nil {
@@ -192,7 +192,7 @@ func (ft *FileTreeExplorer) OpenFile(pathFromLabRoot string) (graph.Graph, error
 }
 
 // Sauvegarde le fichier JSON du graph
-func (ft *FileTreeExplorer) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) error {
+func (ft *FileTree) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) error {
 	path := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
 	// Create truncates the file if it already exists
 	f, err := os.Create(path)
@@ -210,7 +210,7 @@ func (ft *FileTreeExplorer) SaveFile(pathFromLabRoot string, graphToSave graph.G
 }
 
 // Rename a file on the user's machine and inside the in-memory tree
-func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName string) error {
+func (ft *FileTree) RenameFile(pathFromRootOfTheLab, oldName, newName string) error {
 	labPath := ft.GetLabPath()
 	oldPath := filepath.Join(labPath, pathFromRootOfTheLab, oldName)
 	newPath := filepath.Join(labPath, pathFromRootOfTheLab, newName)
@@ -227,7 +227,7 @@ func (ft *FileTreeExplorer) RenameFile(pathFromRootOfTheLab, oldName, newName st
 // deletes a file on the user's machine and from the in-memory tree
 // The function will add the ".json" file extension if it's missing
 // from the path
-func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
+func (ft *FileTree) DeleteFile(pathFromRootOfTheLab string) error {
 	err := os.Remove(filepath.Join(ft.GetLabPath(), pathFromRootOfTheLab))
 	if err != nil {
 		return err
@@ -238,7 +238,7 @@ func (ft *FileTreeExplorer) DeleteFile(pathFromRootOfTheLab string) error {
 
 // Given a path to a file starting from the lab root and an another path to a directory,
 // moves the file to the new directory.
-func (ft *FileTreeExplorer) MoveFileToExistingDir(oldPath, newPath string) (string, error) {
+func (ft *FileTree) MoveFileToExistingDir(oldPath, newPath string) (string, error) {
 	if oldPath == newPath {
 		return "", ErrEqualOldAndNewPath
 	}
@@ -277,7 +277,7 @@ func (ft *FileTreeExplorer) MoveFileToExistingDir(oldPath, newPath string) (stri
 
 // Create a file named after the fileName argument. If the file already exists, it will try
 // to add a number at the end to avoid duplicates
-func (ft *FileTreeExplorer) DuplicateFile(pathToFileFromLabRoot, extension string) (newFileName string, error error) {
+func (ft *FileTree) DuplicateFile(pathToFileFromLabRoot, extension string) (newFileName string, error error) {
 	labPath := ft.GetLabPath()
 	path := filepath.Join(labPath, pathToFileFromLabRoot+extension)
 
