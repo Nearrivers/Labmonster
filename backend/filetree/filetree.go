@@ -11,7 +11,12 @@ import (
 	"strings"
 
 	"flow-poc/backend/config"
+	"flow-poc/backend/filetree/recentfiles"
 	"flow-poc/backend/graph"
+)
+
+const (
+	maxRecentlyOpenedFiles = 15
 )
 
 var (
@@ -23,11 +28,13 @@ var (
 type FileTree struct {
 	Cfg         *config.AppConfig
 	Directories []string `json:"directories"`
+	RecentFiles recentfiles.RecentlyOpened
 }
 
 func NewFileTree(cfg *config.AppConfig) *FileTree {
 	ft := &FileTree{
 		Cfg: cfg,
+		RecentFiles: *recentfiles.NewRecentlyOpened(cfg, maxRecentlyOpenedFiles),
 	}
 
 	ft.GetLabDirs()
@@ -136,43 +143,6 @@ func (ft *FileTree) CreateFile(pathFromLabRoot string) (Node, error) {
 
 	n := NewNode(name, ".json", FILE)
 	return n, nil
-}
-
-// Create a file at lab root
-func (ft *FileTree) CreateNewFileAtRoot(newFileName string) (Node, error) {
-	// Création d'un fichier si ce dernier n'existe pas
-	if !doesFileExist(filepath.Join(ft.GetLabPath(), newFileName+".json")) {
-		f, err := os.Create(filepath.Join(ft.GetLabPath(), newFileName+".json"))
-		if err != nil {
-			return Node{}, err
-		}
-
-		defer f.Close()
-
-		n := NewNode(newFileName, ".json", FILE)
-		return n, nil
-	}
-
-	// Si un fichier avec le même nom existe déjà alors on va boucler avec un compteur afin de créer un
-	// "Sans titre n.json" avec n un compteur incrémenté à chaque fois qu'un fichier du même nom est trouvé
-	cpt := 1
-	for {
-		name := fmt.Sprintf("%s %d.json", newFileName, cpt)
-		if doesFileExist(filepath.Join(ft.GetLabPath(), name)) {
-			cpt++
-			continue
-		}
-
-		f, err := os.Create(filepath.Join(ft.GetLabPath(), name))
-		if err != nil {
-			return Node{}, err
-		}
-
-		defer f.Close()
-
-		n := NewNode(name, ".json", FILE)
-		return n, nil
-	}
 }
 
 func (ft *FileTree) OpenFile(pathFromLabRoot string) (graph.Graph, error) {

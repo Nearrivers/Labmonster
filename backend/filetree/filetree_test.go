@@ -47,7 +47,10 @@ func createTempDir(t testing.TB, testDirName, testFileName string) (string, *Fil
 		},
 	})
 
-	ft.CreateNewFileAtRoot(testFileName)
+	_, err = ft.CreateFile(testFileName)
+	if err != nil {
+		t.Fatalf("couldn't create file at the specified location: %v", err)
+	}
 
 	return dir, ft
 }
@@ -152,7 +155,7 @@ func getNewFileTreeExplorer() (*FileTree, string) {
 func createFileBeforeTest(t testing.TB, ft *FileTree, fileName string) {
 	t.Helper()
 
-	_, err := ft.CreateNewFileAtRoot(fileName)
+	_, err := ft.CreateFile(fileName)
 	if err != nil {
 		t.Errorf("Error when creating the file: %v", err)
 	}
@@ -218,13 +221,13 @@ func TestRenameFile(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
 
-		oldName := "test rename"
+		oldName := "test rename.json"
 		newName := "test rename 1.json"
 
 		createFileBeforeTest(t, ft, oldName)
 		defer ft.DeleteFile(newName)
 
-		err := ft.RenameFile("", oldName+".json", newName)
+		err := ft.RenameFile("", oldName, newName)
 		if err != nil {
 			t.Fatalf("got an error %v", err)
 		}
@@ -257,17 +260,17 @@ func TestDeleteFile(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
 
-		fileName := "test delete"
+		fileName := "test delete.json"
 
 		createFileBeforeTest(t, ft, fileName)
 
-		err := ft.DeleteFile(fileName + ".json")
+		err := ft.DeleteFile(fileName)
 		if err != nil {
 			t.Errorf("An error occured while deleting the file: %v", err)
 		}
 
 		want := false
-		got := doesFileExist(filepath.Join(ft.GetLabPath(), fileName+".json"))
+		got := doesFileExist(filepath.Join(ft.GetLabPath(), fileName))
 
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
@@ -312,7 +315,7 @@ func TestDuplicateFile(t *testing.T) {
 	t.Run("File duplication at first level", func(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
-		fileName := "duplication test"
+		fileName := "duplication test.json"
 		createFileBeforeTest(t, ft, fileName)
 		defer ft.DeleteFile(fileName)
 
@@ -404,11 +407,11 @@ func TestMoveFile(t *testing.T) {
 		fileName := subFile1 + ".json"
 		f, err := ft.MoveFileToExistingDir(fileName, "testDir1/testSubDir")
 		if err != nil {
-			t.Errorf("got error %v, but did not want one", err)
+			t.Fatalf("got error %v, but did not want one", err)
 		}
 
 		if fileName != f {
-			t.Errorf("wrong file name returned, got %s, want %s", fileName, f)
+			t.Fatalf("wrong file name returned, got %s, want %s", fileName, f)
 		}
 		assertFileExistence(t, dir, subDir1, subDir2, fileName)
 	})

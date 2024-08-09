@@ -1,4 +1,4 @@
-package recent
+package recentfiles
 
 import (
 	"bufio"

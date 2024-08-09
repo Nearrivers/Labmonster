@@ -6,7 +6,6 @@ import (
 
 	"flow-poc/backend/config"
 	"flow-poc/backend/filetree"
-	"flow-poc/backend/lab/recent"
 	"flow-poc/backend/topmenu"
 
 	"github.com/wailsapp/wails/v2"
@@ -17,9 +16,6 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-const (
-	maxRecentlyOpenedFiles = 15
-)
 
 func main() {
 	// Create an instance of the app structure
@@ -27,7 +23,6 @@ func main() {
 	topmenu := topmenu.NewTopMenu()
 	config := config.NewAppConfig()
 	filetree := filetree.NewFileTree(config)
-	recent := recent.NewRecentlyOpened(config, maxRecentlyOpenedFiles)
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -51,10 +46,9 @@ func main() {
 			topmenu,
 			config,
 			filetree,
-			recent,
 		},
 		OnShutdown: func(ctx context.Context) {
-			recent.SaveRecentlyOpended()
+			filetree.RecentFiles.SaveRecentlyOpended()
 		},
 	})
 	if err != nil {

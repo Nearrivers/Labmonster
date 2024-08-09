@@ -1,4 +1,4 @@
-package recent
+package recentfiles
 
 import (
 	"flow-poc/backend/config"
@@ -25,7 +25,7 @@ func NewRecentlyOpened(c *config.AppConfig, max int) *RecentlyOpened {
 	return &RecentlyOpened{c, make([]string, 0), max}
 }
 
-func (r *RecentlyOpened) GetLabPath() string {
+func (r *RecentlyOpened) getLabPath() string {
 	return r.Cfg.ConfigFile.LabPath
 }
 
@@ -36,7 +36,7 @@ func (r *RecentlyOpened) GetRecentlyOpenedFiles() []string {
 // Truncate recently opended text file and save the paths contained
 // in the FilePaths array
 func (r *RecentlyOpened) SaveRecentlyOpended() error {
-	p := filepath.Join(r.GetLabPath(), ".labmonster", recentlyOpenedFilename)
+	p := filepath.Join(r.getLabPath(), ".labmonster", recentlyOpenedFilename)
 	f, err := os.Create(p)
 	if err != nil {
 		return err
@@ -53,20 +53,20 @@ func (r *RecentlyOpened) SaveRecentlyOpended() error {
 	return nil
 }
 
-// Prepend a path to the FilePath array. A path will not be present
+// Prepend a path relative to the lab's root to the FilePath array. A path will not be present
 // twice in this array. RecentlyOpened.maxFiles sets the maximum of recently opened file
 // and this function will make sure the capacity is never exceeded.
-func (r *RecentlyOpened) AddRecentFile(absolutePath string) {
+func (r *RecentlyOpened) AddRecentFile(pathFromLabRoot string) {
 	if len(r.FilePaths) == r.maxFiles {
 		r.FilePaths = r.FilePaths[0:len(r.FilePaths) - 1]
 	}
 
-	if slices.Contains(r.FilePaths, absolutePath) {
+	if slices.Contains(r.FilePaths, pathFromLabRoot) {
 		r.FilePaths = slices.DeleteFunc(r.FilePaths, func(p string) bool {
-			return p == absolutePath
+			return p == pathFromLabRoot
 		})
 	}
 
 	// Cannot make use of r.FilePaths's capacity since this line resets it
-	r.FilePaths = append([]string{absolutePath}, r.FilePaths...)
+	r.FilePaths = append([]string{pathFromLabRoot}, r.FilePaths...)
 }

@@ -1,8 +1,4 @@
-import {
-  GetSubDirAndFiles,
-  CreateNewFileAtRoot,
-  CreateFile,
-} from '$/filetree/FileTreeExplorer';
+import { GetSubDirAndFiles, CreateFile } from '$/filetree/FileTreeExplorer';
 import { filetree } from '$/models';
 import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
 import { nextTick, ref } from 'vue';
@@ -64,7 +60,7 @@ export function useSidePanel() {
     try {
       const file = await CreateFile(NEW_FILE_NAME);
       // removing .json from the file name
-      file.name = file.name.slice(0, file.name.indexOf('.'))
+      file.name = file.name.slice(0, file.name.indexOf('.'));
       files.value.push(file);
       files.value.sort(sortNodes);
     } catch (error) {
