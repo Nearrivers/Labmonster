@@ -22,15 +22,15 @@ func initRecentlyOpened(t testing.TB, max int) (*RecentlyOpened, string) {
 	}
 
 	return NewRecentlyOpened(&config.AppConfig{
-			ConfigFile: config.ConfigFile{
-				LabPath: dir,
-			},
-		}, max), dir
+		ConfigFile: config.ConfigFile{
+			LabPath: dir,
+		},
+	}, max), dir
 }
 
 func assertRecentSaved(t testing.TB, tempDirPath string) {
 	t.Helper()
-	
+
 	_, err := os.Stat(filepath.Join(tempDirPath, ".labmonster", recentlyOpenedFilename))
 	if err != nil {
 		t.Fatalf("couldn't find recently opended file: %v", err)
@@ -66,22 +66,23 @@ func assertContentMatchWithSaved(t testing.TB, tempDirPath string, r *RecentlyOp
 
 func TestSaveRecent(t *testing.T) {
 	r, dir := initRecentlyOpened(t, 10)
+	defer os.RemoveAll(dir)
 
-	tests := []struct{
-		name string
+	tests := []struct {
+		name        string
 		filesToSave []string
 	}{
 		{
-			name: "Save one recent file",
-			filesToSave:	[]string{"testRecent.json"},
+			name:        "Save one recent file",
+			filesToSave: []string{"testRecent.json"},
 		},
 		{
-			name: "Save multiple files and one not at lab root",
-			filesToSave:	[]string{"testRecent.json", "/Foo/testRecentFoo.json"},
+			name:        "Save multiple files and one not at lab root",
+			filesToSave: []string{"testRecent.json", "/Foo/testRecentFoo.json"},
 		},
 		{
-			name: "Save multiple non json files",
-			filesToSave:	[]string{"/Bar/Foo/Fizz/testRecentDeep.json", "pasUnJSON.png", "/Bar/text.txt"},
+			name:        "Save multiple non json files",
+			filesToSave: []string{"/Bar/Foo/Fizz/testRecentDeep.json", "pasUnJSON.png", "/Bar/text.txt"},
 		},
 	}
 
@@ -102,6 +103,7 @@ func TestSaveRecent(t *testing.T) {
 func TestAddRecent(t *testing.T) {
 	t.Run("add recent file", func(t *testing.T) {
 		r, dir := initRecentlyOpened(t, 1)
+		defer os.RemoveAll(dir)
 		file := "testAddRecent.json"
 		p := filepath.Join(dir, file)
 
@@ -113,6 +115,7 @@ func TestAddRecent(t *testing.T) {
 
 	t.Run("add the same file twice in a row", func(t *testing.T) {
 		r, dir := initRecentlyOpened(t, 2)
+		defer os.RemoveAll(dir)
 		file := "testAddRecentTwice.json"
 		p := filepath.Join(dir, file)
 
@@ -130,6 +133,7 @@ func TestAddRecent(t *testing.T) {
 
 	t.Run("add more recent files than expected", func(t *testing.T) {
 		r, dir := initRecentlyOpened(t, 2)
+		defer os.RemoveAll(dir)
 		f1 := "testAddRecentTwice.json"
 		f2 := "testAddTooMuch2.json"
 		f3 := "testAddTooMuch3.json"
@@ -137,7 +141,7 @@ func TestAddRecent(t *testing.T) {
 		p2 := filepath.Join(dir, f2)
 		p3 := filepath.Join(dir, f3)
 
-		want := []string {p3, p2}
+		want := []string{p3, p2}
 
 		r.AddRecentFile(p1)
 		r.AddRecentFile(p2)

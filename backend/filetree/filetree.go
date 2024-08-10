@@ -52,7 +52,7 @@ func (ft *FileTree) GetDirectories() []string {
 	return ft.Directories
 }
 
-func (ft *FileTree) GetRecentlyOpenedFiles() []string {
+func (ft *FileTree) GetRecentlyOpenedFiles() ([]string, error) {
 	return ft.RecentFiles.GetRecentlyOpenedFiles()
 }
 
