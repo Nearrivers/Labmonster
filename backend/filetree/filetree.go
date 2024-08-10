@@ -23,6 +23,7 @@ var (
 	ErrFileAreDifferent   = errors.New("the 2 files are different")
 	ErrEqualOldAndNewPath = errors.New("the old and paths must be different")
 	ErrGetSubDirAndFile   = errors.New("can't build file tree")
+	ErrNothingRead        = errors.New("nothing was read when trying to copy")
 )
 
 type FileTree struct {
@@ -33,7 +34,7 @@ type FileTree struct {
 
 func NewFileTree(cfg *config.AppConfig) *FileTree {
 	ft := &FileTree{
-		Cfg: cfg,
+		Cfg:         cfg,
 		RecentFiles: *recentfiles.NewRecentlyOpened(cfg, maxRecentlyOpenedFiles),
 	}
 
@@ -88,7 +89,7 @@ func (ft *FileTree) GetLabDirs() error {
 		}
 
 		n := strings.TrimPrefix(path, ft.GetLabPath())
-		ft.Directories = append(ft.Directories, strings.ReplaceAll(n[1:], string(filepath.Separator), "/"))
+		ft.Directories = append(ft.Directories, filepath.ToSlash(n))
 		return nil
 	})
 
@@ -231,7 +232,7 @@ func (ft *FileTree) MoveFileToExistingDir(oldPath, newPath string) (string, erro
 		return moveFile(op, np)
 	}
 
-	fileName := oldPath[strings.LastIndex(oldPath, "/")+1:]
+	fileName := filepath.Base(oldPath)
 	if oldPath == newPath+"/"+fileName {
 		return "", ErrEqualOldAndNewPath
 	}
@@ -249,11 +250,11 @@ func (ft *FileTree) MoveFileToExistingDir(oldPath, newPath string) (string, erro
 // to add a number at the end to avoid duplicates
 func (ft *FileTree) DuplicateFile(pathToFileFromLabRoot, extension string) (newFileName string, error error) {
 	labPath := ft.GetLabPath()
-	path := filepath.Join(labPath, pathToFileFromLabRoot+extension)
+	path := filepath.Join(labPath, pathToFileFromLabRoot)
 
 	f, err := os.Open(path)
 	if err != nil {
-		return "", fmt.Errorf("can't open file: %v", err)
+		return "", err
 	}
 
 	f2, name, err := createNonDuplicateFile(path)
@@ -264,9 +265,13 @@ func (ft *FileTree) DuplicateFile(pathToFileFromLabRoot, extension string) (newF
 	defer f.Close()
 	defer f2.Close()
 
-	_, err = io.Copy(f, f2)
+	n, err := io.Copy(f2, f)
 	if err != nil {
 		return "", err
+	}
+
+	if n == 0 {
+		return "", ErrNothingRead
 	}
 
 	return name, nil
@@ -321,8 +326,9 @@ func moveFile(oldPath, newPath string) (string, error) {
 // It will continue to increment the appended number as long as the function finds a file with the same name. After succeeding in creating the file,
 // it will return an os.File pointer to it that the caller will have to close, the actual name of the file to avoid f.Stat() boilerplate and an error
 func createNonDuplicateFile(absPath string) (*os.File, string, error) {
-	p := absPath[:strings.LastIndex(absPath, string(filepath.Separator))+1]
-	newFileName := absPath[strings.LastIndex(absPath, string(filepath.Separator))+1 : strings.LastIndex(absPath, ".")]
+	p := filepath.Dir(absPath)
+	b := filepath.Base(absPath)
+	newFileName := b[:strings.LastIndex(b, ".")]
 	ext := filepath.Ext(absPath)
 
 	for i := 1; ; i++ {

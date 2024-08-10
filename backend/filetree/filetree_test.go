@@ -304,7 +304,7 @@ func assertSameFiles(t testing.TB, ft *FileTree, file1, file2 string) {
 
 	if err := fileContentCompare(ft.GetLabPath(), file1, file2); err != nil {
 		if err == ErrFileAreDifferent {
-			t.Fatalf("the two files are different: %v", err)
+			t.Fatalf("the two files %s and %s are different", file1, file2)
 		}
 
 		t.Errorf("an error occured before comparing the two files: %v", err)
@@ -325,13 +325,13 @@ func TestDuplicateFile(t *testing.T) {
 		}
 		defer ft.DeleteFile(duplicatedFile)
 
-		assertSameFiles(t, ft, fileName+".json", duplicatedFile)
+		assertSameFiles(t, ft, fileName, duplicatedFile)
 	})
 
 	t.Run("Running multiple file duplications in a row", func(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
-		fileName := "multiple duplication test"
+		fileName := "multiple duplication test.json"
 		createFileBeforeTest(t, ft, fileName)
 		defer ft.DeleteFile(fileName)
 
@@ -347,8 +347,8 @@ func TestDuplicateFile(t *testing.T) {
 		}
 		defer ft.DeleteFile(duplicatedFile2)
 
-		assertSameFiles(t, ft, fileName+".json", duplicatedFile1)
-		assertSameFiles(t, ft, fileName+".json", duplicatedFile2)
+		assertSameFiles(t, ft, fileName, duplicatedFile1)
+		assertSameFiles(t, ft, fileName, duplicatedFile2)
 	})
 
 	t.Run("Trying to duplicate a file that doesn't exists", func(t *testing.T) {
@@ -396,7 +396,7 @@ func assertError(t testing.TB, got, want error) {
 func TestMoveFile(t *testing.T) {
 	t.Run("move a file from lab root to another directory", func(t *testing.T) {
 		subDir1 := "testDir1"
-		subFile1 := "testFile1"
+		subFile1 := "testFile1.json"
 		dir, ft := createTempDir(t, "testMoveFromRoot", subFile1)
 		defer os.RemoveAll(dir)
 		createDirHelper(t, dir, subDir1)
@@ -404,16 +404,15 @@ func TestMoveFile(t *testing.T) {
 		subDir2 := "testSubDir"
 		createDirHelper(t, filepath.Join(dir, subDir1), subDir2)
 
-		fileName := subFile1 + ".json"
-		f, err := ft.MoveFileToExistingDir(fileName, "testDir1/testSubDir")
+		f, err := ft.MoveFileToExistingDir(subFile1, "testDir1/testSubDir")
 		if err != nil {
 			t.Fatalf("got error %v, but did not want one", err)
 		}
 
-		if fileName != f {
-			t.Fatalf("wrong file name returned, got %s, want %s", fileName, f)
+		if subFile1 != f {
+			t.Fatalf("wrong file name returned, got %s, want %s", subFile1, f)
 		}
-		assertFileExistence(t, dir, subDir1, subDir2, fileName)
+		assertFileExistence(t, dir, subDir1, subDir2, subFile1)
 	})
 
 	t.Run("move a file from a directory to the lab root", func(t *testing.T) {
@@ -502,44 +501,44 @@ func TestMoveFile(t *testing.T) {
 
 func getNewTestGraph() graph.Graph {
 	return graph.Graph{
-			Nodes: []graph.GraphNode{
-				{
-					Id:          "1",
-					Initialized: false,
-					Position: graph.GraphNodePosition{
-						X: 25,
-						Y: 90,
-					},
-					NodeType: "custom",
+		Nodes: []graph.GraphNode{
+			{
+				Id:          "1",
+				Initialized: false,
+				Position: graph.GraphNodePosition{
+					X: 25,
+					Y: 90,
 				},
-				{
-					Id:          "2",
-					Initialized: false,
-					Position: graph.GraphNodePosition{
-						X: 125,
-						Y: 290,
-					},
-					NodeType: "custom",
+				NodeType: "custom",
+			},
+			{
+				Id:          "2",
+				Initialized: false,
+				Position: graph.GraphNodePosition{
+					X: 125,
+					Y: 290,
+				},
+				NodeType: "custom",
+			},
+		},
+		Edges: []graph.GraphEdge{
+			{
+				Id:    "1->2",
+				Label: "test",
+				MarkerEnd: graph.EdgeMarker{
+					Color:    "#52525",
+					Height:   10,
+					Width:    10,
+					EdgeType: "arrowClosed",
 				},
 			},
-			Edges: []graph.GraphEdge{
-				{
-					Id:    "1->2",
-					Label: "test",
-					MarkerEnd: graph.EdgeMarker{
-						Color:    "#52525",
-						Height:   10,
-						Width:    10,
-						EdgeType: "arrowClosed",
-					},
-				},
-			},
-			Viewport: graph.GraphViewport{
-				Zoom: 1,
-				X:    0,
-				Y:    0,
-			},
-		}
+		},
+		Viewport: graph.GraphViewport{
+			Zoom: 1,
+			X:    0,
+			Y:    0,
+		},
+	}
 }
 
 func TestSaveFile(t *testing.T) {
