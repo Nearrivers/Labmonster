@@ -1,36 +1,20 @@
-import { ref, computed, watch, Ref, onMounted } from "vue";
-import Fuse from 'fuse.js'
-import { GetDirectories, MoveFileToExistingDir } from "$/filetree/FileTreeExplorer";
-import { useShowErrorToast } from "./useShowErrorToast";
+import { ref, onMounted } from "vue";
+import { GetDirectories, MoveFileToExistingDir } from "$/filetree/FileTree";
+import { useShowErrorToast } from "../useShowErrorToast";
 
-export function useMoveFile(selectedNode: HTMLLIElement | null, activeDir: Ref<number>) {
+export function useMoveFile(selectedNode: HTMLLIElement | null) {
   const { showToast } = useShowErrorToast()
   const directories = ref<string[]>([]);
-  let fuse: Fuse<string>;
-  const path = ref('');
-
-  const fuzzyFoundDirs = computed(() =>
-    path.value ? fuse.search(path.value).map((f) => f.item) : directories.value,
-  );
-
-  watch(
-    () => fuzzyFoundDirs.value.length,
-    () => {
-      activeDir.value = 0;
-    },
-  );
 
   onMounted(async () => {
     try {
       directories.value = await GetDirectories();
-      fuse = new Fuse(directories.value, { threshold: 0.35 });
     } catch (error) {
       showToast(error);
     }
   });
 
-  function moveDOMNode(oldPath: string) {
-    const newPath = fuzzyFoundDirs.value[activeDir.value];
+  function moveDOMNode(newPath: string, oldPath: string) {
     const nodeFolder = document.querySelector(`[data-path="${newPath}"] ul`);
 
     if (nodeFolder && selectedNode) {
@@ -76,7 +60,7 @@ export function useMoveFile(selectedNode: HTMLLIElement | null, activeDir: Ref<n
     return 0
   }
 
-  async function onSelect(hideModalCb: () => void) {
+  async function onSelect(newPath: string, hideModalCb: () => void) {
     if (selectedNode) {
       const oldPath = selectedNode.dataset.path!;
       const extension = selectedNode.dataset.extension;
@@ -84,9 +68,9 @@ export function useMoveFile(selectedNode: HTMLLIElement | null, activeDir: Ref<n
       try {
         await MoveFileToExistingDir(
           `${oldPath}${extension}`,
-          fuzzyFoundDirs.value[activeDir.value],
+          newPath,
         );
-        moveDOMNode(oldPath);
+        moveDOMNode(newPath, oldPath);
         hideModalCb();
       } catch (error) {
         showToast(error);
@@ -95,8 +79,7 @@ export function useMoveFile(selectedNode: HTMLLIElement | null, activeDir: Ref<n
   }
 
   return {
-    path,
-    fuzzyFoundDirs,
+    directories,
     onSelect
   }
 }

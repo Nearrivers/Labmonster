@@ -52,7 +52,7 @@ import { filetree } from '$/models';
 import { computed, ref } from 'vue';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import { RenameFile } from '$/filetree/FileTreeExplorer';
+import { RenameFile } from '$/filetree/FileTree';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 
 const props = defineProps<{

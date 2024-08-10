@@ -60,7 +60,7 @@ import FlowchartButtons from './flowchart/FlowchartControls.vue';
 import CustomNode from './flowchart/CustomNode.vue';
 import CustomEdge from './flowchart/CustomEdge.vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
-import { OpenFile } from '$/filetree/FileTreeExplorer';
+import { OpenFile } from '$/filetree/FileTree';
 import { useRoute } from 'vue-router';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import FilePanel from './flowchart/FilePanel.vue';
@@ -71,7 +71,7 @@ const route = useRoute();
 const nodes = ref<Node<CustomNodeData>[]>([]);
 const edges = ref<Edge[]>([]);
 const { addNodes, fromObject } = useVueFlow();
-const { createNewNode, zoomIn, zoomOut } = useTopMenuActions(nodes);
+const { createNewNode, zoomIn, zoomOut } = useTopMenuActions();
 useHandleFlowchartChanges(route.params.path as string);
 
 watch(() => route.params.path, loadGraph, { immediate: true });

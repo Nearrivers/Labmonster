@@ -1,4 +1,4 @@
-import { GetSubDirAndFiles, CreateFile } from '$/filetree/FileTreeExplorer';
+import { GetSubDirAndFiles, CreateFile } from '$/filetree/FileTree';
 import { filetree } from '$/models';
 import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
 import { nextTick, ref } from 'vue';

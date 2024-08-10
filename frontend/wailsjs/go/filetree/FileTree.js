@@ -6,10 +6,6 @@ export function CreateFile(arg1) {
   return window['go']['filetree']['FileTree']['CreateFile'](arg1);
 }
 
-export function CreateNewFileAtRoot(arg1) {
-  return window['go']['filetree']['FileTree']['CreateNewFileAtRoot'](arg1);
-}
-
 export function DeleteFile(arg1) {
   return window['go']['filetree']['FileTree']['DeleteFile'](arg1);
 }
@@ -28,6 +24,10 @@ export function GetLabDirs() {
 
 export function GetLabPath() {
   return window['go']['filetree']['FileTree']['GetLabPath']();
+}
+
+export function GetRecentlyOpenedFiles() {
+  return window['go']['filetree']['FileTree']['GetRecentlyOpenedFiles']();
 }
 
 export function GetSubDirAndFiles(arg1) {

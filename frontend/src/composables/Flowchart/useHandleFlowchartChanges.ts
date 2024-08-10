@@ -1,4 +1,4 @@
-import { SaveFile } from "$/filetree/FileTreeExplorer";
+import { SaveFile } from "$/filetree/FileTree";
 import { graph } from "$/models";
 import { EdgeChange, NodeChange, useVueFlow, ViewportTransform } from "@vue-flow/core";
 import { useShowErrorToast } from "../useShowErrorToast";
@@ -11,10 +11,6 @@ export function useHandleFlowchartChanges(pathFromLabRoot: string) {
     if (param.length === 1) {
       const change = param[0]
 
-      if (change.type === 'select') {
-        return
-      }
-
       try {
         await SaveFile(pathFromLabRoot, toObject() as unknown as graph.Graph)
       } catch (error) {
@@ -23,7 +19,6 @@ export function useHandleFlowchartChanges(pathFromLabRoot: string) {
       return
     }
 
-    console.log('multiple changes', param)
   })
 
   onEdgesChange((param: EdgeChange[]) => {})

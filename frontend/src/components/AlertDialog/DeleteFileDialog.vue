@@ -31,7 +31,7 @@
 </template>
 
 <script lang="ts" setup>
-import { DeleteFile } from '$/filetree/FileTreeExplorer';
+import { DeleteFile } from '$/filetree/FileTree';
 import {
   AlertDialog,
   AlertDialogAction,

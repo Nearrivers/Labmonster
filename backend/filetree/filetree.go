@@ -52,6 +52,10 @@ func (ft *FileTree) GetDirectories() []string {
 	return ft.Directories
 }
 
+func (ft *FileTree) GetRecentlyOpenedFiles() []string {
+	return ft.RecentFiles.GetRecentlyOpenedFiles()
+}
+
 // Given a path to a directory starting from the lab root, this function will read
 // its content using the os.ReadDir method, transforms those entries into Nodes
 // and return them
@@ -158,6 +162,8 @@ func (ft *FileTree) OpenFile(pathFromLabRoot string) (graph.Graph, error) {
 	if err != nil {
 		return graph.Graph{}, err
 	}
+
+	ft.RecentFiles.AddRecentFile(pathFromLabRoot)
 
 	return g, nil
 }

@@ -49,7 +49,7 @@ import { computed, ref } from 'vue';
 import { ChevronRight } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import { GetSubDirAndFiles } from '$/filetree/FileTreeExplorer';
+import { GetSubDirAndFiles } from '$/filetree/FileTree';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';

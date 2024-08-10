@@ -1,7 +1,7 @@
 import { Node, useVueFlow } from '@vue-flow/core';
 import { Ref } from 'vue';
 
-export function useTopMenuActions(nodes: Ref<Node[]>) {
+export function useTopMenuActions() {
   const { zoomIn, zoomOut } = useVueFlow();
 
   function createNewNode() {
