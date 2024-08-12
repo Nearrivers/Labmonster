@@ -49,3 +49,7 @@ export function RenameFile(arg1, arg2, arg3) {
 export function SaveFile(arg1, arg2) {
   return window['go']['filetree']['FileTree']['SaveFile'](arg1, arg2);
 }
+
+export function SaveMedia(arg1, arg2, arg3) {
+  return window['go']['filetree']['FileTree']['SaveMedia'](arg1, arg2, arg3);
+}

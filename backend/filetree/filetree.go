@@ -160,7 +160,7 @@ func (ft *FileTree) OpenFile(pathFromLabRoot string) (graph.Graph, error) {
 	var g graph.Graph
 	err = json.Unmarshal(f, &g)
 	if err != nil {
-		return graph.Graph{}, err
+		return graph.Graph{}, &OpenFileError{err}
 	}
 
 	ft.RecentFiles.AddRecentFile(pathFromLabRoot)
@@ -186,7 +186,7 @@ func (ft *FileTree) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) er
 	return nil
 }
 
-// Rename a file on the user's machine and inside the in-memory tree
+// Rename a file on the user's machine
 func (ft *FileTree) RenameFile(pathFromRootOfTheLab, oldName, newName string) error {
 	labPath := ft.GetLabPath()
 	oldPath := filepath.Join(labPath, pathFromRootOfTheLab, oldName)
@@ -202,13 +202,13 @@ func (ft *FileTree) RenameFile(pathFromRootOfTheLab, oldName, newName string) er
 
 // Given the path to a file starting from the lab root,
 // deletes a file on the user's machine and from the in-memory tree
-// The function will add the ".json" file extension if it's missing
-// from the path
 func (ft *FileTree) DeleteFile(pathFromRootOfTheLab string) error {
 	err := os.Remove(filepath.Join(ft.GetLabPath(), pathFromRootOfTheLab))
 	if err != nil {
 		return err
 	}
+
+	ft.RecentFiles.RemoveRecent(pathFromRootOfTheLab)
 
 	return nil
 }
@@ -284,7 +284,7 @@ func (ft *FileTree) DuplicateFile(pathToFileFromLabRoot, extension string) (newF
 }
 
 func writeFile(g graph.Graph, f *os.File) error {
-	b, err := json.Marshal(g)
+	b, err := json.MarshalIndent(g, "", "\t")
 	if err != nil {
 		return &WriteFileError{f.Name(), err}
 	}
@@ -340,7 +340,6 @@ func createNonDuplicateFile(absPath string) (*os.File, string, error) {
 	for i := 1; ; i++ {
 		name := fmt.Sprintf("%s %d%s", newFileName, i, ext)
 		if doesFileExist(filepath.Join(p, name)) {
-			i++
 			continue
 		}
 

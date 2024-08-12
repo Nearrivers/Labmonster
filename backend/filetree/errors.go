@@ -28,7 +28,7 @@ func (g *GetLabDirsError) Unwrap() error {
 
 type SaveFileError struct {
 	path string
-	err error
+	err  error
 }
 
 func (s *SaveFileError) Error() string {
@@ -41,7 +41,7 @@ func (s *SaveFileError) Unwrap() error {
 
 type WriteFileError struct {
 	fileName string
-	err error
+	err      error
 }
 
 func (w *WriteFileError) Error() string {
@@ -50,4 +50,12 @@ func (w *WriteFileError) Error() string {
 
 func (w *WriteFileError) Unwrap() error {
 	return w.err
+}
+
+type OpenFileError struct {
+	err error
+}
+
+func (o *OpenFileError) Error() string {
+	return fmt.Sprintf("couldn't open graph correctly: %v", o.err)
 }

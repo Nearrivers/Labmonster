@@ -23,7 +23,6 @@
 import {
   BezierEdge,
   EdgeLabelRenderer,
-  EdgeMouseEvent,
   EdgeProps,
   getBezierPath,
   useVueFlow,

@@ -1,12 +1,11 @@
 import { Node, useVueFlow } from '@vue-flow/core';
-import { Ref } from 'vue';
 
 export function useTopMenuActions() {
   const { zoomIn, zoomOut } = useVueFlow();
 
-  function createNewNode() {
+  function createNewNode(): Node {
     const id = Date.now().toString();
-    const newNode = {
+    const newNode: Node = {
       id,
       position: { x: 150, y: 50 },
       data: { hello: `Node ${id}` },

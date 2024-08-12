@@ -1,21 +1,20 @@
 <template>
   <Panel :position="'bottom-right'" class="flex">
     <div
-      class="select-none rounded-md border border-border bg-background p-1 text-sm"
+      class="flex select-none items-center gap-2 rounded-md border border-border bg-background p-1 text-sm"
     >
-      {{ fileName }}
+      <slot></slot>
+      <RefreshCw class="h-4 w-4 animate-spin" v-if="isSaving" />
+      <CircleCheck class="h-4 w-4" v-else />
     </div>
   </Panel>
 </template>
 
 <script setup lang="ts">
 import { Panel } from '@vue-flow/core';
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { CircleCheck, RefreshCw } from 'lucide-vue-next';
 
-const route = useRoute();
-
-const fileName = computed(() =>
-  route.params.path.slice(0, route.params.path.indexOf('.')),
-);
+defineProps<{
+  isSaving: boolean;
+}>();
 </script>

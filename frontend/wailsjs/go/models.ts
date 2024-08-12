@@ -146,6 +146,7 @@ export namespace graph {
 	}
 	export class GraphNodeData {
 	    text: string;
+	    image?: string;
 	    hasFrameDataSection: boolean;
 	
 	    static createFrom(source: any = {}) {
@@ -155,6 +156,7 @@ export namespace graph {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.text = source["text"];
+	        this.image = source["image"];
 	        this.hasFrameDataSection = source["hasFrameDataSection"];
 	    }
 	}

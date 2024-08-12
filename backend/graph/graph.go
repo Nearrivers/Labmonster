@@ -1,18 +1,19 @@
 package graph
 
 type GraphNodePosition struct {
-	X int `json:"x"`
-	Y int `json:"y"`
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
 }
 
 type GraphViewport struct {
-	X    int     `json:"x"`
-	Y    int     `json:"y"`
+	X    float64 `json:"x"`
+	Y    float64 `json:"y"`
 	Zoom float32 `json:"zoom"`
 }
 
 type GraphNodeData struct {
 	Text                string `json:"text"`
+	Image               string `json:"image,omitempty"`
 	HasFrameDataSection bool   `json:"hasFrameDataSection"`
 }
 
@@ -37,11 +38,11 @@ type GraphEdge struct {
 	Label            string      `json:"label"`
 	MarkerEnd        EdgeMarker  `json:"markerEnd"`
 	Source           string      `json:"source"`
-	SourceX          int         `json:"sourceX"`
-	SourceY          int         `json:"sourceY"`
+	SourceX          float64     `json:"sourceX"`
+	SourceY          float64     `json:"sourceY"`
 	Target           string      `json:"target"`
-	TargetX          int         `json:"targetX"`
-	TargetY          int         `json:"targetY"`
+	TargetX          float64     `json:"targetX"`
+	TargetY          float64     `json:"targetY"`
 	SourceHandle     string      `json:"sourceHandle"`
 	TargetHandle     string      `json:"targetHandle"`
 	InteractionWidth int         `json:"interactionWidth"`

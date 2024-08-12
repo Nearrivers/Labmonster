@@ -37,15 +37,24 @@
       />
     </template>
 
+    <template #node-image="props">
+      <ImageNode
+        :id="props.id"
+        :data="props.data"
+        :width="props.dimensions.width"
+        :height="props.dimensions.height"
+      />
+    </template>
+
     <template #edge-custom="props">
       <CustomEdge v-bind="props" />
     </template>
-    <FilePanel />
+    <FilePanel :isSaving="isSaving"> {{ fileName }} </FilePanel>
   </VueFlow>
 </template>
 
 <script setup lang="ts">
-import { onActivated, ref, watch } from 'vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import {
   Edge,
   FlowExportObject,
@@ -60,21 +69,76 @@ import FlowchartButtons from './flowchart/FlowchartControls.vue';
 import CustomNode from './flowchart/CustomNode.vue';
 import CustomEdge from './flowchart/CustomEdge.vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
-import { OpenFile } from '$/filetree/FileTree';
+import { OpenFile, SaveMedia } from '$/filetree/FileTree';
 import { useRoute } from 'vue-router';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import FilePanel from './flowchart/FilePanel.vue';
 import { useHandleFlowchartChanges } from '@/composables/Flowchart/useHandleFlowchartChanges';
+import { useEventListener } from '@/composables/useEventListener';
+import ImageNode from './flowchart/ImageNode.vue';
 
-const { showToast } = useShowErrorToast();
+const path = ref('');
 const route = useRoute();
-const nodes = ref<Node<CustomNodeData>[]>([]);
 const edges = ref<Edge[]>([]);
-const { addNodes, fromObject } = useVueFlow();
+useEventListener(window, 'paste', foo);
+const { showToast } = useShowErrorToast();
+const nodes = ref<Node<CustomNodeData>[]>([]);
+const { isSaving } = useHandleFlowchartChanges(path);
+const { addNodes, updateNode, fromObject } = useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions();
-useHandleFlowchartChanges(route.params.path as string);
 
-watch(() => route.params.path, loadGraph, { immediate: true });
+async function foo(e: ClipboardEvent) {
+  console.log();
+  const id = (e.target as HTMLInputElement).id;
+
+  if (!e.clipboardData) {
+    return;
+  }
+
+  if (
+    e.clipboardData.files &&
+    e.clipboardData.files.length > 0 &&
+    e.clipboardData.files[0].type.startsWith('image/')
+  ) {
+    const file = e.clipboardData.files[0];
+    const mimeType = e.clipboardData.files[0].type;
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+      console.log(e.target?.result);
+      try {
+        await SaveMedia(path.value, mimeType, e.target?.result as string);
+      } catch (error) {
+        showToast(error);
+      }
+    };
+    reader.onerror = function (e) {
+      showToast(e.target?.error);
+    };
+    reader.readAsDataURL(file);
+
+    updateNode<CustomNodeData>(id, {
+      type: 'image',
+      data: {
+        hasFrameDataSection: false,
+        image: e.clipboardData?.files[0],
+        text: '',
+      },
+    });
+  }
+}
+
+const fileName = computed(() =>
+  route.params.path.slice(0, route.params.path.indexOf('.')),
+);
+
+watch(
+  () => route.params.path,
+  async () => {
+    path.value = route.params.path as string;
+    await loadGraph();
+  },
+  { immediate: true },
+);
 
 function onAddNode() {
   addNodes(createNewNode());
@@ -89,4 +153,6 @@ async function loadGraph() {
     showToast(error);
   }
 }
+
+onUnmounted(() => console.log('b'));
 </script>

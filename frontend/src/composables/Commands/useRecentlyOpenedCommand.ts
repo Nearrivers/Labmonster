@@ -1,4 +1,4 @@
-import { onMounted, Ref, ref, watch } from "vue";
+import { Ref, ref, watch } from "vue";
 import { useShowErrorToast } from "../useShowErrorToast";
 import { useRouter } from "vue-router";
 import { GetRecentlyOpenedFiles } from "$/filetree/FileTree";

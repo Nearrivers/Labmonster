@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue';
+import { nextTick, onMounted, ref, watch } from 'vue';
 import EdgeToolbar from './EdgeToolbar.vue';
 import { EdgeMouseEvent, useEdge, useVueFlow } from '@vue-flow/core';
 
@@ -42,6 +42,10 @@ const label = defineModel<string>('label');
 const input = ref<HTMLInputElement | null>(null);
 const isEditing = ref(false);
 const { onEdgeDoubleClick, addSelectedEdges } = useVueFlow();
+
+onMounted(() => {
+  label.value = edge.data.label;
+});
 
 watch(label, () => {
   if (!input.value) {

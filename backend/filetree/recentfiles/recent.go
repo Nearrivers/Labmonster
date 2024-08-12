@@ -70,15 +70,32 @@ func (r *RecentlyOpened) AddRecentFile(pathFromLabRoot string) {
 	}
 
 	if slices.Contains(r.FilePaths, pathFromLabRoot) {
-		r.FilePaths = slices.DeleteFunc(r.FilePaths, func(p string) bool {
-			return p == pathFromLabRoot
-		})
+		r.RemoveRecent(pathFromLabRoot)
 	}
 
 	// Cannot make use of r.FilePaths's capacity since this line resets it
 	r.FilePaths = append([]string{pathFromLabRoot}, r.FilePaths...)
 }
 
+// Replace a recent file with a new one. This method is used when renaming a file to make sure
+// the file can still be opened via the recent file command
+func (r *RecentlyOpened) ReplaceRecent(oldPath, newPath string) {
+	i := slices.Index(r.FilePaths, oldPath)
+	if i == -1 {
+		return
+	}
+
+	r.FilePaths = slices.Replace(r.FilePaths, i, i, newPath)
+}
+
+// Remove a recent file. Used when deleting a file
+func (r *RecentlyOpened) RemoveRecent(pathFromLabRoot string) {
+	r.FilePaths = slices.DeleteFunc(r.FilePaths, func(p string) bool {
+		return p == pathFromLabRoot
+	})
+}
+
+// Read the recentFile.txt and load each line inside the RecentlyOpened.FilePaths array
 func (r *RecentlyOpened) LoadRecentlyOpended() error {
 	p := r.getLabmonsterDirPath()
 	fmt.Println(p)

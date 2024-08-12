@@ -1,27 +1,32 @@
 import { SaveFile } from "$/filetree/FileTree";
 import { graph } from "$/models";
-import { EdgeChange, NodeChange, useVueFlow, ViewportTransform } from "@vue-flow/core";
+import { NodeChange, useVueFlow } from "@vue-flow/core";
 import { useShowErrorToast } from "../useShowErrorToast";
+import { Ref, ref } from "vue";
 
-export function useHandleFlowchartChanges(pathFromLabRoot: string) {
+export function useHandleFlowchartChanges(pathFromLabRoot: Ref<string>) {
+  const isSaving = ref(false)
   const { showToast } = useShowErrorToast()
-  const { onNodesChange, onEdgesChange, onViewportChange, toObject } = useVueFlow()
+  const { onNodesChange, onEdgesChange, findNode, onViewportChangeEnd, toObject } = useVueFlow()
+
+  async function Save() {
+    try {
+      isSaving.value = true
+      await SaveFile(pathFromLabRoot.value, toObject() as unknown as graph.Graph)
+    } catch (error) {
+      showToast(error)
+    } finally {
+      isSaving.value = false
+    }
+  }
 
   onNodesChange(async (param: NodeChange[]) => {
-    if (param.length === 1) {
-      const change = param[0]
-
-      try {
-        await SaveFile(pathFromLabRoot, toObject() as unknown as graph.Graph)
-      } catch (error) {
-        showToast(error)
-      }
-      return
-    }
-
+    await Save()
   })
+  onEdgesChange(async (_) => { await Save() })
+  onViewportChangeEnd(async (_) => { await Save() })
 
-  onEdgesChange((param: EdgeChange[]) => {})
-
-  onViewportChange((param: ViewportTransform) => {})
+  return {
+    isSaving
+  }
 }
