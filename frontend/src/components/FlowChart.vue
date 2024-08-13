@@ -106,7 +106,19 @@ async function foo(e: ClipboardEvent) {
     reader.onload = async function (e) {
       console.log(e.target?.result);
       try {
-        await SaveMedia(path.value, mimeType, e.target?.result as string);
+        const imagePath = await SaveMedia(
+          path.value,
+          mimeType,
+          e.target?.result as string,
+        );
+        updateNode<CustomNodeData>(id, {
+          type: 'image',
+          data: {
+            hasFrameDataSection: false,
+            image: imagePath,
+            text: '',
+          },
+        });
       } catch (error) {
         showToast(error);
       }
@@ -115,15 +127,6 @@ async function foo(e: ClipboardEvent) {
       showToast(e.target?.error);
     };
     reader.readAsDataURL(file);
-
-    updateNode<CustomNodeData>(id, {
-      type: 'image',
-      data: {
-        hasFrameDataSection: false,
-        image: e.clipboardData?.files[0],
-        text: '',
-      },
-    });
   }
 }
 

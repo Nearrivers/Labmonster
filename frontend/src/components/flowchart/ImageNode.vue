@@ -47,16 +47,9 @@ onMounted(() => {
   }
 
   if (typeof props.data.image === 'string') {
-    console.log('test');
     imgSrc.value = props.data.image;
     return;
   }
-
-  const reader = new FileReader();
-  reader.onload = function (e) {
-    imgSrc.value = e.target?.result as string;
-  };
-  reader.readAsDataURL(props.data.image);
 });
 
 function handleUpdate() {

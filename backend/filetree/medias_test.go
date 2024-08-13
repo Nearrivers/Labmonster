@@ -1,7 +1,6 @@
 package filetree_test
 
 import (
-	"encoding/base64"
 	"flow-poc/backend/config"
 	"flow-poc/backend/filetree"
 	"os"
@@ -31,17 +30,7 @@ func openPngImageFile(t testing.TB) string {
 		t.Fatalf("couldn't find pngImage file: %v", err)
 	}
 
-	dest := make([]byte, len(b))
-	n, err := base64.StdEncoding.Decode(b, dest)
-	if err != nil {
-		t.Fatalf("couldn't decode file: %v", err)
-	}
-
-	if n == 0 {
-		t.Fatalf("didn't read anything")
-	}
-
-	return string(dest)
+	return string(b)
 }
 
 func TestSaveMedia(t *testing.T) {
