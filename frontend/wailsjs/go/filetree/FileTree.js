@@ -42,6 +42,14 @@ export function OpenFile(arg1) {
   return window['go']['filetree']['FileTree']['OpenFile'](arg1);
 }
 
+export function OpenMedia(arg1) {
+  return window['go']['filetree']['FileTree']['OpenMedia'](arg1);
+}
+
+export function OpenMediaConc(arg1) {
+  return window['go']['filetree']['FileTree']['OpenMediaConc'](arg1);
+}
+
 export function RenameFile(arg1, arg2, arg3) {
   return window['go']['filetree']['FileTree']['RenameFile'](arg1, arg2, arg3);
 }

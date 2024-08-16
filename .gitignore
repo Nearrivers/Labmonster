@@ -3,6 +3,3 @@ node_modules
 frontend/dist
 *.toml
 .labmonster
-*.png
-*.jpeg
-*.mp4

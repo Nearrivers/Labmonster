@@ -16,7 +16,6 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
@@ -31,8 +30,8 @@ func main() {
 		Height:           768,
 		AlwaysOnTop:      false,
 		WindowStartState: options.Maximised,
-		Frameless: true,
-		DisableResize: false,
+		Frameless:        true,
+		DisableResize:    false,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
@@ -51,6 +50,7 @@ func main() {
 			filetree.RecentFiles.SaveRecentlyOpended()
 		},
 	})
+
 	if err != nil {
 		println("Error:", err.Error())
 	}

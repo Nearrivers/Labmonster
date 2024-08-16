@@ -9,6 +9,8 @@ import { configFileLoaded } from '@/events/ReloadFileExplorer';
 import { useEventListener } from '@vueuse/core';
 import DirContextMenu from '../components/contextmenus/DirContextMenu.vue';
 import { useRouter } from 'vue-router';
+import { Routes } from '@/types/Routes';
+import { SupportedFiles } from '@/types/SupportedFiles';
 
 export function useSidePanel() {
   const files = ref<filetree.Node[]>([]);
@@ -85,17 +87,31 @@ export function useSidePanel() {
   function onLeftClick(event: MouseEvent) {
     const node = (event.target as HTMLElement).closest('li');
 
-    if (!node) {
+    if (!node || node.dataset.type === 'directory') {
       return;
     }
 
-    if (node.dataset.type === 'file') {
-      const { path, extension } = node.dataset;
-      router.push({
-        name: 'flowchart',
-        params: { path: path?.includes('.json') ? path! : path! + extension },
-      });
+    let name: Routes;
+    const { path, extension } = node.dataset;
+    switch (node.dataset.file) {
+      case SupportedFiles.GRAPH:
+        name = Routes.Flowchart;
+        break;
+      case SupportedFiles.IMAGE:
+        name = Routes.Image;
+        break;
+      case SupportedFiles.VIDEO:
+        name = Routes.Video;
+        break;
+      default:
+        name = Routes.Unsupported;
+        break;
     }
+
+    router.push({
+      name,
+      params: { path: path?.includes('.json') ? path! : path! + extension },
+    });
   }
 
   return {

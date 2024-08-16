@@ -4,6 +4,7 @@
     :data-path="nodePath"
     data-type="file"
     :data-extension="node.extension"
+    :data-file="node.fileType"
   >
     <TooltipProvider>
       <Tooltip>
@@ -15,12 +16,19 @@
             )
           "
         >
-          <div class="flex items-center gap-x-1 font-normal">
-            <p class="w-[14px]"></p>
+          <div class="flex items-center gap-x-1 pl-[14px] font-normal">
+            <Image
+              v-if="node.fileType === SupportedFiles.IMAGE"
+              class="h-[14px] w-[14px] transition-transform"
+            />
+            <Clapperboard
+              v-else-if="node.extension === '.mp4'"
+              class="w-[14px] transition-transform"
+            />
             <div
               role="textbox"
               ref="input"
-              class="cursor-pointer overflow-hidden whitespace-nowrap bg-transparent [&_br]:hidden"
+              class="w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap bg-transparent [&_br]:hidden"
               :id="nodePathWithoutSpaces"
               @key.enter="input?.blur()"
               @blur.stop="onBlur"
@@ -34,6 +42,7 @@
         <TooltipContent as-child :side="'right'" :side-offset="20">
           <div>
             <p class="text-xs">Dernière modification le: {{ updatedAt }}</p>
+            <p class="text-center text-xs">{{ ext }}</p>
           </div>
         </TooltipContent>
       </Tooltip>
@@ -49,52 +58,25 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { filetree } from '$/models';
-import { computed, ref } from 'vue';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import { RenameFile } from '$/filetree/FileTree';
-import { useShowErrorToast } from '@/composables/useShowErrorToast';
+import { Clapperboard, Image } from 'lucide-vue-next';
+import { useFileNode } from '@/composables/Nodes/useFileNode';
+import { toRef } from 'vue';
+import { SupportedFiles } from '@/types/SupportedFiles';
 
 const props = defineProps<{
   node: filetree.Node;
   path: string;
 }>();
 
-const { showToast } = useShowErrorToast();
-const fileName = ref(props.node.name);
-const input = ref<HTMLDivElement | null>(null);
-const nodePath = ref(
-  props.path ? props.path + '/' + props.node.name : props.node.name,
-);
-
-const nodePathWithoutSpaces = computed(() =>
-  nodePath.value.replaceAll(' ', '-'),
-);
-
-const updatedAt = computed(() => {
-  const date = new Date(props.node.updatedAt);
-  return `${date.toLocaleDateString()} à ${date.toLocaleTimeString()}`;
-});
-
-async function onBlur() {
-  if (!input.value) {
-    showToast('Input introuvable');
-    return;
-  }
-
-  input.value.toggleAttribute('contenteditable');
-  input.value.classList.add('cursor-pointer');
-  input.value.classList.remove('cursor-text');
-  fileName.value = input.value.innerText.trim();
-
-  try {
-    await RenameFile(
-      props.path,
-      props.node.name + props.node.extension,
-      fileName.value + props.node.extension,
-    );
-  } catch (error) {
-    showToast(error);
-  }
-}
+const {
+  nodePath,
+  ext,
+  fileName,
+  input,
+  nodePathWithoutSpaces,
+  onBlur,
+  updatedAt,
+} = useFileNode(toRef(props));
 </script>

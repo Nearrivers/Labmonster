@@ -17,7 +17,6 @@
               class="w-[14px] transition-transform"
               :class="{ 'rotate-90': isOpen }"
             />
-            <p v-else class="w-[14px]"></p>
             <p>
               {{ node.name }}
             </p>
@@ -45,38 +44,18 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { filetree } from '$/models';
-import { computed, ref } from 'vue';
+import { toRef } from 'vue';
 import { ChevronRight } from 'lucide-vue-next';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import { GetSubDirAndFiles } from '$/filetree/FileTree';
-import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';
+import { useDirNode } from '@/composables/Nodes/useDirNode';
 
 const props = defineProps<{
   node: filetree.Node;
   path: string;
 }>();
 
-const files = ref<filetree.Node[]>([]);
-const isOpen = ref(false);
-const isFolder = computed(() => props.node.type === 'DIR');
-const { showToast } = useShowErrorToast();
-
-const nodePath = computed(() =>
-  props.path ? props.path + '/' + props.node.name : props.node.name,
-);
-
-async function toggle() {
-  try {
-    files.value = props.path
-      ? await GetSubDirAndFiles(props.path + '/' + props.node.name)
-      : await GetSubDirAndFiles(props.node.name);
-  } catch (error) {
-    showToast(error);
-  } finally {
-    isOpen.value = !isOpen.value;
-  }
-}
+const { files, isOpen, isFolder, nodePath, toggle } = useDirNode(toRef(props));
 </script>

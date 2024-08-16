@@ -1,20 +1,3 @@
-export namespace config {
-	
-	export class ConfigFile {
-	
-	
-	    static createFrom(source: any = {}) {
-	        return new ConfigFile(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	
-	    }
-	}
-
-}
-
 export namespace filetree {
 	
 	export class Node {
@@ -23,6 +6,7 @@ export namespace filetree {
 	    // Go type: time
 	    updatedAt: any;
 	    extension: string;
+	    fileType: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Node(source);
@@ -34,6 +18,7 @@ export namespace filetree {
 	        this.type = source["type"];
 	        this.updatedAt = this.convertValues(source["updatedAt"], null);
 	        this.extension = source["extension"];
+	        this.fileType = source["fileType"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

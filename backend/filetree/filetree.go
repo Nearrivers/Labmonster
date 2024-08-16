@@ -355,7 +355,8 @@ func createNonDuplicateFile(absPath string) (*os.File, string, error) {
 func createNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
 	dirNames := make([]*Node, 0)
 	for _, entry := range entries {
-		if entry.Name() == filepath.Ext(entry.Name()) {
+		ext := filepath.Ext(entry.Name())
+		if entry.Name() == ext {
 			continue
 		}
 
@@ -373,10 +374,24 @@ func createNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
 		if entry.IsDir() {
 			newNode.Type = DIR
 		} else {
+			newNode.FileType = detectFileType(ext)
 			newNode.Type = FILE
 		}
 
 		dirNames = append(dirNames, &newNode)
 	}
 	return dirNames, nil
+}
+
+func detectFileType(extension string) FileType {
+	switch extension {
+	case ".png", ".jpeg", ".gif", ".webp":
+		return IMAGE
+	case ".json":
+		return GRAPH
+	case ".mp4", ".mpeg":
+		return VIDEO
+	default:
+		return GRAPH
+	}
 }
