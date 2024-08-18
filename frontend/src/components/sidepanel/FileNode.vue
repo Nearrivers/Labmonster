@@ -17,14 +17,7 @@
           "
         >
           <div class="flex items-center gap-x-1 pl-[14px] font-normal">
-            <Image
-              v-if="node.fileType === SupportedFiles.IMAGE"
-              class="h-[14px] w-[14px] transition-transform"
-            />
-            <Clapperboard
-              v-else-if="node.extension === '.mp4'"
-              class="w-[14px] transition-transform"
-            />
+            <NodeIcon :fileType="fType" />
             <div
               role="textbox"
               ref="input"
@@ -60,15 +53,21 @@ import {
 import { filetree } from '$/models';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
-import { Clapperboard, Image } from 'lucide-vue-next';
 import { useFileNode } from '@/composables/Nodes/useFileNode';
-import { toRef } from 'vue';
+import { computed, toRef } from 'vue';
 import { SupportedFiles } from '@/types/SupportedFiles';
+import NodeIcon from './NodeIcon.vue';
 
 const props = defineProps<{
   node: filetree.Node;
   path: string;
 }>();
+
+const emit = defineEmits<{
+  (e: 'nodeRenamed', newName: string): void;
+}>();
+
+const fType = computed(() => props.node.fileType as SupportedFiles);
 
 const {
   nodePath,

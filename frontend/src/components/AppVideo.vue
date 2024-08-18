@@ -6,8 +6,9 @@
     <div class="flex w-full justify-center px-2">
       <video
         controls
+        preload="auto"
         alt="Fichier vidéo"
-        class="max-w-full object-cover text-center"
+        class="block max-w-full"
         :src="src"
       ></video>
     </div>
@@ -31,7 +32,7 @@ const path = computed(() =>
 watchEffect(async () => {
   try {
     console.time('open media');
-    src.value = await OpenMediaConc(route.params.path as string);
+    src.value = await OpenMedia(route.params.path as string);
     console.timeEnd('open media');
   } catch (error) {
     showToast(error);

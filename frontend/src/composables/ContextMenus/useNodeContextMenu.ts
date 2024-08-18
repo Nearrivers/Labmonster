@@ -2,17 +2,18 @@ import { DuplicateFile } from '$/filetree/FileTree';
 import { AppDialog } from '@/types/AppDialog';
 import { nextTick, Ref, ref } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
+import AppCtxMenu from '@/components/contextmenus/AppCtxMenu.vue';
 
-export function useNodeContextMenu(deleteDialog: Ref<AppDialog | null>) {
-  const menu = ref<any | null>(null);
+export function useNodeContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>, deleteDialog: Ref<AppDialog | null>) {
   const { showToast } = useShowErrorToast();
 
   function showPopover() {
-    menu.value?.showPopover();
+    ctxMenu.value?.showPopover();
+    console.log(ctxMenu.value)
   }
 
   function hidePopover() {
-    menu.value?.hidePopover();
+    ctxMenu.value?.hidePopover();
   }
 
   async function onRenameClick(filePath: string) {
@@ -44,7 +45,7 @@ export function useNodeContextMenu(deleteDialog: Ref<AppDialog | null>) {
   }
 
   return {
-    menu,
+    ctxMenu,
     showPopover,
     hidePopover,
     onRenameClick,

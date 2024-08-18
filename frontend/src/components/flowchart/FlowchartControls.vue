@@ -3,10 +3,6 @@
     <section
       class="overflow-hidden rounded-md border bg-background shadow-md dark:border-zinc-600 dark:bg-secondary"
     >
-      <ControlButton @click="emit('addNode')">
-        <Plus :stroke-width="1.75" class="h-4 w-4" />
-        <template #tooltip> Ajouter un noeud </template>
-      </ControlButton>
       <ControlButton @click="emit('zoomIn')">
         <ZoomIn :stroke-width="1.75" class="h-4 w-4" />
         <template #tooltip> Zoomer </template>
@@ -37,11 +33,10 @@
 
 <script setup lang="ts">
 import { Panel } from '@vue-flow/core';
-import { CircleHelp, Plus, Settings, ZoomIn, ZoomOut } from 'lucide-vue-next';
+import { CircleHelp, Settings, ZoomIn, ZoomOut } from 'lucide-vue-next';
 import ControlButton from './FlowchartControls/ControlButton.vue';
 
 const emit = defineEmits<{
-  (e: 'addNode'): void;
   (e: 'zoomIn'): void;
   (e: 'zoomOut'): void;
 }>();

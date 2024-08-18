@@ -46,6 +46,15 @@
       />
     </template>
 
+    <template #node-video="props">
+      <VideoNode
+        :id="props.id"
+        :data="props.data"
+        :width="props.dimensions.width"
+        :height="props.dimensions.height"
+      />
+    </template>
+
     <template #edge-custom="props">
       <CustomEdge v-bind="props" />
     </template>
@@ -66,6 +75,8 @@ import FilePanel from './flowchart/FilePanel.vue';
 import { useHandleFlowchartChanges } from '@/composables/Flowchart/useHandleFlowchartChanges';
 import ImageNode from './flowchart/ImageNode.vue';
 import { useFlowChart } from '@/composables/Flowchart/useFlowChart';
+import VideoNode from './flowchart/VideoNode.vue';
+import FlowchartContextMenu from './contextmenus/FlowchartContextMenu.vue';
 
 const edges = ref<Edge[]>([]);
 const nodes = ref<Node<CustomNodeData>[]>([]);

@@ -25,26 +25,26 @@ func saveMedia(t testing.TB, mime string) (dir, path string, ft *filetree.FileTr
 	return
 }
 
-func TestSaveAndOpenMediaConc(t *testing.T) {
-	t.Run("save png image and open it concurrently", func(t *testing.T) {
-		dir, path, ft := saveMedia(t, "image/png")
-		defer os.RemoveAll(dir)
+// func TestSaveAndOpenMediaConc(t *testing.T) {
+// 	t.Run("save png image and open it concurrently", func(t *testing.T) {
+// 		dir, path, ft := saveMedia(t, "image/png")
+// 		defer os.RemoveAll(dir)
 
-		got, err := ft.OpenMediaConc(path)
-		if err != nil {
-			t.Errorf("got an error but didn't expect one: %s", err)
-		}
+// 		got, err := ft.OpenMediaConc(path)
+// 		if err != nil {
+// 			t.Errorf("got an error but didn't expect one: %s", err)
+// 		}
 
-		want, err := ft.OpenMedia(path)
-		if err != nil {
-			t.Fatalf("got an error but didn't expect one: %s", err)
-		}
+// 		want, err := ft.OpenMedia(path)
+// 		if err != nil {
+// 			t.Fatalf("got an error but didn't expect one: %s", err)
+// 		}
 
-		if got[:50] != want[:50] {
-			t.Errorf("got %s, want %s", got[:50], want[:50])
-		}
-	})
-}
+// 		if got[:50] != want[:50] {
+// 			t.Errorf("got %s, want %s", got[:50], want[:50])
+// 		}
+// 	})
+// }
 
 func BenchmarkOpenMedia(b *testing.B) {
 	ft := filetree.NewFileTree(&config.AppConfig{

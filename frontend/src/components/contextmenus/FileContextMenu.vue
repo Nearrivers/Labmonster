@@ -1,63 +1,51 @@
 <template>
-  <ul
-    id="filepopover"
-    popover
-    ref="menu"
-    class="fixed z-10 min-w-52 rounded-lg border border-border bg-background text-xs text-primary"
-    :style="{ top: y + 'px', left: x + 'px' }"
-  >
-    <li>
-      <ul class="border-b border-b-border p-1.5">
-        <li
-          class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
-          @click="onDuplicateClick(selectedNode?.dataset.path!, extension)"
-        >
-          <Files :stroke-width="1.75" class="h-[16px] w-4" />
-          <p>Dupliquer</p>
-        </li>
-        <li
-          class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
-          @click="onMoveClick"
-        >
-          <FolderTree :stroke-width="1.75" class="h-[16px] w-4" />
-          Déplacer le fichier vers...
-        </li>
-      </ul>
-    </li>
-    <li>
-      <ul class="p-1.5">
-        <li
-          class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 hover:bg-muted"
-          @click="onRenameClick(selectedNode?.dataset.path!)"
-        >
-          <PencilLine :stroke-width="1.75" class="h-[16px] w-4" />
-          Renommer
-        </li>
-        <li
-          class="flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-red-500 hover:bg-muted"
-          @click="
-            onDeleteClick(
-              selectedNode?.dataset.path!,
-              selectedNode?.dataset.extension!,
-            )
-          "
-        >
-          <Trash2 :stroke-width="1.75" class="h-[16px] w-4" />
-          Supprimer
-        </li>
-      </ul>
-    </li>
-    <MoveFileCommand
-      ref="moveFileCommand"
-      :key="props.x"
-      :selected-node="selectedNode"
-    />
-    <DeleteFileDialog
-      ref="deleteFileDialog"
-      :path="selectedNode?.dataset.path"
-      :extension="selectedNode?.dataset.extension"
-    />
-  </ul>
+  <AppCtxMenu :x="x" :y="y" :popover-id="'filepopover'" ref="ctxMenu">
+    <CtxSection>
+      <CtxItem
+        @click="onDuplicateClick(selectedNode?.dataset.path!, extension)"
+      >
+        <template #icon="{ strokeWidth, iconClass }">
+          <Files :stroke-width="strokeWidth" :class="iconClass" />
+        </template>
+        <template #text>Dupliquer</template>
+      </CtxItem>
+      <CtxItem @click="onMoveClick">
+        <template #icon="{ strokeWidth, iconClass }">
+          <FolderTree :stroke-width="strokeWidth" :class="iconClass" />
+        </template>
+        <template #text>Déplacer le fichier vers...</template>
+      </CtxItem>
+    </CtxSection>
+    <CtxSection>
+      <CtxItem @click="onRenameClick(selectedNode?.dataset.path!)">
+        <template #icon="{ strokeWidth, iconClass }">
+          <PencilLine :stroke-width="strokeWidth" :class="iconClass" />
+        </template>
+        <template #text>Renommer</template>
+      </CtxItem>
+      <CtxItem
+        @click="onDeleteClick(selectedNode?.dataset.path!, extension)"
+        class="text-red-500"
+      >
+        <template #icon="{ strokeWidth, iconClass }">
+          <Trash2 :stroke-width="strokeWidth" :class="iconClass" />
+        </template>
+        <template #text>Supprimer</template>
+      </CtxItem>
+    </CtxSection>
+    <template #commands>
+      <MoveFileCommand
+        ref="moveFileCommand"
+        :key="props.x"
+        :selected-node="selectedNode"
+      />
+      <DeleteFileDialog
+        ref="deleteFileDialog"
+        :path="selectedNode?.dataset.path"
+        :extension="selectedNode?.dataset.extension"
+      />
+    </template>
+  </AppCtxMenu>
 </template>
 
 <script setup lang="ts">
@@ -65,30 +53,33 @@ import { Files } from 'lucide-vue-next';
 import { FolderTree, Trash2, PencilLine } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import DeleteFileDialog from '../AlertDialog/DeleteFileDialog.vue';
-import { ContextMenuProps } from '@/types/props/ContextMenuProps';
 import { useNodeContextMenu } from '@/composables/ContextMenus/useNodeContextMenu';
 import MoveFileCommand from '../commands/MoveFileCommand.vue';
+import AppCtxMenu from './AppCtxMenu.vue';
+import CtxSection from './CtxSection.vue';
+import CtxItem from './CtxItem.vue';
 
-const props = defineProps<
-  ContextMenuProps & {
-    selectedNode: HTMLLIElement | null;
-  }
->();
+const props = defineProps<{
+  x: number;
+  y: number;
+  selectedNode: HTMLLIElement | null;
+}>();
 
+const ctxMenu = ref<InstanceType<typeof AppCtxMenu> | null>(null);
 const extension = computed(() => props.selectedNode?.dataset.extension || '');
 
+const moveFileCommand = ref<InstanceType<typeof MoveFileCommand> | null>(null);
 const deleteFileDialog = ref<InstanceType<typeof DeleteFileDialog> | null>(
   null,
 );
-const moveFileCommand = ref<InstanceType<typeof MoveFileCommand> | null>(null);
+
 const {
-  menu,
   showPopover,
   hidePopover,
   onRenameClick,
   onDeleteClick,
   onDuplicateClick,
-} = useNodeContextMenu(deleteFileDialog);
+} = useNodeContextMenu(ctxMenu, deleteFileDialog);
 
 function onMoveClick() {
   moveFileCommand.value?.showModal();

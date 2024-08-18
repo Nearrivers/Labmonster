@@ -392,6 +392,6 @@ func detectFileType(extension string) FileType {
 	case ".mp4", ".mpeg":
 		return VIDEO
 	default:
-		return GRAPH
+		return UNSUPPORTED
 	}
 }

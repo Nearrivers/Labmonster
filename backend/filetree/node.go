@@ -13,10 +13,11 @@ const (
 )
 
 const (
-	GRAPH FileType = "GRAPH"
-	SHEET FileType = "SHEET"
-	VIDEO FileType = "VIDEO"
-	IMAGE FileType = "IMAGE"
+	GRAPH       FileType = "GRAPH"
+	SHEET       FileType = "SHEET"
+	VIDEO       FileType = "VIDEO"
+	IMAGE       FileType = "IMAGE"
+	UNSUPPORTED FileType = "UNSUPPORTED"
 )
 
 // A node is the in-memory representation of a file or a directory on the user's machine

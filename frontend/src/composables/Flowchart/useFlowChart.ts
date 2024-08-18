@@ -44,15 +44,47 @@ export function useFlowChart() {
       return;
     }
 
+    if (!e.clipboardData.files || e.clipboardData.files.length === 0) {
+      return
+    }
+
     const file = e.clipboardData.files[0];
     const mimeType = e.clipboardData.files[0].type;
 
     if (
-      e.clipboardData.files &&
-      e.clipboardData.files.length > 0 &&
-      e.clipboardData.files[0].type.startsWith('image/')
+      file.type.startsWith('image/')
     ) {
       handleImagePaste(id, mimeType, file)
+      return
+    }
+
+    if (
+      file.type.startsWith('video/')
+    ) {
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        try {
+          const imagePath = await SaveMedia(
+            path.value,
+            mimeType,
+            e.target?.result as string,
+          );
+          updateNode<CustomNodeData>(id, {
+            type: 'video',
+            data: {
+              hasFrameDataSection: false,
+              image: imagePath,
+              text: '',
+            },
+          });
+        } catch (error) {
+          showToast(error);
+        }
+      };
+      reader.onerror = function (e) {
+        showToast(e.target?.error);
+      };
+      reader.readAsDataURL(file);
     }
   }
 

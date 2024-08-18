@@ -4,14 +4,16 @@ import (
 	"bufio"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"mime"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/logger"
 )
 
 type MediaChunk struct {
@@ -120,27 +122,6 @@ const (
 	limit = 20 * mb
 )
 
-func (ft *FileTree) OpenMediaConc(path string) (string, error) {
-	var p string
-
-	if filepath.IsAbs(path) {
-		p = path
-	} else {
-		p = filepath.Join(ft.GetLabPath(), path)
-	}
-
-	wg := sync.WaitGroup{}
-
-	f, err := os.Open(p)
-	if err != nil {
-		return "", err
-	}
-
-	scanner := bufio.NewScanner(f)
-
-	return "", nil
-}
-
 // func (ft *FileTree) OpenMediaConc(path string) (string, error) {
 // 	var p string
 
@@ -150,57 +131,86 @@ func (ft *FileTree) OpenMediaConc(path string) (string, error) {
 // 		p = filepath.Join(ft.GetLabPath(), path)
 // 	}
 
-// 	stat, err := os.Stat(p)
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	fileSize := stat.Size()
-// 	b := make([]byte, fileSize)
 // 	wg := sync.WaitGroup{}
-// 	done := make(chan (bool), 1)
-// 	fileContentCh := make(chan (MediaChunk))
 
-// 	go func() {
-// 		for fc := range fileContentCh {
-// 			b = slices.Insert(b, fc.offset, fc.b...)
-// 		}
-
-// 		done <- true
-// 	}()
-
-// 	var current int64
 // 	f, err := os.Open(p)
 // 	if err != nil {
 // 		return "", err
 // 	}
 
-// 	defer f.Close()
-// 	for ; current < fileSize; current += limit + 1 {
-// 		wg.Add(1)
+// 	scanner := bufio.NewScanner(f)
 
-// 		go func(c int64) {
-// 			readMedia(f, c, fileContentCh)
-// 			wg.Done()
-// 		}(current)
-// 	}
-
-// 	wg.Wait()
-// 	close(fileContentCh)
-
-// 	<-done
-// 	close(done)
-
-// 	m := mime.TypeByExtension(filepath.Ext(p))
-
-// 	s := base64.StdEncoding.EncodeToString(b)
-// 	return "data:" + m + ";base64," + s, nil
+// 	return "", nil
 // }
 
-func readMedia(f *os.File, offset int64, ch chan (MediaChunk)) {
+func (ft *FileTree) OpenMediaConc(path string) ([]byte, error) {
+	log := logger.NewDefaultLogger()
+	var p string
+
+	if filepath.IsAbs(path) {
+		p = path
+	} else {
+		p = filepath.Join(ft.GetLabPath(), path)
+	}
+
+	stat, err := os.Stat(p)
+	if err != nil {
+		return nil, err
+	}
+
+	fileSize := stat.Size()
+	log.Error(fmt.Sprintf("taille du fichier en octets: %d", fileSize))
+	b := make([]byte, 0)
+	wg := sync.WaitGroup{}
+	done := make(chan (bool), 1)
+	fileContentCh := make(chan (MediaChunk))
+
+	go func() {
+		for fc := range fileContentCh {
+			// b = slices.Insert(b, fc.offset, fc.b...)
+			b = append(b, fc.b...)
+		}
+
+		done <- true
+	}()
+
+	var current int64
+	var toReadLeft int64
+	f, err := os.Open(p)
+	if err != nil {
+		return nil, err
+	}
+
+	defer f.Close()
+	for ; current < fileSize; current += limit + 1 {
+		wg.Add(1)
+		toReadLeft = fileSize - current
+
+		go func(c, tr int64) {
+			readMedia(f, c, tr, fileContentCh)
+			log.Debug(fmt.Sprintf("Octets restant à lire: %d", tr))
+			wg.Done()
+		}(current, toReadLeft)
+	}
+
+	wg.Wait()
+	close(fileContentCh)
+
+	<-done
+	close(done)
+	return b, nil
+}
+
+func readMedia(f *os.File, offset, toReadLeft int64, ch chan<- (MediaChunk)) {
 	f.Seek(offset, 0)
 	reader := bufio.NewReader(f)
-	b := make([]byte, limit)
+	var b []byte
+
+	if toReadLeft > limit {
+		b = make([]byte, limit)
+	} else {
+		b = make([]byte, toReadLeft)
+	}
 
 	_, readErr := reader.Read(b)
 	if readErr != nil && readErr != io.EOF {

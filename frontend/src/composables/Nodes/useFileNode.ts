@@ -1,9 +1,10 @@
 import { RenameFile } from "$/filetree/FileTree";
-import { ref, computed, Ref } from "vue";
+import { ref, computed, Ref, getCurrentInstance } from "vue";
 import { useShowErrorToast } from "../useShowErrorToast";
 import { filetree } from "$/models";
 
 export function useFileNode(props: Ref<{ node: filetree.Node, path: string }>) {
+  const { emit } = getCurrentInstance()!
   const { showToast } = useShowErrorToast();
   const fileName = ref(props.value.node.name);
   const input = ref<HTMLDivElement | null>(null);
@@ -35,11 +36,14 @@ export function useFileNode(props: Ref<{ node: filetree.Node, path: string }>) {
     fileName.value = input.value.innerText.trim();
 
     try {
+      const newName = fileName.value + props.value.node.extension
       await RenameFile(
         props.value.path,
         props.value.node.name + props.value.node.extension,
-        fileName.value + props.value.node.extension,
+        newName
       );
+
+      emit('nodeRenamed', newName)
     } catch (error) {
       showToast(error);
     }
