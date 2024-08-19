@@ -4,7 +4,7 @@ import { nextTick, Ref } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
 import AppCtxMenu from '@/components/contextmenus/AppCtxMenu.vue';
 
-export function useNodeContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>, deleteDialog: Ref<AppDialog | null>) {
+export function useFileContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>, deleteDialog: Ref<AppDialog | null>) {
   const { showToast } = useShowErrorToast();
 
   function showPopover() {

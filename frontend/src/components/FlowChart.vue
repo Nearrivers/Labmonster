@@ -21,6 +21,7 @@
     :pan-activation-key-code="'Space'"
     :zoom-activation-key-code="['Control', 'Space']"
     :select-nodes-on-drag="true"
+    :multi-selection-key-code="['Shift']"
     @click.right.prevent="onFlowRightClick"
   >
     <FlowchartButtons
