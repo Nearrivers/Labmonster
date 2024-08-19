@@ -32,7 +32,6 @@ export function useFlowChart() {
       const graph = await OpenFile(path);
       fromObject(graph as unknown as FlowExportObject);
     } catch (error) {
-      console.log("test")
       showToast(error);
     }
   }

@@ -55,9 +55,9 @@ import { computed, ref } from 'vue';
 import DeleteFileDialog from '../AlertDialog/DeleteFileDialog.vue';
 import { useNodeContextMenu } from '@/composables/ContextMenus/useNodeContextMenu';
 import MoveFileCommand from '../commands/MoveFileCommand.vue';
-import AppCtxMenu from './AppCtxMenu.vue';
-import CtxSection from './CtxSection.vue';
-import CtxItem from './CtxItem.vue';
+import AppCtxMenu from '../ui/context-menu/AppCtxMenu.vue';
+import CtxSection from '../ui/context-menu/CtxSection.vue';
+import CtxItem from '../ui/context-menu/CtxItem.vue';
 
 const props = defineProps<{
   x: number;

@@ -55,9 +55,9 @@ import {
   Trash2,
 } from 'lucide-vue-next';
 import { ref } from 'vue';
-import AppCtxMenu from './AppCtxMenu.vue';
-import CtxSection from './CtxSection.vue';
-import CtxItem from './CtxItem.vue';
+import AppCtxMenu from '../ui/context-menu/AppCtxMenu.vue';
+import CtxSection from '../ui/context-menu/CtxSection.vue';
+import CtxItem from '../ui/context-menu/CtxItem.vue';
 
 defineProps<{
   x: number;

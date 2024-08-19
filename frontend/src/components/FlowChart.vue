@@ -21,6 +21,7 @@
     :pan-activation-key-code="'Space'"
     :zoom-activation-key-code="['Control', 'Space']"
     :select-nodes-on-drag="true"
+    @click.right.prevent="onFlowRightClick"
   >
     <FlowchartButtons
       @add-node="onAddNode"
@@ -60,6 +61,12 @@
     </template>
     <FilePanel :isSaving="isSaving"> {{ fileName }} </FilePanel>
   </VueFlow>
+  <FlowchartContextMenu
+    :x="contextMenuX"
+    :y="contextMenuY"
+    popover-id="flowchartPopover"
+    ref="ctxMenu"
+  />
 </template>
 
 <script setup lang="ts">
@@ -79,11 +86,20 @@ import VideoNode from './flowchart/VideoNode.vue';
 import FlowchartContextMenu from './contextmenus/FlowchartContextMenu.vue';
 
 const edges = ref<Edge[]>([]);
+const contextMenuX = ref(100);
+const contextMenuY = ref(100);
 const nodes = ref<Node<CustomNodeData>[]>([]);
 const { addNodes } = useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions();
 const { path, fileName } = useFlowChart();
 const { isSaving } = useHandleFlowchartChanges(path);
+const ctxMenu = ref<InstanceType<typeof FlowchartContextMenu> | null>(null);
+
+function onFlowRightClick(e: MouseEvent) {
+  contextMenuX.value = e.clientX;
+  contextMenuY.value = e.clientY;
+  ctxMenu.value?.showPopover();
+}
 
 function onAddNode() {
   addNodes(createNewNode());

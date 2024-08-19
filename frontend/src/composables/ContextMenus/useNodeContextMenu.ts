@@ -9,7 +9,6 @@ export function useNodeContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> 
 
   function showPopover() {
     ctxMenu.value?.showPopover();
-    console.log(ctxMenu.value)
   }
 
   function hidePopover() {
