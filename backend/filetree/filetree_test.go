@@ -315,7 +315,7 @@ func TestDuplicateFile(t *testing.T) {
 	t.Run("File duplication at first level", func(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
-		fileName := "duplication test.json"
+		fileName := "duplication test"
 		createFileBeforeTest(t, ft, fileName)
 		defer ft.DeleteFile(fileName)
 
@@ -331,7 +331,7 @@ func TestDuplicateFile(t *testing.T) {
 	t.Run("Running multiple file duplications in a row", func(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
-		fileName := "multiple duplication test.json"
+		fileName := "multiple duplication test"
 		createFileBeforeTest(t, ft, fileName)
 		defer ft.DeleteFile(fileName)
 

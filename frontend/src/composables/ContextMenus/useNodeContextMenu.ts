@@ -1,6 +1,6 @@
 import { DuplicateFile } from '$/filetree/FileTree';
 import { AppDialog } from '@/types/AppDialog';
-import { nextTick, Ref, ref } from 'vue';
+import { nextTick, Ref } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
 import AppCtxMenu from '@/components/contextmenus/AppCtxMenu.vue';
 

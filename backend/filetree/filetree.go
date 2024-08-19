@@ -256,7 +256,7 @@ func (ft *FileTree) MoveFileToExistingDir(oldPath, newPath string) (string, erro
 // to add a number at the end to avoid duplicates
 func (ft *FileTree) DuplicateFile(pathToFileFromLabRoot, extension string) (newFileName string, error error) {
 	labPath := ft.GetLabPath()
-	path := filepath.Join(labPath, pathToFileFromLabRoot)
+	path := filepath.Join(labPath, pathToFileFromLabRoot+extension)
 
 	f, err := os.Open(path)
 	if err != nil {

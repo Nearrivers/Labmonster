@@ -71,7 +71,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Edge, MarkerType, Node, useVueFlow, VueFlow } from '@vue-flow/core';
+import {
+  Edge,
+  MarkerType,
+  Node,
+  SelectionMode,
+  useVueFlow,
+  VueFlow,
+} from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
 import { useTopMenuActions } from '@/composables/Flowchart/useTopMenuActions';
 import FlowchartButtons from './flowchart/FlowchartControls.vue';
