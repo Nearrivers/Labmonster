@@ -16,20 +16,20 @@
             )
           "
         >
-          <div class="flex items-center gap-x-1 pl-[14px] font-normal">
+          <div class="flex w-full items-center gap-x-1 pl-[14px] font-normal">
             <NodeIcon :fileType="fType" />
-            <div
+            <input
               role="textbox"
               ref="input"
-              class="w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap bg-transparent [&_br]:hidden"
+              class="w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap bg-transparent outline-none"
               :id="nodePathWithoutSpaces"
-              @key.enter="input?.blur()"
+              @key.enter.prevent="input?.blur()"
               @blur.stop="onBlur"
               spellcheck="false"
               autocomplete="off"
-            >
-              {{ fileName }}
-            </div>
+              v-model="fileName"
+              readonly
+            />
           </div>
         </TooltipTrigger>
         <TooltipContent as-child :side="'right'" :side-offset="20">

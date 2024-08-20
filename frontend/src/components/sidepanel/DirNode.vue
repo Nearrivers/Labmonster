@@ -28,8 +28,13 @@
       </Tooltip>
     </TooltipProvider>
     <ul v-show="isOpen" class="w-full pl-[18.5px]">
-      <template v-for="child in files" :key="child.name">
-        <FileNode v-if="child.type == 'FILE'" :node="child" :path="nodePath" />
+      <template v-for="(child, index) in files" :key="child.name">
+        <FileNode
+          v-if="child.type == 'FILE'"
+          :node="child"
+          :path="nodePath"
+          @node-renamed="(n: string) => onNodeRenamed(n, index)"
+        />
         <DirNode v-else :node="child" :path="nodePath" />
       </template>
     </ul>
@@ -56,6 +61,10 @@ const props = defineProps<{
   node: filetree.Node;
   path: string;
 }>();
+
+function onNodeRenamed(newName: string, index: number) {
+  files.value[index].name = newName.slice(0, newName.lastIndexOf('.'));
+}
 
 const { files, isOpen, isFolder, nodePath, toggle } = useDirNode(toRef(props));
 </script>

@@ -7,7 +7,7 @@ export function useFileNode(props: Ref<{ node: filetree.Node, path: string }>) {
   const { emit } = getCurrentInstance()!
   const { showToast } = useShowErrorToast();
   const fileName = ref(props.value.node.name);
-  const input = ref<HTMLDivElement | null>(null);
+  const input = ref<HTMLInputElement | null>(null);
   const nodePath = ref(
     props.value.path ? props.value.path + '/' + props.value.node.name : props.value.node.name,
   );
@@ -30,10 +30,13 @@ export function useFileNode(props: Ref<{ node: filetree.Node, path: string }>) {
       return;
     }
 
-    input.value.toggleAttribute('contenteditable');
+    if (input.value.readOnly) {
+      return
+    }
+
+    input.value.toggleAttribute('readonly');
     input.value.classList.add('cursor-pointer');
     input.value.classList.remove('cursor-text');
-    fileName.value = input.value.innerText.trim();
 
     try {
       const newName = fileName.value + props.value.node.extension

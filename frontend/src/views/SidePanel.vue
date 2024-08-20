@@ -9,8 +9,13 @@
       @click.right.prevent="onRightClick"
       @click.left="onLeftClick"
     >
-      <template v-for="file in files" :key="file.name">
-        <FileNode v-if="file.type === 'FILE'" :node="file" path="" />
+      <template v-for="(file, index) in files" :key="file.name">
+        <FileNode
+          v-if="file.type === 'FILE'"
+          :node="file"
+          path=""
+          @node-renamed="(n: string) => onNodeRenamed(n, index)"
+        />
         <DirNode v-if="file.type === 'DIR'" :node="file" path="" />
       </template>
     </ul>
@@ -48,6 +53,10 @@ const {
   showToast,
   onLeftClick,
 } = useSidePanel();
+
+function onNodeRenamed(newName: string, index: number) {
+  files.value[index].name = newName.slice(0, newName.lastIndexOf('.'));
+}
 
 onMounted(async () => {
   try {

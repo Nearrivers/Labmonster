@@ -18,12 +18,13 @@ export function useFileContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> 
   async function onRenameClick(filePath: string) {
     hidePopover();
     const inputPath = filePath.replaceAll(' ', '-');
-    const fileInput = document.getElementById(inputPath) as HTMLDivElement;
+    const fileInput = document.getElementById(inputPath) as HTMLInputElement;
 
     if (fileInput) {
-      fileInput.toggleAttribute('contenteditable');
+      fileInput.toggleAttribute('readonly');
       fileInput.classList.remove('cursor-pointer');
       fileInput.classList.add('cursor-text');
+      fileInput.select()
       fileInput.focus();
     }
   }
