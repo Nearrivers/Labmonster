@@ -1,0 +1,415 @@
+package watcher
+
+import (
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
+)
+
+var (
+	// ErrDurationTooShort survient lorsque l'on appelle la méthode Start()
+	// du watcher avec une durée inférieure à 1 nanoseconde
+	ErrDurationTooShort = errors.New("error: duration is less than 1ns")
+
+	// ErrWatcherRunning survient lorsque l'on tente d'appeller la méthode Start()
+	// du watcher alors que le cycle de "polling" (sondage) est en train d'être exécuté
+	// et que la méthode Close() n'a pas encore été appelée
+	ErrWatcherRunning = errors.New("error: watcher is already running")
+
+	// ErrWatcherFileDeleted survient lorsqu'un fichier / répertoire suivi est supprimé
+	ErrWatcherFileDeleted = errors.New("error: watched file or folder deleted")
+
+	// ErrSkip est une erreur utilisée afin de dire aux hooks des chemins de passer un fichier
+	ErrSkip = errors.New("error: skipping file")
+)
+
+// Une Op est un type permettant de décrire quel type d'évènement
+// est survenu lors d'un processus de surveillance
+type Op uint32
+
+// Opérations
+const (
+	Create Op = iota
+	Write
+	Remove
+	Rename
+	Chmod
+	Move
+)
+
+var ops = map[Op]string{
+	Create: "CREATE",
+	Write:  "WRITE",
+	Remove: "REMOVE",
+	Rename: "RENAME",
+	Chmod:  "CHMOD",
+	Move:   "MOVE",
+}
+
+// Récupère une Op sous forme de string
+func (e Op) String() string {
+	if op, found := ops[e]; found {
+		return op
+	}
+	return "???"
+}
+
+// Un Event décrit un évènement reçu lorsque des changements sur un fichier / répertoire surviennent.
+// Cela inclut la os.FileInfo de l'élément modifié, le type d'évènement survenu ainsi que le chemin
+// complet du fichier
+type Event struct {
+	Op
+	Path    string
+	OldPath string
+	os.FileInfo
+}
+
+// String retourne une string dépendant de quel type d'évènement est survenu ainsi que le fichier
+// associé
+func (e Event) String() string {
+	if e.FileInfo == nil {
+		return "???"
+	}
+
+	pathType := "FILE"
+	if e.IsDir() {
+		pathType = "DIRECTORY"
+	}
+	return fmt.Sprintf("%s %q %s [%s]", pathType, e.Name(), e.Op, e.Path)
+}
+
+// FilterFileHookFunc est une fonction appelée pour filtrer les fichiers lors des listages.
+// Si un fichier peut être listé, nil est retourné ou une erreur dans le cas contraire
+type FilterFileHookFunc func(info os.FileInfo, fullPath string) error
+
+// Watcher décrit une process qui surveille les changements dans des fichiers
+type Watcher struct {
+	Event  chan Event
+	Error  chan error
+	Closed chan struct{}
+	close  chan struct{}
+	wg     *sync.WaitGroup
+
+	// mu protège les attributs le suivant
+	mu           *sync.Mutex
+	ffh          []FilterFileHookFunc
+	running      bool
+	names        map[string]bool        // Booléan qui indique si on est récursif ou non
+	files        map[string]os.FileInfo // map des fichiers
+	ignored      map[string]struct{}    // map des fichiers / répertoires ignorés
+	ops          map[Op]struct{}        // Filtre des Ops
+	ignoreHidden bool                   // ignore les fichiers cachés
+	maxEvents    int                    // nombre maximal d'évènements par cycle
+}
+
+// New crée un nouveau Watcher
+func New() *Watcher {
+	// Setup du WaitGroup pour w.Wait
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	return &Watcher{
+		Event:   make(chan Event),
+		Error:   make(chan error),
+		Closed:  make(chan struct{}),
+		close:   make(chan struct{}),
+		mu:      new(sync.Mutex),
+		wg:      &wg,
+		files:   make(map[string]os.FileInfo),
+		ignored: make(map[string]struct{}),
+		names:   make(map[string]bool),
+	}
+}
+
+// AddRecursive ajoute un fichier ou un répertoire récursivement à la liste des fichiers
+func (w *Watcher) AddRecursive(name string) (err error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	absPath, err := filepath.Abs(name)
+	if err != nil {
+		return err
+	}
+
+	fileList, err := w.listRecursive(absPath)
+	if err != nil {
+		return err
+	}
+
+	for k, v := range fileList {
+		w.files[k] = v
+	}
+
+	// Ajout du nom dans la liste des noms
+	w.names[absPath] = true
+
+	return nil
+}
+
+func (w *Watcher) listRecursive(name string) (map[string]os.FileInfo, error) {
+	fileList := make(map[string]os.FileInfo)
+
+	return fileList, filepath.Walk(name, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		_, ignored := w.ignored[path]
+
+		isHidden, err := isHiddenFile(path)
+		if err != nil {
+			return err
+		}
+
+		// Si l'élément est ignoré ou que l'on ignore les éléments cachés
+		if ignored || (w.ignoreHidden && isHidden) {
+			// Si l'élément est un dossier
+			if info.IsDir() {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+
+		// Ajout du chemin et de l'os.FileInfo du fichier dans la liste des fichiers
+		fileList[path] = info
+		return nil
+	})
+}
+
+// RemoveRecursive supprime soit un fichier soit un répertoire de manière récursive de la liste
+// de fichiers
+func (w *Watcher) RemoveRecursive(name string) (err error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	name, err = filepath.Abs(name)
+	if err != nil {
+		return err
+	}
+
+	// supprime le nom de la liste des noms de w
+	delete(w.names, name)
+
+	// Si name est un simple fichier, le supprimer et retourner
+	info, found := w.files[name]
+	if !found {
+		return nil // Le fichier n'existe pas, on peut retourner
+	}
+
+	if !info.IsDir() {
+		delete(w.files, name)
+		return nil
+	}
+
+	// Si c'est un répertoire, supprimer tout son contenu de w.files récursivement
+	for path := range w.files {
+		if strings.HasPrefix(path, name) {
+			delete(w.files, path)
+		}
+	}
+
+	return nil
+}
+
+func (w *Watcher) retrieveFileList() map[string]os.FileInfo {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	fileList := make(map[string]os.FileInfo)
+
+	for name := range w.names {
+		list, err := w.listRecursive(name)
+		if err != nil {
+			if os.IsNotExist(err) {
+				w.mu.Unlock()
+				if name == err.(*os.PathError).Path {
+					w.Error <- ErrWatcherFileDeleted
+					w.RemoveRecursive(name)
+				}
+				w.mu.Lock()
+			} else {
+				// Erreur inconnue
+				w.Error <- err
+			}
+		}
+
+		for k, v := range list {
+			fileList[k] = v
+		}
+	}
+
+	return fileList
+}
+
+func (w *Watcher) Start(d time.Duration) error {
+	// On retourne une erreur si le temps souhaité est inférieur à 1ns
+	if d < time.Nanosecond {
+		return ErrDurationTooShort
+	}
+
+	// On vérifie si le Watcher tourne déjà
+	w.mu.Lock()
+	if w.running {
+		w.mu.Unlock()
+		return ErrWatcherRunning
+	}
+	w.running = true
+	w.mu.Unlock()
+
+	// Débloque w.Wait()
+	w.wg.Done()
+
+	for {
+		// done signale au cycle de sondage interne lorsque la méthode du cycle
+		// actuel a terminé son travail
+		done := make(chan struct{})
+
+		// Tout évènement trouvé est d'abord donné à evt avant d'être
+		// envoyé channel Event principal
+		evt := make(chan Event)
+
+		// Récupère la liste des fichiers de tous les fichiers et répertoires surveillés
+		fileList := w.retrieveFileList()
+
+		// cancel peut être utilisé pour annuler la fonction de sondage actuelle
+		cancel := make(chan struct{})
+
+		// Recherche des évènements
+		go func() {
+			w.pollEvents(fileList, evt, cancel)
+			done <- struct{}{}
+		}()
+
+		// numEvents tient le nombre des évènements du cycle actuel
+		numEvents := 0
+
+	inner:
+		for {
+			select {
+			case <-w.close:
+				close(cancel)
+				close(w.Closed)
+				return nil
+			case event := <-evt:
+				if len(w.ops) > 0 {
+					_, found := w.ops[event.Op]
+					if !found {
+						continue
+					}
+				}
+				numEvents++
+
+				if w.maxEvents > 0 && numEvents > w.maxEvents {
+					close(cancel)
+					break inner
+				}
+				w.Event <- event
+			case <-done:
+				break inner
+			}
+		}
+
+		w.mu.Lock()
+		w.files = fileList
+		w.mu.Unlock()
+
+		time.Sleep(d)
+	}
+}
+
+func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cancel chan struct{}) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	creates := make(map[string]os.FileInfo)
+	removes := make(map[string]os.FileInfo)
+
+	for path, info := range w.files {
+		if _, found := files[path]; !found {
+			removes[path] = info
+		}
+	}
+
+	// Vérifie si un fichier a été créé, modifié et si un chmod est survenu
+	for path, info := range files {
+		_, found := w.files[path]
+		if !found {
+			// Un fichier a été créé
+			creates[path] = info
+			continue
+		}
+		// Je me fiche du reste je pense
+	}
+
+	for path1, info1 := range removes {
+		for path2, info2 := range creates {
+			if !os.SameFile(info1, info2) {
+				continue
+			}
+
+			e := Event{
+				Op:       Move,
+				Path:     path2,
+				OldPath:  path1,
+				FileInfo: info1,
+			}
+
+			// Si l'élément est toujours dans le même dossier, alors il a été renommé et non pas déplacé
+			if filepath.Dir(path1) == filepath.Dir(path2) {
+				e.Op = Rename
+			}
+
+			delete(removes, path1)
+			delete(creates, path2)
+
+			// Si le cycle n'est pas annulé, on écrit dans le channel evt
+			select {
+			case <-cancel:
+				return
+			case evt <- e:
+			}
+		}
+	}
+
+	// Envoie tous les autres évènements create et remove
+	for path, info := range creates {
+		select {
+		case <-cancel:
+			return
+		case evt <- Event{Create, path, "", info}:
+		}
+	}
+
+	for path, info := range removes {
+		select {
+		case <-cancel:
+			return
+		case evt <- Event{Remove, path, path, info}:
+		}
+	}
+}
+
+// Bloque jusqu'à que le watcher aie démarré
+func (w *Watcher) Wait() {
+	w.wg.Wait()
+}
+
+func (w *Watcher) Close() {
+	w.mu.Lock()
+	if !w.running {
+		w.mu.Unlock()
+		return
+	}
+
+	w.running = false
+	w.files = make(map[string]os.FileInfo)
+	w.names = make(map[string]bool)
+	w.mu.Unlock()
+
+	// Envoie un signal de close à la méthode Start()
+	w.close <- struct{}{}
+}
