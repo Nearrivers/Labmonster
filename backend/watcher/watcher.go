@@ -1,6 +1,7 @@
 package watcher
 
 import (
+	"context"
 	"errors"
 	"flow-poc/backend/config"
 	"fmt"
@@ -63,9 +64,9 @@ func (e Op) String() string {
 // Cela inclut la os.FileInfo de l'élément modifié, le type d'évènement survenu ainsi que le chemin
 // complet du fichier
 type Event struct {
-	Op
-	Path    string
-	OldPath string
+	Op `json:"op"`
+	Path    string `json:"path"`
+	OldPath string `json:"oldPath"`
 	os.FileInfo
 }
 
@@ -88,6 +89,7 @@ type Watcher struct {
 	Event  chan Event
 	Error  chan error
 	Closed chan struct{}
+	Ctx context.Context
 	close  chan struct{}
 	wg     *sync.WaitGroup
 
@@ -119,6 +121,10 @@ func New(cfg *config.AppConfig) *Watcher {
 		ignored: make(map[string]struct{}),
 		names:   make(map[string]bool),
 	}
+}
+
+func (w *Watcher) SetContext(ctx context.Context) {
+	w.Ctx = ctx
 }
 
 // AddRecursive ajoute un fichier ou un répertoire récursivement à la liste des fichiers

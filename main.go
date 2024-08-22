@@ -14,10 +14,15 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+type Bar struct{
+	Name string
+}
 
 func main() {
 	// Create an instance of the app structure
@@ -44,6 +49,7 @@ func main() {
 				log.Fatalln(err)
 			case evt := <- w.Event:
 				log.Printf("event reçu %s", evt)
+				runtime.EventsEmit(w.Ctx, "foo", Bar{"ceci est un test"})
 			}
 		}
 	}()
@@ -64,6 +70,7 @@ func main() {
 			app.SetContext(ctx)
 			topmenu.SetContext(ctx)
 			config.SetContext(ctx)
+			w.SetContext(ctx)
 		},
 		Bind: []interface{}{
 			app,

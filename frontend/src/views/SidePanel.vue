@@ -39,6 +39,7 @@ import { CheckConfigPresenceAndLoadIt } from '$/config/AppConfig';
 import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
 import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
 import TopButtons from '@/components/sidepanel/TopButtons.vue';
+import { EventsOn } from '../../wailsjs/runtime';
 
 const {
   files,
@@ -55,6 +56,7 @@ const {
 } = useSidePanel();
 
 function onNodeRenamed(newName: string, index: number) {
+  console.log(files.value);
   files.value[index].name = newName.slice(0, newName.lastIndexOf('.'));
 }
 
@@ -68,5 +70,9 @@ onMounted(async () => {
   } catch (error) {
     showToast(String(error));
   }
+});
+
+EventsOn('foo', function (...data: any) {
+  console.log(data);
 });
 </script>
