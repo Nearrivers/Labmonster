@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"embed"
+	"log"
+	"time"
 
 	"flow-poc/backend/config"
 	"flow-poc/backend/filetree"
 	"flow-poc/backend/topmenu"
+	"flow-poc/backend/watcher"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -22,6 +25,28 @@ func main() {
 	topmenu := topmenu.NewTopMenu()
 	config := config.NewAppConfig()
 	filetree := filetree.NewFileTree(config)
+	w := watcher.New(config)
+
+	go func() {
+		w.Wait()
+	}()
+
+	go func() {
+		if err := w.Start(time.Millisecond * 100); err != nil {
+			log.Fatalln(err)
+		}
+	}()
+
+	go func() {
+		for {
+			select {
+			case err := <- w.Error:
+				log.Fatalln(err)
+			case evt := <- w.Event:
+				log.Printf("event reçu %s", evt)
+			}
+		}
+	}()
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -48,6 +73,7 @@ func main() {
 		},
 		OnShutdown: func(ctx context.Context) {
 			filetree.RecentFiles.SaveRecentlyOpended()
+			w.Close()
 		},
 	})
 

@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"errors"
+	"flow-poc/backend/config"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -82,10 +83,6 @@ func (e Event) String() string {
 	return fmt.Sprintf("%s %q %s [%s]", pathType, e.Name(), e.Op, e.Path)
 }
 
-// FilterFileHookFunc est une fonction appelée pour filtrer les fichiers lors des listages.
-// Si un fichier peut être listé, nil est retourné ou une erreur dans le cas contraire
-type FilterFileHookFunc func(info os.FileInfo, fullPath string) error
-
 // Watcher décrit une process qui surveille les changements dans des fichiers
 type Watcher struct {
 	Event  chan Event
@@ -95,19 +92,17 @@ type Watcher struct {
 	wg     *sync.WaitGroup
 
 	// mu protège les attributs le suivant
+	config *config.AppConfig
 	mu           *sync.Mutex
-	ffh          []FilterFileHookFunc
 	running      bool
 	names        map[string]bool        // Booléan qui indique si on est récursif ou non
 	files        map[string]os.FileInfo // map des fichiers
 	ignored      map[string]struct{}    // map des fichiers / répertoires ignorés
-	ops          map[Op]struct{}        // Filtre des Ops
 	ignoreHidden bool                   // ignore les fichiers cachés
-	maxEvents    int                    // nombre maximal d'évènements par cycle
 }
 
 // New crée un nouveau Watcher
-func New() *Watcher {
+func New(cfg *config.AppConfig) *Watcher {
 	// Setup du WaitGroup pour w.Wait
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -117,6 +112,7 @@ func New() *Watcher {
 		Error:   make(chan error),
 		Closed:  make(chan struct{}),
 		close:   make(chan struct{}),
+		config:  cfg,
 		mu:      new(sync.Mutex),
 		wg:      &wg,
 		files:   make(map[string]os.FileInfo),
@@ -215,6 +211,44 @@ func (w *Watcher) RemoveRecursive(name string) (err error) {
 	return nil
 }
 
+// fileInfo est un mock de os.FileInfo utilisé pour déclencher des évènements manuellement
+type fileInfo struct {
+	name    string
+	size    int64
+	mode    os.FileMode
+	modTime time.Time
+	sys     interface{}
+	dir     bool
+}
+
+func (fs *fileInfo) IsDir() bool {
+	return fs.dir
+}
+func (fs *fileInfo) ModTime() time.Time {
+	return fs.modTime
+}
+func (fs *fileInfo) Mode() os.FileMode {
+	return fs.mode
+}
+func (fs *fileInfo) Name() string {
+	return fs.name
+}
+func (fs *fileInfo) Size() int64 {
+	return fs.size
+}
+func (fs *fileInfo) Sys() interface{} {
+	return fs.sys
+}
+
+func (w *Watcher) TriggerEvent(eventType Op, file os.FileInfo) {
+	w.Wait()
+
+	if file == nil {
+		file = &fileInfo{name: "triggered event", modTime: time.Now()}
+	}
+	w.Event <- Event{Op: eventType, Path: "-", FileInfo: file}
+}
+
 func (w *Watcher) retrieveFileList() map[string]os.FileInfo {
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -251,6 +285,18 @@ func (w *Watcher) Start(d time.Duration) error {
 		return ErrDurationTooShort
 	}
 
+	for {
+		// On ne veut pas démarrer le watcher tant que le chemin vers le lab
+		// n'est pas configuré
+		if w.config.ConfigFile.LabPath != "" {
+			if err := w.AddRecursive(w.config.ConfigFile.LabPath); err != nil {
+				panic(err)
+			}
+
+			break
+		}
+	}
+
 	// On vérifie si le Watcher tourne déjà
 	w.mu.Lock()
 	if w.running {
@@ -284,9 +330,6 @@ func (w *Watcher) Start(d time.Duration) error {
 			done <- struct{}{}
 		}()
 
-		// numEvents tient le nombre des évènements du cycle actuel
-		numEvents := 0
-
 	inner:
 		for {
 			select {
@@ -295,18 +338,6 @@ func (w *Watcher) Start(d time.Duration) error {
 				close(w.Closed)
 				return nil
 			case event := <-evt:
-				if len(w.ops) > 0 {
-					_, found := w.ops[event.Op]
-					if !found {
-						continue
-					}
-				}
-				numEvents++
-
-				if w.maxEvents > 0 && numEvents > w.maxEvents {
-					close(cancel)
-					break inner
-				}
 				w.Event <- event
 			case <-done:
 				break inner
@@ -340,14 +371,17 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		if !found {
 			// Un fichier a été créé
 			creates[path] = info
-			continue
 		}
 		// Je me fiche du reste je pense
 	}
 
+	// Boucle sur les 2 maps
+	// Si un chemin est dans le map des opérations de suppressions ET dans le map
+	// des opérations de créations alors cela veut dire que le fichier / répertoire
+	// a été déplacé / renommé
 	for path1, info1 := range removes {
 		for path2, info2 := range creates {
-			if !os.SameFile(info1, info2) {
+			if !sameFile(info1, info2) {
 				continue
 			}
 
@@ -370,7 +404,8 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 			select {
 			case <-cancel:
 				return
-			case evt <- e:
+			default:
+				evt <- e
 			}
 		}
 	}
@@ -380,7 +415,9 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		select {
 		case <-cancel:
 			return
-		case evt <- Event{Create, path, "", info}:
+		default:
+			e := Event{Create, path, "", info}
+			evt <- e
 		}
 	}
 
@@ -388,7 +425,9 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		select {
 		case <-cancel:
 			return
-		case evt <- Event{Remove, path, path, info}:
+		default:
+			e := Event{Remove, path, path, info}
+			evt <- e
 		}
 	}
 }
