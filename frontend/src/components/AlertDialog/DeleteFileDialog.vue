@@ -1,5 +1,5 @@
 <template>
-  <AlertDialog asChild :open="isDialogOpen">
+  <AlertDialog :open="isDialogOpen">
     <div data-test="dialog">
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -10,12 +10,13 @@
             </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter class="items-center !justify-start">
+        <AlertDialogFooter :class="'items-center !justify-start'">
           <div class="mr-auto flex items-center gap-2">
             <Checkbox id="never-ask" />
             <label for="never-ask" class="text-sm">Ne pas redemander</label>
           </div>
           <AlertDialogAction
+            as-child
             :class="'bg-red-600 text-white hover:bg-red-500'"
             @click="onDeleteFile"
           >

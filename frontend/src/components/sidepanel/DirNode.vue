@@ -28,7 +28,7 @@
       </Tooltip>
     </TooltipProvider>
     <ul v-show="isOpen" class="w-full pl-[18.5px]">
-      <template v-for="(child, index) in files" :key="child.name">
+      <template v-for="(child, index) in files" :key="nodePath + child.name">
         <FileNode
           v-if="child.type == 'FILE'"
           :node="child"
