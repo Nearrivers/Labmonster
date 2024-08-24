@@ -20,7 +20,7 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-type Bar struct{
+type Bar struct {
 	Name string
 }
 
@@ -45,11 +45,12 @@ func main() {
 	go func() {
 		for {
 			select {
-			case err := <- w.Error:
+			case err := <-w.Error:
 				log.Fatalln(err)
-			case evt := <- w.Event:
+			case evt := <-w.Event:
 				log.Printf("event reçu %s", evt)
-				runtime.EventsEmit(w.Ctx, "foo", Bar{"ceci est un test"})
+				evt.MarshalFrontend(config.ConfigFile.LabPath)
+				runtime.EventsEmit(w.Ctx, "fsop", evt)
 			}
 		}
 	}()
@@ -77,6 +78,9 @@ func main() {
 			topmenu,
 			config,
 			filetree,
+		},
+		EnumBind: []interface{}{
+			watcher.FsOps,
 		},
 		OnShutdown: func(ctx context.Context) {
 			filetree.RecentFiles.SaveRecentlyOpended()

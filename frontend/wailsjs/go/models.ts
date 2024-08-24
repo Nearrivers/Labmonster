@@ -1,20 +1,3 @@
-export namespace config {
-	
-	export class ConfigFile {
-	
-	
-	    static createFrom(source: any = {}) {
-	        return new ConfigFile(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	
-	    }
-	}
-
-}
-
 export namespace filetree {
 	
 	export class Node {
@@ -255,6 +238,17 @@ export namespace graph {
 	
 	
 	
+
+}
+
+export namespace watcher {
+	
+	export enum Op {
+	    CREATE = 0x0,
+	    REMOVE = 0x2,
+	    RENAME = 0x3,
+	    MOVE = 0x5,
+	}
 
 }
 

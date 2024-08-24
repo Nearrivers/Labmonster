@@ -5,6 +5,7 @@ import (
 	"errors"
 	"flow-poc/backend/config"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -52,6 +53,16 @@ var ops = map[Op]string{
 	Move:   "MOVE",
 }
 
+var FsOps = []struct {
+	Value  Op
+	TSName string
+}{
+	{Create, "CREATE"},
+	{Remove, "REMOVE"},
+	{Rename, "RENAME"},
+	{Move, "MOVE"},
+}
+
 // Récupère une Op sous forme de string
 func (e Op) String() string {
 	if op, found := ops[e]; found {
@@ -64,7 +75,7 @@ func (e Op) String() string {
 // Cela inclut la os.FileInfo de l'élément modifié, le type d'évènement survenu ainsi que le chemin
 // complet du fichier
 type Event struct {
-	Op `json:"op"`
+	Op      `json:"op"`
 	Path    string `json:"path"`
 	OldPath string `json:"oldPath"`
 	os.FileInfo
@@ -84,17 +95,32 @@ func (e Event) String() string {
 	return fmt.Sprintf("%s %q %s [%s]", pathType, e.Name(), e.Op, e.Path)
 }
 
+// Marshal an event into something usable to the frontend
+func (e *Event) MarshalFrontend(labpath string) {
+	op, err := filepath.Rel(labpath, e.OldPath)
+	if err != nil {
+		log.Printf("%s erreur", err)
+	}
+	p, err := filepath.Rel(labpath, e.Path)
+	if err != nil {
+		log.Printf("%s erreur", err)
+	}
+
+	e.OldPath = filepath.ToSlash(op)
+	e.Path = filepath.ToSlash(p)
+}
+
 // Watcher décrit une process qui surveille les changements dans des fichiers
 type Watcher struct {
 	Event  chan Event
 	Error  chan error
 	Closed chan struct{}
-	Ctx context.Context
+	Ctx    context.Context
 	close  chan struct{}
 	wg     *sync.WaitGroup
 
 	// mu protège les attributs le suivant
-	config *config.AppConfig
+	config       *config.AppConfig
 	mu           *sync.Mutex
 	running      bool
 	names        map[string]bool        // Booléan qui indique si on est récursif ou non
