@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flow-poc/backend/config"
+	"flow-poc/backend/filetree"
 	"fmt"
 	"log"
 	"os"
@@ -75,9 +76,12 @@ func (e Op) String() string {
 // Cela inclut la os.FileInfo de l'élément modifié, le type d'évènement survenu ainsi que le chemin
 // complet du fichier
 type Event struct {
-	Op      `json:"op"`
-	Path    string `json:"path"`
-	OldPath string `json:"oldPath"`
+	Op       `json:"op"`
+	Path     string            `json:"path"`
+	OldPath  string            `json:"oldPath"`
+	FilePath string            `json:"file"`
+	FileType filetree.FileType `json:"fileType"`
+	DataType filetree.DataType `json:"dataType"`
 	os.FileInfo
 }
 
@@ -99,15 +103,16 @@ func (e Event) String() string {
 func (e *Event) MarshalFrontend(labpath string) {
 	op, err := filepath.Rel(labpath, e.OldPath)
 	if err != nil {
-		log.Printf("%s erreur", err)
+		log.Printf("%s %s", err, e.OldPath)
 	}
 	p, err := filepath.Rel(labpath, e.Path)
 	if err != nil {
-		log.Printf("%s erreur", err)
+		log.Printf("%s %s", err, e.Path)
 	}
 
-	e.OldPath = filepath.ToSlash(op)
-	e.Path = filepath.ToSlash(p)
+	e.OldPath = filepath.ToSlash(filepath.Dir(op))
+	e.Path = filepath.ToSlash(filepath.Dir(p))
+	e.FilePath = filepath.Base(p)
 }
 
 // Watcher décrit une process qui surveille les changements dans des fichiers
@@ -448,7 +453,11 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		case <-cancel:
 			return
 		default:
-			e := Event{Create, path, "", info}
+			var dType = filetree.FILE
+			if info.IsDir() {
+				dType = filetree.DIR
+			}
+			e := Event{Create, path, "", "", filetree.DetectFileType(filepath.Ext(path)), dType, info}
 			evt <- e
 		}
 	}
@@ -458,7 +467,11 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		case <-cancel:
 			return
 		default:
-			e := Event{Remove, path, path, info}
+			var dType = filetree.FILE
+			if info.IsDir() {
+				dType = filetree.DIR
+			}
+			e := Event{Remove, path, path, "", filetree.DetectFileType(filepath.Ext(path)), dType, info}
 			evt <- e
 		}
 	}

@@ -374,7 +374,7 @@ func createNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
 		if entry.IsDir() {
 			newNode.Type = DIR
 		} else {
-			newNode.FileType = detectFileType(ext)
+			newNode.FileType = DetectFileType(ext)
 			newNode.Type = FILE
 		}
 
@@ -383,7 +383,8 @@ func createNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
 	return dirNames, nil
 }
 
-func detectFileType(extension string) FileType {
+// Given an extension, it wil return the corresponding FileType
+func DetectFileType(extension string) FileType {
 	switch extension {
 	case ".png", ".jpeg", ".gif", ".webp":
 		return IMAGE

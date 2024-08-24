@@ -1,7 +1,8 @@
 import { GetSubDirAndFiles } from "$/filetree/FileTree";
 import { filetree } from "$/models";
-import { computed, ref, Ref } from "vue";
+import { computed, inject, ref, Ref } from "vue";
 import { useShowErrorToast } from "../useShowErrorToast";
+import { FiletreeProvide } from "@/types/filetreeProvide";
 
 export function useDirNode(props: Ref<{
   node: filetree.Node;
@@ -11,6 +12,7 @@ export function useDirNode(props: Ref<{
   const isOpen = ref(false);
   const isFolder = computed(() => props.value.node.type === 'DIR');
   const { showToast } = useShowErrorToast();
+  const { addDir } = inject<FiletreeProvide>("dirs")!
 
   const nodePath = computed(() =>
     props.value.path ? props.value.path + '/' + props.value.node.name : props.value.node.name,
@@ -18,9 +20,15 @@ export function useDirNode(props: Ref<{
 
   async function toggle() {
     try {
-      files.value = props.value.path
-        ? await GetSubDirAndFiles(props.value.path + '/' + props.value.node.name)
-        : await GetSubDirAndFiles(props.value.node.name);
+      let p = ''
+      if (!props.value.path) {
+        p = props.value.node.name
+      } else {
+        p = props.value.path + '/' + props.value.node.name
+      }
+
+      files.value = await GetSubDirAndFiles(p)
+      addDir(p, files.value)
     } catch (error) {
       showToast(error);
     } finally {

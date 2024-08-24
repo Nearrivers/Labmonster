@@ -6,11 +6,11 @@ import { useShowErrorToast } from './useShowErrorToast';
 import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
 import { CONFIG_FILE_LOADED } from '@/constants/event-names/CONFIG_FILE_LOADED';
 import { configFileLoaded } from '@/events/ReloadFileExplorer';
-import { useEventListener } from '@vueuse/core';
 import DirContextMenu from '../components/contextmenus/DirContextMenu.vue';
 import { useRouter } from 'vue-router';
 import { Routes } from '@/types/Routes';
 import { SupportedFiles } from '@/types/SupportedFiles';
+import { useEventListener } from './useEventListener';
 
 export function useSidePanel() {
   const files = ref<filetree.Node[]>([]);

@@ -1,12 +1,23 @@
 export namespace filetree {
 	
+	export enum FileType {
+	    GRAPH = "GRAPH",
+	    SHEET = "SHEET",
+	    VIDEO = "VIDEO",
+	    IMAGE = "IMAGE",
+	    UNSUPPORTED = "UNSUPPORTED",
+	}
+	export enum DataType {
+	    FILE = "FILE",
+	    DIR = "DIR",
+	}
 	export class Node {
 	    name: string;
-	    type: string;
+	    type: DataType;
 	    // Go type: time
 	    updatedAt: any;
 	    extension: string;
-	    fileType: string;
+	    fileType: FileType;
 	
 	    static createFrom(source: any = {}) {
 	        return new Node(source);

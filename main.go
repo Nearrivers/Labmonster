@@ -29,7 +29,7 @@ func main() {
 	app := NewApp()
 	topmenu := topmenu.NewTopMenu()
 	config := config.NewAppConfig()
-	filetree := filetree.NewFileTree(config)
+	ft := filetree.NewFileTree(config)
 	w := watcher.New(config)
 
 	go func() {
@@ -77,13 +77,15 @@ func main() {
 			app,
 			topmenu,
 			config,
-			filetree,
+			ft,
 		},
 		EnumBind: []interface{}{
 			watcher.FsOps,
+			filetree.FTypes,
+			filetree.DTypes,
 		},
 		OnShutdown: func(ctx context.Context) {
-			filetree.RecentFiles.SaveRecentlyOpended()
+			ft.RecentFiles.SaveRecentlyOpended()
 			w.Close()
 		},
 	})

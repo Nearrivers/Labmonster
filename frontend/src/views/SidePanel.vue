@@ -41,6 +41,8 @@ import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
 import TopButtons from '@/components/sidepanel/TopButtons.vue';
 import { useFiletree } from '@/composables/useFiletree';
 
+useFiletree();
+
 const {
   files,
   contextMenuX,
@@ -54,7 +56,6 @@ const {
   showToast,
   onLeftClick,
 } = useSidePanel();
-useFiletree();
 
 function onNodeRenamed(newName: string, index: number) {
   console.log(files.value);

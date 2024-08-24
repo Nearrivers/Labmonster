@@ -5,7 +5,7 @@
         <AlertDialogHeader>
           <AlertDialogTitle>Supprimer le fichier</AlertDialogTitle>
           <AlertDialogDescription asChild>
-            <p data-test="description">
+            <p :id="'delete-' + fileTitle">
               Confirmer la suppression de "{{ fileTitle }}"
             </p>
           </AlertDialogDescription>
@@ -16,13 +16,12 @@
             <label for="never-ask" class="text-sm">Ne pas redemander</label>
           </div>
           <AlertDialogAction
-            as-child
             :class="'bg-red-600 text-white hover:bg-red-500'"
             @click="onDeleteFile"
           >
             <p>Supprimer</p>
           </AlertDialogAction>
-          <AlertDialogCancel @click.prevent="closeDialog">
+          <AlertDialogCancel @click.prevent="closeDialog" data-test="cancel">
             Annuler
           </AlertDialogCancel>
         </AlertDialogFooter>
@@ -72,7 +71,6 @@ async function onDeleteFile() {
       description: `Fichier "${fileTitle.value}" supprimé avec succès`,
       duration: 5000,
     });
-    removeNode();
   } catch (error) {
     toast({
       title: 'Suppression impossible',
@@ -91,14 +89,6 @@ async function onDeleteFile() {
     });
   } finally {
     isDialogOpen.value = false;
-  }
-}
-
-// Suppression du fichier du DOM
-function removeNode() {
-  const nodeToRemove = document.querySelector(`[data-path="${props.path}"]`);
-  if (nodeToRemove) {
-    nodeToRemove.remove();
   }
 }
 

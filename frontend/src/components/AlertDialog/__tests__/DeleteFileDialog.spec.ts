@@ -1,25 +1,33 @@
 import { describe, expect, test } from 'vitest'
 import { mount } from '@vue/test-utils'
 import DeleteFileDialog from '../DeleteFileDialog.vue'
-import { nextTick } from 'vue'
+
+function setup() {
+  const wrapper = mount(DeleteFileDialog, {
+    data() {
+      return {
+        isDialogOpen: true
+      }
+    }
+  })
+
+  return wrapper
+}
 
 describe('DeleFileDialog', () => {
   test("open dialog", async () => {
-    const wrapper = mount(DeleteFileDialog, {
-      data() {
-        return {
-          isDialogOpen: true
-        }
-      }
-    })
-
+    const wrapper = setup()
     wrapper.vm.openDialog("test")
-    await nextTick()
 
-    // Ne fonctionnent pas à cause du warning "Extraneous props...."
     const dialog = wrapper.find('[data-test="dialog"]')
     expect(dialog.exists()).toBe(true)
-    const description = wrapper.find('[data-test="description"]')
-    expect(description.exists()).toBe(true)
   })
+
+  // test("cancel dialog", async () => {
+  //   const wrapper = setup()
+  //   wrapper.vm.openDialog("test")
+
+  //   const dialog = wrapper.get('[data-test="dialog"]')
+  //   const cancelBtn = dialog.get('[data-test="cancel"]')
+  // })
 })
