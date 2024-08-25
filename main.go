@@ -48,8 +48,8 @@ func main() {
 			case err := <-w.Error:
 				log.Fatalln(err)
 			case evt := <-w.Event:
-				log.Printf("event reçu %s", evt)
 				evt.MarshalFrontend(config.ConfigFile.LabPath)
+				log.Printf("event reçu %s", evt)
 				runtime.EventsEmit(w.Ctx, "fsop", evt)
 			}
 		}

@@ -61,10 +61,10 @@ export function useSidePanel() {
   async function createNewFileAtRoot() {
     try {
       const file = await CreateFile(NEW_FILE_NAME);
-      // removing .json from the file name
-      file.name = file.name.slice(0, file.name.indexOf('.'));
-      files.value.push(file);
-      files.value.sort(sortNodes);
+      router.push({
+        name: Routes.Flowchart,
+        params: { path: file.name },
+      });
     } catch (error) {
       showToast(error, 'Impossible de créer le fichier');
     }

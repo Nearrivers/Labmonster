@@ -96,21 +96,23 @@ func (e Event) String() string {
 	if e.IsDir() {
 		pathType = "DIRECTORY"
 	}
-	return fmt.Sprintf("%s %q %s [%s]", pathType, e.Name(), e.Op, e.Path)
+	return fmt.Sprintf("%s %q %s %s %s [%s]", pathType, e.Name(), e.Op, e.FileType, e.DataType, e.Path)
 }
 
 // Marshal an event into something usable to the frontend
 func (e *Event) MarshalFrontend(labpath string) {
+	// Will error out if the old path is empty but it's fine
 	op, err := filepath.Rel(labpath, e.OldPath)
 	if err != nil {
 		log.Printf("%s %s", err, e.OldPath)
 	}
+
 	p, err := filepath.Rel(labpath, e.Path)
 	if err != nil {
 		log.Printf("%s %s", err, e.Path)
 	}
 
-	e.OldPath = filepath.ToSlash(filepath.Dir(op))
+	e.OldPath = filepath.ToSlash(op)
 	e.Path = filepath.ToSlash(filepath.Dir(p))
 	e.FilePath = filepath.Base(p)
 }
@@ -422,11 +424,18 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 				continue
 			}
 
+			var dType = filetree.FILE
+			if info1.IsDir() {
+				dType = filetree.DIR
+			}
+
 			e := Event{
 				Op:       Move,
 				Path:     path2,
 				OldPath:  path1,
 				FileInfo: info1,
+				FileType: filetree.DetectFileType(filepath.Ext(path2)),
+				DataType: dType,
 			}
 
 			// Si l'élément est toujours dans le même dossier, alors il a été renommé et non pas déplacé
@@ -457,6 +466,7 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 			if info.IsDir() {
 				dType = filetree.DIR
 			}
+			log.Println(path)
 			e := Event{Create, path, "", "", filetree.DetectFileType(filepath.Ext(path)), dType, info}
 			evt <- e
 		}
@@ -471,6 +481,7 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 			if info.IsDir() {
 				dType = filetree.DIR
 			}
+			log.Println(path)
 			e := Event{Remove, path, path, "", filetree.DetectFileType(filepath.Ext(path)), dType, info}
 			evt <- e
 		}

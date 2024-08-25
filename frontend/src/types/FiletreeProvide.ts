@@ -11,7 +11,7 @@ export type DirPath = string
  * Utility type that removes useless keys from the type so I don't have
  * to create Partial types everywhere
  */
-export type ShortNode = Omit<filetree.Node, 'convertValues' | 'updatedAt'>
+export type ShortNode = Omit<filetree.Node, 'convertValues'>
 
 export type FiletreeProvide = {
   dirs: Ref<Map<DirPath, ShortNode[]>>

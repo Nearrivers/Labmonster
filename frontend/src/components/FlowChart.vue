@@ -72,14 +72,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import {
-  Edge,
-  MarkerType,
-  Node,
-  SelectionMode,
-  useVueFlow,
-  VueFlow,
-} from '@vue-flow/core';
+import { Edge, MarkerType, Node, useVueFlow, VueFlow } from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
 import { useTopMenuActions } from '@/composables/Flowchart/useTopMenuActions';
 import FlowchartButtons from './flowchart/FlowchartControls.vue';
@@ -92,7 +85,13 @@ import ImageNode from './flowchart/ImageNode.vue';
 import { useFlowChart } from '@/composables/Flowchart/useFlowChart';
 import VideoNode from './flowchart/VideoNode.vue';
 import FlowchartContextMenu from './contextmenus/FlowchartContextMenu.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { EventsOn } from '../../wailsjs/runtime/runtime';
+import { FsEvent } from '@/types/FsEvent';
+import { watcher } from '$/models';
+import { Routes } from '@/types/Routes';
 
+const router = useRouter();
 const edges = ref<Edge[]>([]);
 const contextMenuX = ref(100);
 const contextMenuY = ref(100);
@@ -108,6 +107,30 @@ function onFlowRightClick(e: MouseEvent) {
   contextMenuY.value = e.clientY;
   ctxMenu.value?.showPopover();
 }
+
+const route = useRoute();
+
+EventsOn('fsop', (e: FsEvent) => {
+  const filePath = e.path + '/' + e.file;
+  if (
+    // We skip if the operation is a file creation
+    e.op === watcher.Op.CREATE || // OR
+    // If the operation is a delete but the deleted file is not the one currently opened, we skip
+    (filePath != route.params.path && e.op === watcher.Op.REMOVE) || // OR
+    // If the operation is a move or a rename and the old path is different from the one of the file currently opened, we skip
+    (e.oldPath != route.params.path &&
+      (e.op === watcher.Op.MOVE || e.op === watcher.Op.RENAME))
+  ) {
+    return;
+  }
+
+  if (e.op === watcher.Op.REMOVE) {
+    router.push({ name: Routes.NotOpened });
+    return;
+  }
+
+  router.push({ name: Routes.Flowchart, params: { path: filePath } });
+});
 
 function onAddNode() {
   addNodes(createNewNode());

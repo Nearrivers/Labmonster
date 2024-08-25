@@ -17,7 +17,7 @@
           "
         >
           <div class="flex w-full items-center gap-x-1 pl-[14px] font-normal">
-            <NodeIcon :fileType="fType" />
+            <NodeIcon :fileType="props.node.fileType" />
             <input
               role="textbox"
               ref="input"
@@ -54,20 +54,13 @@ import { filetree } from '$/models';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { useFileNode } from '@/composables/Nodes/useFileNode';
-import { computed, toRef } from 'vue';
-import { SupportedFiles } from '@/types/SupportedFiles';
+import { toRef } from 'vue';
 import NodeIcon from './NodeIcon.vue';
 
 const props = defineProps<{
   node: filetree.Node;
   path: string;
 }>();
-
-const emit = defineEmits<{
-  (e: 'nodeRenamed', newName: string): void;
-}>();
-
-const fType = computed(() => props.node.fileType as SupportedFiles);
 
 const {
   nodePath,

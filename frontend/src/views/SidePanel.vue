@@ -14,9 +14,9 @@
           v-if="file.type === 'FILE'"
           :node="file"
           path=""
-          @node-renamed="(n: string) => onNodeRenamed(n, index)"
+          :data-id="index"
         />
-        <DirNode v-if="file.type === 'DIR'" :node="file" path="" />
+        <DirNode v-else :node="file" path="" :data-id="index" />
       </template>
     </ul>
   </ScrollArea>
@@ -41,8 +41,6 @@ import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
 import TopButtons from '@/components/sidepanel/TopButtons.vue';
 import { useFiletree } from '@/composables/useFiletree';
 
-useFiletree();
-
 const {
   files,
   contextMenuX,
@@ -57,10 +55,7 @@ const {
   onLeftClick,
 } = useSidePanel();
 
-function onNodeRenamed(newName: string, index: number) {
-  console.log(files.value);
-  files.value[index].name = newName.slice(0, newName.lastIndexOf('.'));
-}
+useFiletree(files, showToast);
 
 onMounted(async () => {
   try {

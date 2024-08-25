@@ -33,9 +33,9 @@
           v-if="child.type == 'FILE'"
           :node="child"
           :path="nodePath"
-          @node-renamed="(n: string) => onNodeRenamed(n, index)"
+          :data-id="index"
         />
-        <DirNode v-else :node="child" :path="nodePath" />
+        <DirNode v-else :node="child" :path="nodePath" :data-id="index" />
       </template>
     </ul>
   </li>
@@ -61,10 +61,6 @@ const props = defineProps<{
   node: filetree.Node;
   path: string;
 }>();
-
-function onNodeRenamed(newName: string, index: number) {
-  files.value[index].name = newName.slice(0, newName.lastIndexOf('.'));
-}
 
 const { files, isOpen, isFolder, nodePath, toggle } = useDirNode(toRef(props));
 </script>
