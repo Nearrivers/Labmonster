@@ -34,20 +34,22 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
   EventsOn('fsop', function (e: FsEvent) {
     switch (e.op) {
       case watcher.Op.CREATE:
-        OnCreate(e)
+        createFileInSidePanel(e)
         break;
       case watcher.Op.REMOVE:
-        onDelete(e)
+        deleteFileFromSidePannelWithPath(e)
         break
       case watcher.Op.RENAME:
+        renameFileInSidePannel(e)
+        break;
       case watcher.Op.MOVE:
-        onMoveOrRename(e)
+        moveFileInSidePannel(e)
         break
     }
     console.log(e)
   });
 
-  function OnCreate(e: FsEvent) {
+  function createFileInSidePanel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: Array<object>
     if (e.path === '.') {
@@ -72,18 +74,97 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
       extension: extension,
       fileType: e.fileType,
       type: e.dataType,
-      updatedAt: new Date().toLocaleDateString()
+      updatedAt: new Date()
     })
   }
 
-  function onDelete(e: FsEvent) {
+  function deleteFileFromSidePannelWithPath(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: filetree.Node[] | ShortNode[]
+    let oldFilepath: string
     if (e.path === '.') {
       // handle lab's root delete
       dir = rootFiles.value
+      oldFilepath = e.file.slice(0, e.file.lastIndexOf('.'))
     } else {
       dir = dirs.value.get(e.path as DirPath) as ShortNode[]
+      // Removing the extension
+      oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+    }
+
+    if (!dir) {
+      return
+    }
+
+    // Finding the element using its path
+    const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
+    if (!el) {
+      showErrorToastFunc("Element not found")
+      return
+    }
+
+    // Using the data-id attribute
+    const index = parseInt(el.dataset.id!)
+    if (isNaN(index)) {
+      showErrorToastFunc("Element index not found")
+      return
+    }
+
+    // Removing the element
+    dir.splice(index, 1)
+  }
+
+  function deleteFileFromSidePannelWithOldPath(e: FsEvent) {
+    // If e.oldpath doesn't include '/', that means that the deletion happened at lab's root
+    let dir: filetree.Node[] | ShortNode[]
+    let oldFilepath: string
+    if (!e.oldPath.includes('/')) {
+      // handle lab's root delete
+      dir = rootFiles.value
+      // Removing the extension
+      oldFilepath = e.file.slice(0, e.file.lastIndexOf('.'))
+    } else {
+      // Removing the extension
+      oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+      dir = dirs.value.get(e.oldPath.slice(0, e.oldPath.lastIndexOf('/'))) as ShortNode[]
+    }
+
+    if (!dir) {
+      return
+    }
+
+    // Finding the element using its path
+    const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
+    if (!el) {
+      showErrorToastFunc("Element not found")
+      return
+    }
+
+    // Using the data-id attribute
+    const index = parseInt(el.dataset.id!)
+    if (isNaN(index)) {
+      showErrorToastFunc("Element index not found")
+      return
+    }
+
+    // Removing the element
+    dir.splice(index, 1)
+  }
+
+  function moveFileInSidePannel(e: FsEvent) {
+    deleteFileFromSidePannelWithOldPath(e)
+    createFileInSidePanel(e)
+  }
+
+  function renameFileInSidePannel(e: FsEvent) {
+    // If e.path === '.' means that the deletion happened at lab's root
+    let dir: Array<object>
+    if (!e.oldPath.includes('/')) {
+      // handle lab's root delete
+      dir = rootFiles.value
+    } else {
+      // Removing the extension
+      dir = dirs.value.get(e.oldPath.slice(0, e.oldPath.lastIndexOf('/'))) as ShortNode[]
     }
 
     if (!dir) {
@@ -92,24 +173,31 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
 
     // Removing the extension
     const oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+    console.log(oldFilepath)
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {
       showErrorToastFunc("Element not found")
+      return
     }
 
     // Using the data-id attribute
     const index = parseInt(el.dataset.id!)
     if (isNaN(index)) {
       showErrorToastFunc("Element index not found")
+      return
     }
 
-    // Removing the element
-    dir.splice(index, 1)
-  }
+    const i = e.file.lastIndexOf('.')
+    const fileName = e.file.slice(0, i)
+    const extension = e.file.slice(i)
 
-  function onMoveOrRename(e: FsEvent) {
-    onDelete(e)
-    OnCreate(e)
+    dir.splice(index, 1, {
+      name: fileName,
+      extension,
+      fileType: e.fileType,
+      type: e.dataType,
+      updatedAt: new Date()
+    })
   }
 }

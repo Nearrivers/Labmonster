@@ -315,7 +315,6 @@ func moveFile(oldPath, newPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer oldFile.Close()
 
 	newFile, name, err := createNonDuplicateFile(newPath)
 	if err != nil {
@@ -324,6 +323,21 @@ func moveFile(oldPath, newPath string) (string, error) {
 	defer newFile.Close()
 
 	_, err = io.Copy(oldFile, newFile)
+	if err != nil {
+		return "", err
+	}
+
+	err = oldFile.Close()
+	if err != nil {
+		return "", nil
+	}
+
+	// We delete the old file
+	err = os.Remove(oldPath)
+	if err != nil {
+		return "", err
+	}
+
 	return name, err
 }
 
