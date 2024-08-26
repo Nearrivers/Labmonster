@@ -5,16 +5,13 @@
     data-type="file"
     :data-extension="node.extension"
     :data-file="node.fileType"
+    @keyup.stop="selectInput"
   >
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
-          :class="
-            cn(
-              buttonVariants({ variant: 'ghost', size: 'sm' }),
-              'h-7 w-full justify-start rounded-md',
-            )
-          "
+          class="h-7 w-full justify-start rounded-md hover:bg-accent hover:text-accent-foreground"
+          :class="{ 'bg-accent text-accent-foreground': isActive }"
         >
           <div class="flex w-full items-center gap-x-1 pl-[14px] font-normal">
             <NodeIcon :fileType="props.node.fileType" />
@@ -51,8 +48,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { filetree } from '$/models';
-import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
 import { useFileNode } from '@/composables/Nodes/useFileNode';
 import { toRef } from 'vue';
 import NodeIcon from './NodeIcon.vue';
@@ -70,5 +65,7 @@ const {
   nodePathWithoutSpaces,
   onBlur,
   updatedAt,
+  selectInput,
+  isActive,
 } = useFileNode(toRef(props));
 </script>

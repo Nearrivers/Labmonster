@@ -16,6 +16,7 @@ export function useFlowChart() {
   watch(
     () => route.params.path,
     async () => {
+      console.log(route.fullPath)
       path.value = route.params.path as string;
       await loadGraph();
     },

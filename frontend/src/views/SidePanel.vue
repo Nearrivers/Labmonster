@@ -30,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';
@@ -40,6 +40,7 @@ import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
 import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
 import TopButtons from '@/components/sidepanel/TopButtons.vue';
 import { useFiletree } from '@/composables/useFiletree';
+import { useMagicKeys } from '@vueuse/core';
 
 const {
   files,
@@ -56,6 +57,16 @@ const {
 } = useSidePanel();
 
 useFiletree(files, showToast);
+const keys = useMagicKeys();
+const F2 = keys['F2'];
+
+watch(F2, (v) => {
+  if (!v) {
+    return;
+  }
+
+  console.log('test');
+});
 
 onMounted(async () => {
   try {

@@ -1,15 +1,15 @@
 export namespace filetree {
 	
+	export enum DataType {
+	    FILE = "FILE",
+	    DIR = "DIR",
+	}
 	export enum FileType {
 	    GRAPH = "GRAPH",
 	    SHEET = "SHEET",
 	    VIDEO = "VIDEO",
 	    IMAGE = "IMAGE",
 	    UNSUPPORTED = "UNSUPPORTED",
-	}
-	export enum DataType {
-	    FILE = "FILE",
-	    DIR = "DIR",
 	}
 	export class Node {
 	    name: string;
