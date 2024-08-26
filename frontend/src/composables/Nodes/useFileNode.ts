@@ -21,7 +21,7 @@ export function useFileNode(props: Ref<{ node: filetree.Node, path: string }>) {
   const updatedAt = computed(() => {
     const date = new Date(props.value.node.updatedAt);
     return `${date.toLocaleDateString()} à ${date.toLocaleTimeString()}`;
-  });
+  })
 
   async function onBlur() {
     if (!input.value) {

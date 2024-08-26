@@ -1,18 +1,21 @@
 <template>
   <section class="ml-auto" style="--wails-draggable: no-drag">
-    <TopButton class="rounded-none" @click="MinimiseWindow">
+    <TopButton additionnalClasses="rounded-none" @click="MinimiseWindow">
       <template #icon>
         <Minus class="h-full w-7 p-1" />
       </template>
       <template #tooltip>Minimiser</template>
     </TopButton>
-    <TopButton class="rounded-none" @click="onChangeSizeClick">
+    <TopButton additionnalClasses="rounded-none" @click="onChangeSizeClick">
       <template #icon>
         <Maximize class="h-full w-7 p-1" />
       </template>
       <template #tooltip>Restaurer</template>
     </TopButton>
-    <TopButton class="rounded-none hover:!bg-red-600" @click="QuitApp">
+    <TopButton
+      additionnalClasses="rounded-none hover:!bg-red-600"
+      @click="QuitApp"
+    >
       <template #icon>
         <X class="h-full w-7 p-1" />
       </template>

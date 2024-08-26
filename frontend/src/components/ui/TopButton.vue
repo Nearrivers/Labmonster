@@ -2,8 +2,14 @@
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger
-        class="rounded-md p-1.5 hover:bg-secondary hover:bg-zinc-700 hover:text-primary"
-        :class="class"
+        class="rounded-md"
+        :class="
+          cn(
+            buttonVariants({ variant: 'ghost', size: 'sm' }),
+            'h-min rounded-md p-1.5',
+            additionnalClasses,
+          )
+        "
         @click="emit('click')"
       >
         <slot name="icon" />
@@ -22,9 +28,11 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 
 defineProps<{
-  class?: string;
+  additionnalClasses?: string;
 }>();
 
 const emit = defineEmits<{
