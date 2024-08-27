@@ -1,14 +1,14 @@
-import { FlowExportObject, useVueFlow } from "@vue-flow/core";
-import { useEventListener } from "../useEventListener";
-import { OpenFile, SaveMedia } from "$/filetree/FileTree";
-import { CustomNodeData } from "@/types/CustomNodeData";
-import { useRoute } from "vue-router";
-import { computed, ref, watch } from "vue";
-import { useShowErrorToast } from "../useShowErrorToast";
+import { FlowExportObject, useVueFlow } from '@vue-flow/core';
+import { useEventListener } from '../useEventListener';
+import { OpenFile, SaveMedia } from '$/filetree/FileTree';
+import { CustomNodeData } from '@/types/CustomNodeData';
+import { useRoute } from 'vue-router';
+import { computed, ref, watch } from 'vue';
+import { useShowErrorToast } from '../useShowErrorToast';
 
 export function useFlowChart() {
-  const path = ref('')
-  const route = useRoute()
+  const path = ref('');
+  const route = useRoute();
   const { updateNode, fromObject } = useVueFlow();
   const { showToast } = useShowErrorToast();
   useEventListener(window, 'paste', onPaste);
@@ -16,7 +16,6 @@ export function useFlowChart() {
   watch(
     () => route.params.path,
     async () => {
-      console.log(route.fullPath)
       path.value = route.params.path as string;
       await loadGraph();
     },
@@ -45,22 +44,18 @@ export function useFlowChart() {
     }
 
     if (!e.clipboardData.files || e.clipboardData.files.length === 0) {
-      return
+      return;
     }
 
     const file = e.clipboardData.files[0];
     const mimeType = e.clipboardData.files[0].type;
 
-    if (
-      file.type.startsWith('image/')
-    ) {
-      handleImagePaste(id, mimeType, file)
-      return
+    if (file.type.startsWith('image/')) {
+      handleImagePaste(id, mimeType, file);
+      return;
     }
 
-    if (
-      file.type.startsWith('video/')
-    ) {
+    if (file.type.startsWith('video/')) {
       const reader = new FileReader();
       reader.onload = async function (e) {
         try {
@@ -117,6 +112,6 @@ export function useFlowChart() {
 
   return {
     path,
-    fileName
-  }
+    fileName,
+  };
 }

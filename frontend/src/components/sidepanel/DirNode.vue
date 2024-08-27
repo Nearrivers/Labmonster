@@ -3,15 +3,10 @@
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
-          :class="
-            cn(
-              buttonVariants({ variant: 'ghost', size: 'sm' }),
-              'h-7 w-full justify-start rounded-md',
-            )
-          "
+          class="h-7 w-full justify-start rounded-md hover:bg-accent hover:text-accent-foreground"
           @click="toggle"
         >
-          <div class="flex items-center gap-x-1 font-normal">
+          <div class="flex items-center gap-x-1 pl-[14px] font-normal">
             <ChevronRight
               v-if="isFolder"
               class="w-[14px] transition-transform"

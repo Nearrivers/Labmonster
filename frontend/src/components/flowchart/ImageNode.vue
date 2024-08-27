@@ -1,5 +1,5 @@
 <template>
-  <GraphNode :id="id" :data="data" isResizable class="p-2">
+  <GraphNode :id="id" :data="data">
     <label :for="props.id">
       <input
         ref="input"
@@ -11,11 +11,11 @@
         autocomplete="off"
       />
     </label>
-    <div class="nodrag resize overflow-auto">
+    <div class="p-2">
       <img
         :src="imgSrc"
         alt="Image du setup"
-        class="h-full w-full object-contain"
+        class="h-full w-full object-cover"
       />
     </div>
   </GraphNode>

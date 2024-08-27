@@ -1,6 +1,10 @@
 <template>
+  <NodeResizer
+    :minWidth="100"
+    :handleClassName="'!bg-accent-foreground w-12 z-20'"
+  />
   <div
-    class="relative min-w-40 rounded-lg bg-background text-primary shadow-md ring-2 ring-border transition-all dark:shadow-none dark:ring-border"
+    class="relative h-full rounded-lg bg-background text-primary shadow-md ring-2 ring-border transition-all dark:shadow-none dark:ring-border"
     :class="[{ '!ring-primary': isNodeSelected }, props.class]"
     @click.right.stop="console.log('noeud cliqué')"
   >
@@ -31,6 +35,8 @@ import { computed, ref } from 'vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
 import NodeToolbar from '../flowchart/NodeToolbar.vue';
 import FrameData from '../flowchart/FrameData.vue';
+import { NodeResizer } from '@vue-flow/node-resizer';
+import '@vue-flow/node-resizer/dist/style.css';
 
 const props = defineProps<{
   id: string;

@@ -1,6 +1,6 @@
 <template>
   <li
-    class="w-full"
+    class="mb-0.5 w-full"
     :data-path="nodePath"
     data-type="file"
     :data-extension="node.extension"

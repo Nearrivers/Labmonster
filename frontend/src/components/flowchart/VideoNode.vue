@@ -1,5 +1,5 @@
 <template>
-  <GraphNode :id="id" :data="data" isResizable class="p-2">
+  <GraphNode :id="id" :data="data">
     <label :for="props.id">
       <input
         ref="input"
