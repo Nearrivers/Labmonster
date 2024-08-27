@@ -11,7 +11,7 @@
         autocomplete="off"
       />
     </label>
-    <div class="nodrag resize overflow-auto">
+    <div class="nodrag resize overflow-auto" :style="dimensions">
       <video
         controls
         :src="imgSrc"
@@ -23,8 +23,8 @@
 </template>
 
 <script setup lang="ts">
-import { useVueFlow } from '@vue-flow/core';
-import { onMounted, onUnmounted, ref } from 'vue';
+import { Styles, useNode, useVueFlow } from '@vue-flow/core';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
 import { OpenMedia } from '$/filetree/FileTree';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
@@ -36,9 +36,18 @@ const props = defineProps<{
 }>();
 
 const imgSrc = ref('');
+const { node } = useNode(props.id);
 const { updateNode } = useVueFlow();
 const { showToast } = useShowErrorToast();
 const input = ref<HTMLInputElement | null>(null);
+const dimensions = computed(() =>
+  node.style
+    ? {
+        width: (node.style as Styles).width + 'px',
+        height: (node.style as Styles).height + 'px',
+      }
+    : {},
+);
 
 onMounted(async () => {
   if (!props.data.image) {
