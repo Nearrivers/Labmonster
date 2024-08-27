@@ -11,11 +11,11 @@
         autocomplete="off"
       />
     </label>
-    <div class="p-2">
+    <div class="h-full overflow-hidden p-2">
       <img
         :src="imgSrc"
         alt="Image du setup"
-        class="h-full w-full object-cover"
+        class="h-full w-full object-contain"
       />
     </div>
   </GraphNode>

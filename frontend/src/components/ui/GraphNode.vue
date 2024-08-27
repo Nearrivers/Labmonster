@@ -1,7 +1,8 @@
 <template>
   <NodeResizer
     :minWidth="100"
-    :handleClassName="'!bg-accent-foreground w-12 z-20'"
+    :handleClassName="'opacity-0 z-20'"
+    :lineClassName="'z-20 !border-transparent rounded-lg !border'"
   />
   <div
     class="relative h-full rounded-lg bg-background text-primary shadow-md ring-2 ring-border transition-all dark:shadow-none dark:ring-border"
