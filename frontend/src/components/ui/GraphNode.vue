@@ -1,8 +1,10 @@
 <template>
   <NodeResizer
     :minWidth="100"
+    :minHeight="60"
     :handleClassName="'opacity-0 z-20'"
     :lineClassName="'z-20 !border-transparent rounded-lg !border'"
+    @resizeEnd="rememberDimensions"
   />
   <div
     class="relative h-full rounded-lg bg-background text-primary shadow-md ring-2 ring-border transition-all dark:shadow-none dark:ring-border"
@@ -31,18 +33,17 @@
 </template>
 
 <script setup lang="ts">
-import { Handle, Position, useVueFlow } from '@vue-flow/core';
+import { Handle, Position, useNode, useVueFlow } from '@vue-flow/core';
 import { computed, ref } from 'vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
 import NodeToolbar from '../flowchart/NodeToolbar.vue';
 import FrameData from '../flowchart/FrameData.vue';
-import { NodeResizer } from '@vue-flow/node-resizer';
+import { NodeResizer, OnResizeStart } from '@vue-flow/node-resizer';
 import '@vue-flow/node-resizer/dist/style.css';
 
 const props = defineProps<{
   id: string;
   data: CustomNodeData;
-  isResizable?: boolean;
   class?: string;
 }>();
 
@@ -51,12 +52,20 @@ const emit = defineEmits<{
 }>();
 
 const isDragging = ref(false);
-const { getSelectedNodes, onNodeDragStart, onNodeDragStop, selectNodesOnDrag } =
-  useVueFlow();
+const { node } = useNode(props.id);
+console.log(node.style);
+const { getSelectedNodes, onNodeDragStart, onNodeDragStop } = useVueFlow();
 
 const isNodeSelected = computed(() =>
   getSelectedNodes.value.some((n) => n.id === props.id),
 );
+
+function rememberDimensions(e: OnResizeStart) {
+  node.style = {
+    width: e.params.width,
+    height: e.params.height,
+  };
+}
 
 onNodeDragStart((_) => {
   isDragging.value = true;

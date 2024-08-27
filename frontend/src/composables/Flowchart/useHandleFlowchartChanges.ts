@@ -14,10 +14,9 @@ export function useHandleFlowchartChanges(pathFromLabRoot: Ref<string>) {
   async function Save() {
     try {
       isSaving.value = true;
-      await SaveFile(
-        pathFromLabRoot.value,
-        toObject() as unknown as graph.Graph,
-      );
+      const graph = toObject() as unknown as graph.Graph;
+      console.log(graph);
+      await SaveFile(pathFromLabRoot.value, graph);
     } catch (error) {
       showToast(error);
     } finally {

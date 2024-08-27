@@ -1,9 +1,9 @@
 <template>
   <GraphNode :id="id" :data="data" v-slot="isNodeSelected">
-    <input
+    <textarea
       ref="input"
       :id="props.id"
-      class="bg-transparent px-2 py-4 outline-none"
+      class="h-full w-full resize-none whitespace-normal break-words bg-transparent px-2 py-4 outline-none"
       :class="{ 'cursor-grab': !isNodeSelected }"
       v-model="nodeText"
       @input="handleUpdate"
@@ -25,7 +25,7 @@ const props = defineProps<{
 }>();
 
 const nodeText = defineModel<string>('text');
-const input = ref<HTMLInputElement | null>(null);
+const input = ref<HTMLTextAreaElement | null>(null);
 const { updateNode } = useVueFlow();
 
 function handleUpdate() {

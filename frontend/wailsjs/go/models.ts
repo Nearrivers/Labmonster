@@ -160,6 +160,20 @@ export namespace graph {
 		    return a;
 		}
 	}
+	export class GraphNodeStyle {
+	    width: any;
+	    height: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new GraphNodeStyle(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
 	export class GraphNodePosition {
 	    x: number;
 	    y: number;
@@ -196,6 +210,7 @@ export namespace graph {
 	    initialized: boolean;
 	    position: GraphNodePosition;
 	    type: string;
+	    style: GraphNodeStyle;
 	
 	    static createFrom(source: any = {}) {
 	        return new GraphNode(source);
@@ -208,6 +223,7 @@ export namespace graph {
 	        this.initialized = source["initialized"];
 	        this.position = this.convertValues(source["position"], GraphNodePosition);
 	        this.type = source["type"];
+	        this.style = this.convertValues(source["style"], GraphNodeStyle);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -262,6 +278,7 @@ export namespace graph {
 		    return a;
 		}
 	}
+	
 	
 	
 	
