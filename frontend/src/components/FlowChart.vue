@@ -32,7 +32,7 @@
     <Background :gap="30" />
 
     <template #node-custom="props">
-      <CustomNode
+      <TextNode
         :id="props.id"
         :data="props.data"
         v-model:text="props.data.text"
@@ -40,21 +40,11 @@
     </template>
 
     <template #node-image="props">
-      <ImageNode
-        :id="props.id"
-        :data="props.data"
-        :width="props.dimensions.width"
-        :height="props.dimensions.height"
-      />
+      <ImageNode :id="props.id" :data="props.data" />
     </template>
 
     <template #node-video="props">
-      <VideoNode
-        :id="props.id"
-        :data="props.data"
-        :width="props.dimensions.width"
-        :height="props.dimensions.height"
-      />
+      <VideoNode :id="props.id" :data="props.data" />
     </template>
 
     <template #edge-custom="props">
@@ -76,20 +66,20 @@ import { Edge, MarkerType, Node, useVueFlow, VueFlow } from '@vue-flow/core';
 import { Background } from '@vue-flow/background';
 import { useTopMenuActions } from '@/composables/Flowchart/useTopMenuActions';
 import FlowchartButtons from './flowchart/FlowchartControls.vue';
-import CustomNode from './flowchart/CustomNode.vue';
 import CustomEdge from './flowchart/CustomEdge.vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
 import FilePanel from './flowchart/FilePanel.vue';
 import { useHandleFlowchartChanges } from '@/composables/Flowchart/useHandleFlowchartChanges';
-import ImageNode from './flowchart/ImageNode.vue';
 import { useFlowChart } from '@/composables/Flowchart/useFlowChart';
-import VideoNode from './flowchart/VideoNode.vue';
 import FlowchartContextMenu from './contextmenus/FlowchartContextMenu.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { FsEvent } from '@/types/FsEvent';
 import { watcher } from '$/models';
 import { Routes } from '@/types/Routes';
+import TextNode from './flowchart/Nodes/TextNode.vue';
+import VideoNode from './flowchart/Nodes/VideoNode.vue';
+import ImageNode from './flowchart/Nodes/ImageNode.vue';
 
 const router = useRouter();
 const edges = ref<Edge[]>([]);

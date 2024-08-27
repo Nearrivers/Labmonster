@@ -25,14 +25,12 @@
 import { useVueFlow } from '@vue-flow/core';
 import { onMounted, ref } from 'vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
-import GraphNode from '../ui/GraphNode.vue';
 import { OpenMedia } from '$/filetree/FileTree';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
+import GraphNode from '@/components/ui/GraphNode.vue';
 
 const props = defineProps<{
   id: string;
-  width: number;
-  height: number;
   data: CustomNodeData;
 }>();
 

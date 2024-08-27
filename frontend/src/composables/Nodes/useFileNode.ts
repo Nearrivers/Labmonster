@@ -19,7 +19,6 @@ export function useFileNode(props: Ref<{ node: filetree.Node; path: string }>) {
       : props.value.node.name,
   );
 
-  console.log(decodeURI(route.params.path as string), nodePath.value);
   const isActive = computed(
     () =>
       route.params.path &&

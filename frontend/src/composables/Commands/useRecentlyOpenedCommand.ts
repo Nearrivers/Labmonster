@@ -10,7 +10,7 @@ export function useRecentlyOpendedCommand(appCmd: Ref<InstanceType<typeof AppCom
   const keys = useMagicKeys()
   const { showToast } = useShowErrorToast()
   const recentlyOpendedFiles = ref<string[]>([])
-  const CtrlO = keys['Ctrl+o']
+  const CtrlO = keys['Ctrl+O']
 
   watch(CtrlO, async (v) => {
     if (!v || !appCmd.value) {

@@ -9,7 +9,6 @@
   <div
     class="relative h-full rounded-lg bg-background text-primary shadow-md ring-2 ring-border transition-all dark:shadow-none dark:ring-border"
     :class="[{ '!ring-primary': isNodeSelected }, props.class]"
-    @click.right.stop="console.log('noeud cliqué')"
   >
     <slot :isNodeSelected="isNodeSelected"></slot>
     <FrameData v-if="data.hasFrameDataSection" />
@@ -26,7 +25,12 @@
       />
     </Transition>
   </div>
-  <Handle :id="props.id + 'top'" type="source" :position="Position.Top" />
+  <Handle
+    :id="props.id + 'top'"
+    type="source"
+    :position="Position.Top"
+    :class="'absolute top-0 z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
+  />
   <Handle :id="props.id + 'right'" type="source" :position="Position.Right" />
   <Handle :id="props.id + 'left'" type="source" :position="Position.Left" />
   <Handle :id="props.id + 'bot'" type="source" :position="Position.Bottom" />
@@ -53,7 +57,6 @@ const emit = defineEmits<{
 
 const isDragging = ref(false);
 const { node } = useNode(props.id);
-console.log(node.style);
 const { getSelectedNodes, onNodeDragStart, onNodeDragStop } = useVueFlow();
 
 const isNodeSelected = computed(() =>

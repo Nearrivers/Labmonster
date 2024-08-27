@@ -46,7 +46,6 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
         moveFileInSidePannel(e)
         break
     }
-    console.log(e)
   });
 
   function createFileInSidePanel(e: FsEvent) {
@@ -173,7 +172,6 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
 
     // Removing the extension
     const oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
-    console.log(oldFilepath)
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {

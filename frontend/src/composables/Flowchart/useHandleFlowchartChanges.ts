@@ -15,7 +15,6 @@ export function useHandleFlowchartChanges(pathFromLabRoot: Ref<string>) {
     try {
       isSaving.value = true;
       const graph = toObject() as unknown as graph.Graph;
-      console.log(graph);
       await SaveFile(pathFromLabRoot.value, graph);
     } catch (error) {
       showToast(error);
