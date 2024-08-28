@@ -1,8 +1,8 @@
 <template>
-  <header class="flex justify-center gap-[2px] py-2 text-muted-foreground">
-    <TopButtons @createFile="createNewFileAtRoot" />
-  </header>
-  <ScrollArea class="h-[90svh] pb-4" data-path="/">
+  <section class="flex justify-center gap-[2px] py-2 text-muted-foreground">
+    <DataButtons @createFile="createNewFileAtRoot" />
+  </section>
+  <ScrollArea class="b-4 h-[90svh]" data-path="/">
     <ul
       class="w-full px-2 text-sm text-muted-foreground"
       v-if="files.length > 0"
@@ -20,7 +20,7 @@
       </template>
     </ul>
   </ScrollArea>
-  <FileContextMenu
+  <eContextMenu
     ref="fileContextMenu"
     :x="contextMenuX"
     :y="contextMenuY"
@@ -38,9 +38,11 @@ import { useSidePanel } from '@/composables/useSidePanel';
 import { CheckConfigPresenceAndLoadIt } from '$/config/AppConfig';
 import FileContextMenu from '@/components/contextmenus/FileContextMenu.vue';
 import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
-import TopButtons from '@/components/sidepanel/TopButtons.vue';
 import { useFiletree } from '@/composables/useFiletree';
 import { useMagicKeys } from '@vueuse/core';
+import DataButtons from '@/components/sidepanel/DataButtons.vue';
+import OpsButtons from '@/components/sidepanel/OpsButtons.vue';
+import SideSearch from '@/components/sidepanel/SideSearch.vue';
 
 const {
   files,

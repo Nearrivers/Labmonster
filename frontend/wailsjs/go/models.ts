@@ -1,3 +1,20 @@
+export namespace config {
+	
+	export class ConfigFile {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new ConfigFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
+
+}
+
 export namespace filetree {
 	
 	export enum FileType {

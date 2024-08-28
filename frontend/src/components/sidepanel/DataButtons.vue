@@ -11,11 +11,17 @@
     </template>
     <template #tooltip>Créer un nouveau dossier</template>
   </TopButton>
+  <TopButton @click="emit('createFolder')">
+    <template #icon>
+      <Search :stroke-width="1.75" class="h-[18px] w-[18px]" />
+    </template>
+    <template #tooltip>Rechercher</template>
+  </TopButton>
 </template>
 
 <script setup lang="ts">
 import TopButton from '@/components/ui/TopButton.vue';
-import { FilePlus2, FolderPlus } from 'lucide-vue-next';
+import { FilePlus2, FolderPlus, Search } from 'lucide-vue-next';
 
 const emit = defineEmits<{
   (e: 'createFile'): void;

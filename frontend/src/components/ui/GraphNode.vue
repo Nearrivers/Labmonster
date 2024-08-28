@@ -7,8 +7,8 @@
     @resizeEnd="rememberDimensions"
   />
   <div
-    class="relative h-full rounded-lg bg-background text-primary shadow-md ring-2 ring-border transition-all dark:shadow-none dark:ring-border"
-    :class="[{ '!ring-primary': isNodeSelected }, props.class]"
+    class="relative h-full rounded-lg bg-background text-popover ring-2 ring-accent transition-all"
+    :class="[{ '!ring-popover': isNodeSelected }, props.class]"
   >
     <slot :isNodeSelected="isNodeSelected"></slot>
     <FrameData v-if="data.hasFrameDataSection" />
@@ -29,11 +29,26 @@
     :id="props.id + 'top'"
     type="source"
     :position="Position.Top"
-    :class="'absolute top-0 z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
+    :class="'z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
   />
-  <Handle :id="props.id + 'right'" type="source" :position="Position.Right" />
-  <Handle :id="props.id + 'left'" type="source" :position="Position.Left" />
-  <Handle :id="props.id + 'bot'" type="source" :position="Position.Bottom" />
+  <Handle
+    :id="props.id + 'right'"
+    type="source"
+    :position="Position.Right"
+    :class="'z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
+  />
+  <Handle
+    :id="props.id + 'left'"
+    type="source"
+    :position="Position.Left"
+    :class="'z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
+  />
+  <Handle
+    :id="props.id + 'bot'"
+    type="source"
+    :position="Position.Bottom"
+    :class="'z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
+  />
 </template>
 
 <script setup lang="ts">

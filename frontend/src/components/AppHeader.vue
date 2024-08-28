@@ -1,9 +1,9 @@
 <template>
-  <header class="flex border-b border-b-border" style="--wails-draggable: drag">
+  <header class="flex bg-secondary" style="--wails-draggable: drag">
     <section class="p-1">
       <TopButton @click="toggleSidePanel">
         <template #icon>
-          <PanelLeft class="h-5 w-5 text-muted-foreground" />
+          <PanelLeft class="h-5 w-5" />
         </template>
         <template #tooltip> Basculer </template>
       </TopButton>

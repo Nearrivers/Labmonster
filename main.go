@@ -86,7 +86,6 @@ func main() {
 		},
 		OnShutdown: func(ctx context.Context) {
 			ft.RecentFiles.SaveRecentlyOpended()
-			w.Close()
 		},
 	})
 

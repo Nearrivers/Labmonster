@@ -1,7 +1,7 @@
 <template>
   <VueFlow
     :nodes="nodes"
-    class="h-[calc(100%-33px)]"
+    class="h-full"
     auto-connect
     :edges="edges"
     :default-edge-options="{
