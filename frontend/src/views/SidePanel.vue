@@ -20,7 +20,7 @@
       </template>
     </ul>
   </ScrollArea>
-  <eContextMenu
+  <FileContextMenu
     ref="fileContextMenu"
     :x="contextMenuX"
     :y="contextMenuY"
@@ -41,8 +41,6 @@ import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
 import { useFiletree } from '@/composables/useFiletree';
 import { useMagicKeys } from '@vueuse/core';
 import DataButtons from '@/components/sidepanel/DataButtons.vue';
-import OpsButtons from '@/components/sidepanel/OpsButtons.vue';
-import SideSearch from '@/components/sidepanel/SideSearch.vue';
 
 const {
   files,

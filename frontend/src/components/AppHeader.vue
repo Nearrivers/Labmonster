@@ -1,7 +1,10 @@
 <template>
   <header class="flex bg-secondary" style="--wails-draggable: drag">
     <section class="p-1">
-      <TopButton @click="toggleSidePanel">
+      <TopButton
+        @click="toggleSidePanel"
+        :additionnalClasses="'text-muted-foreground hover:text-accent-foreground hover:bg-accent'"
+      >
         <template #icon>
           <PanelLeft class="h-5 w-5" />
         </template>

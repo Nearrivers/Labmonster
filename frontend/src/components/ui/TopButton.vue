@@ -2,14 +2,8 @@
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger
-        class="rounded-md"
-        :class="
-          cn(
-            buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'h-min rounded-md p-1.5',
-            additionnalClasses,
-          )
-        "
+        class="h-min rounded-md p-1.5 hover:bg-accent hover:text-accent-foreground"
+        :class="additionnalClasses"
         @click="emit('click')"
       >
         <slot name="icon" />

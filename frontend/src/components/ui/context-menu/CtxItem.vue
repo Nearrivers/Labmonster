@@ -1,6 +1,6 @@
 <template>
   <li
-    class="relative flex cursor-default items-center justify-between rounded-sm px-2 py-1.5 hover:bg-muted"
+    class="relative flex cursor-default items-center justify-between rounded-sm px-2 py-1.5 hover:bg-accent"
   >
     <div class="flex items-center gap-2">
       <slot name="icon" :stroke-width="1.75" iconClass="h-[16px] w-4"></slot>
