@@ -171,6 +171,10 @@ func (ft *FileTree) OpenFile(pathFromLabRoot string) (graph.Graph, error) {
 // Sauvegarde le fichier JSON du graph
 func (ft *FileTree) SaveFile(pathFromLabRoot string, graphToSave graph.Graph) error {
 	path := filepath.Join(ft.GetLabPath(), pathFromLabRoot)
+	if !doesFileExist(path) {
+		return nil
+	}
+
 	// Create truncates the file if it already exists
 	f, err := os.Create(path)
 	if err != nil {
