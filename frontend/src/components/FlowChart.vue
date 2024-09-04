@@ -72,23 +72,18 @@ import FilePanel from './flowchart/FilePanel.vue';
 import { useHandleFlowchartChanges } from '@/composables/Flowchart/useHandleFlowchartChanges';
 import { useFlowChart } from '@/composables/Flowchart/useFlowChart';
 import FlowchartContextMenu from './contextmenus/FlowchartContextMenu.vue';
-import { useRoute, useRouter } from 'vue-router';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
-import { FsEvent } from '@/types/FsEvent';
-import { watcher } from '$/models';
-import { Routes } from '@/types/Routes';
 import TextNode from './flowchart/Nodes/TextNode.vue';
 import VideoNode from './flowchart/Nodes/VideoNode.vue';
 import ImageNode from './flowchart/Nodes/ImageNode.vue';
 
-const router = useRouter();
 const edges = ref<Edge[]>([]);
 const contextMenuX = ref(100);
 const contextMenuY = ref(100);
 const nodes = ref<Node<CustomNodeData>[]>([]);
 const { addNodes } = useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions();
-const { path, fileName } = useFlowChart();
+const { path, fileName, onFsEvent } = useFlowChart();
 const { isSaving } = useHandleFlowchartChanges(path);
 const ctxMenu = ref<InstanceType<typeof FlowchartContextMenu> | null>(null);
 
@@ -98,29 +93,7 @@ function onFlowRightClick(e: MouseEvent) {
   ctxMenu.value?.showPopover();
 }
 
-const route = useRoute();
-
-EventsOn('fsop', (e: FsEvent) => {
-  const filePath = e.path + '/' + e.file;
-  if (
-    // We skip if the operation is a file creation
-    e.op === watcher.Op.CREATE || // OR
-    // If the operation is a delete but the deleted file is not the one currently opened, we skip
-    (filePath != route.params.path && e.op === watcher.Op.REMOVE) || // OR
-    // If the operation is a move or a rename and the old path is different from the one of the file currently opened, we skip
-    (e.oldPath != route.params.path &&
-      (e.op === watcher.Op.MOVE || e.op === watcher.Op.RENAME))
-  ) {
-    return;
-  }
-
-  if (e.op === watcher.Op.REMOVE) {
-    router.push({ name: Routes.NotOpened });
-    return;
-  }
-
-  router.push({ name: Routes.Flowchart, params: { path: filePath } });
-});
+EventsOn('fsop', onFsEvent);
 
 function onAddNode() {
   addNodes(createNewNode());

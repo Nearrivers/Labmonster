@@ -420,7 +420,7 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 	// a été déplacé / renommé
 	for path1, info1 := range removes {
 		for path2, info2 := range creates {
-			if !sameFile(info1, info2) || filepath.Dir(path1) != filepath.Dir(path2) {
+			if !sameFile(info1, info2) {
 				continue
 			}
 
@@ -434,7 +434,7 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 			// will create a brand new file with a different name, making the sameFile function just above say that the file
 			// we just moved is different from the original.
 			e := Event{
-				Op:       Rename,
+				Op:       Move,
 				Path:     path2,
 				OldPath:  path1,
 				FileInfo: info1,
@@ -443,9 +443,9 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 			}
 
 			// Si l'élément est toujours dans le même dossier, alors il a été renommé et non pas déplacé
-			// if {
-			// 	e.Op = Rename
-			// }
+			if filepath.Dir(path1) == filepath.Dir(path2) {
+				e.Op = Rename
+			}
 
 			delete(removes, path1)
 			delete(creates, path2)
