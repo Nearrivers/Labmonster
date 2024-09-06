@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+const pngFileName = "testImage.png"
+
 func createTempDir(t testing.TB, dirName string) (string, *filetree.FileTree) {
 	t.Helper()
 
@@ -21,6 +23,22 @@ func createTempDir(t testing.TB, dirName string) (string, *filetree.FileTree) {
 			LabPath: dir,
 		},
 	})
+
+	b, err := os.ReadFile("./testFiles/pngImage.txt")
+	if err != nil {
+		t.Fatalf("couldn't find pngImage file: %v", err)
+	}
+
+	f, cErr := os.Create(filepath.Join(ft.GetLabPath(), pngFileName))
+	if cErr != nil {
+		t.Fatalf("couldn't create test image file: %v", cErr)
+	}
+	defer f.Close()
+
+	_, wErr := f.Write(b)
+	if wErr != nil {
+		t.Fatalf("couldn't write in test image file: %v", wErr)
+	}
 
 	return dir, ft
 }
@@ -57,23 +75,21 @@ func TestOpenMedia(t *testing.T) {
 	t.Run("opening a png image with absolute path", func(t *testing.T) {
 		dir, ft := createTempDir(t, "openPng")
 		defer os.RemoveAll(dir)
-		fileName := "Pasted Image 20240814200358.png"
-		p := filepath.Join(dir, fileName)
+		p := filepath.Join(dir, pngFileName)
 
 		_, err := ft.OpenMedia(p)
 		if err != nil {
-			t.Errorf("got an unexpected error: %v", err)
+			t.Errorf("couldn't open media: %v", err)
 		}
 	})
 
 	t.Run("opening a png image with path relative the lab's root", func(t *testing.T) {
 		dir, ft := createTempDir(t, "openPng")
 		defer os.RemoveAll(dir)
-		fileName := "Pasted Image 20240814200358.png"
 
-		_, err := ft.OpenMedia(fileName)
+		_, err := ft.OpenMedia(pngFileName)
 		if err != nil {
-			t.Errorf("got an unexpected error: %v", err)
+			t.Errorf("couldn't open media: %v", err)
 		}
 	})
 }

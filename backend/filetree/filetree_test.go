@@ -316,39 +316,36 @@ func TestDuplicateFile(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
 		fileName := "duplication test"
-		createFileBeforeTest(t, ft, fileName)
-		defer ft.DeleteFile(fileName)
+		fExt := fileName + ".json"
+		createFileBeforeTest(t, ft, fExt)
 
 		duplicatedFile, err := ft.DuplicateFile(fileName, ".json")
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
-		defer ft.DeleteFile(duplicatedFile)
 
-		assertSameFiles(t, ft, fileName, duplicatedFile)
+		assertSameFiles(t, ft, fExt, duplicatedFile)
 	})
 
 	t.Run("Running multiple file duplications in a row", func(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
 		fileName := "multiple duplication test"
-		createFileBeforeTest(t, ft, fileName)
-		defer ft.DeleteFile(fileName)
+		fExt := fileName + ".json"
+		createFileBeforeTest(t, ft, fExt)
 
 		duplicatedFile1, err := ft.DuplicateFile(fileName, ".json")
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
-		defer ft.DeleteFile(duplicatedFile1)
 
 		duplicatedFile2, err := ft.DuplicateFile(fileName, ".json")
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
-		defer ft.DeleteFile(duplicatedFile2)
 
-		assertSameFiles(t, ft, fileName, duplicatedFile1)
-		assertSameFiles(t, ft, fileName, duplicatedFile2)
+		assertSameFiles(t, ft, fExt, duplicatedFile1)
+		assertSameFiles(t, ft, fExt, duplicatedFile2)
 	})
 
 	t.Run("Trying to duplicate a file that doesn't exists", func(t *testing.T) {
@@ -548,10 +545,16 @@ func TestSaveFile(t *testing.T) {
 		ft, dir := getNewFileTreeExplorer()
 		defer os.RemoveAll(dir)
 
+		_, cErr := ft.CreateFile(fileName)
+		if cErr != nil {
+			t.Fatalf("got an error but didn't want one: %v", cErr)
+		}
+
 		err := ft.SaveFile(fileName, g)
 		if err != nil {
 			t.Fatalf("got an error but didn't want one: %v", err)
 		}
+
 		assertFileExistence(t, dir, fileName)
 	})
 }

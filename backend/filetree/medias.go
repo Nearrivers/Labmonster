@@ -48,7 +48,7 @@ func (ft *FileTree) OpenMedia(path string) (string, error) {
 	return "data:" + m + ";base64," + s, nil
 }
 
-func (ft *FileTree) SaveMedia(pathToFile, mimetype string, base64File string) (string, error) {
+func (ft *FileTree) SaveMedia(pathToFile, mimetype, base64File string) (string, error) {
 	p := filepath.Dir(pathToFile)
 	b, err := fileToBytes(base64File, mimetype)
 	if err != nil {
