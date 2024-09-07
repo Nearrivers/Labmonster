@@ -1,5 +1,6 @@
 import { ref, onMounted } from "vue";
-import { GetDirectories, MoveFileToExistingDir } from "$/filetree/FileTree";
+import { MoveFileToExistingDir } from "$/file_handler/FileHandler";
+import { GetDirectories } from "$/dirhandler/DirHandler";
 import { useShowErrorToast } from "../useShowErrorToast";
 
 export function useMoveFile(selectedNode: HTMLLIElement | null) {

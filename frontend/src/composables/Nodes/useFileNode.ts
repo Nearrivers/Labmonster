@@ -1,29 +1,29 @@
-import { RenameFile } from '$/filetree/FileTree';
+import { RenameFile } from '$/file_handler/FileHandler';
 import { ref, computed, Ref } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
-import { filetree } from '$/models';
 import { useRoute } from 'vue-router';
+import { node } from '$/models';
 
-export function useFileNode(props: Ref<{ node: filetree.Node; path: string }>) {
+export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
   const route = useRoute();
   const { showToast } = useShowErrorToast();
-  const fileName = ref(props.value.node.name);
+  const fileName = ref(props.value.fileNode.name);
   const input = ref<HTMLInputElement | null>(null);
   const ext = computed(() =>
-    props.value.node.extension.replace('.', '').toLocaleUpperCase(),
+    props.value.fileNode.extension.replace('.', '').toLocaleUpperCase(),
   );
 
   const nodePath = ref(
     props.value.path
-      ? props.value.path + '/' + props.value.node.name
-      : props.value.node.name,
+      ? props.value.path + '/' + props.value.fileNode.name
+      : props.value.fileNode.name,
   );
 
   const isActive = computed(
     () =>
       route.params.path &&
       decodeURI(route.params.path as string).includes(
-        nodePath.value + props.value.node.extension,
+        nodePath.value + props.value.fileNode.extension,
       ),
   );
 
@@ -32,7 +32,7 @@ export function useFileNode(props: Ref<{ node: filetree.Node; path: string }>) {
   );
 
   const updatedAt = computed(() => {
-    const date = new Date(props.value.node.updatedAt);
+    const date = new Date(props.value.fileNode.updatedAt);
     return `${date.toLocaleDateString()} à ${date.toLocaleTimeString()}`;
   });
 
@@ -61,10 +61,10 @@ export function useFileNode(props: Ref<{ node: filetree.Node; path: string }>) {
     input.value.classList.remove('cursor-text');
 
     try {
-      const newName = fileName.value + props.value.node.extension;
+      const newName = fileName.value + props.value.fileNode.extension;
       await RenameFile(
         props.value.path,
-        props.value.node.name + props.value.node.extension,
+        props.value.fileNode.name + props.value.fileNode.extension,
         newName,
       );
     } catch (error) {

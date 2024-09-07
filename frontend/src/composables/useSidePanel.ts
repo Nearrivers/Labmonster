@@ -1,5 +1,5 @@
-import { GetSubDirAndFiles, CreateFile } from '$/filetree/FileTree';
-import { filetree } from '$/models';
+import { GetSubDirAndFiles, CreateFile } from '$/file_handler/FileHandler';
+import { node } from '$/models';
 import { NEW_FILE_NAME } from '@/constants/NEW_FILE_NAME';
 import { nextTick, ref } from 'vue';
 import { useShowErrorToast } from './useShowErrorToast';
@@ -13,7 +13,7 @@ import { SupportedFiles } from '@/types/SupportedFiles';
 import { useEventListener } from './useEventListener';
 
 export function useSidePanel() {
-  const files = ref<filetree.Node[]>([]);
+  const files = ref<node.Node[]>([]);
   const router = useRouter();
   const { showToast } = useShowErrorToast();
   const contextMenuX = ref(100);

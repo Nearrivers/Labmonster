@@ -1,7 +1,7 @@
 import { Ref, ref, watch } from "vue";
 import { useShowErrorToast } from "../useShowErrorToast";
 import { useRouter } from "vue-router";
-import { GetRecentlyOpenedFiles } from "$/filetree/FileTree";
+import { GetRecentlyOpenedFiles } from "$/file_handler/FileHandler";
 import { useMagicKeys } from "@vueuse/core";
 import AppCommand from "@/components/ui/AppCommand.vue";
 

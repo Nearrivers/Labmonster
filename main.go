@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"flow-poc/backend/config"
-	"flow-poc/backend/filetree"
+	dirhandler "flow-poc/backend/filesystem/dir_handler"
+	"flow-poc/backend/filesystem/file_handler"
+	"flow-poc/backend/filesystem/node"
 	"flow-poc/backend/topmenu"
 	"flow-poc/backend/watcher"
 
@@ -29,7 +31,8 @@ func main() {
 	app := NewApp()
 	topmenu := topmenu.NewTopMenu()
 	config := config.NewAppConfig()
-	ft := filetree.NewFileTree(config)
+	fh := file_handler.NewFileHandler(config)
+	dh := dirhandler.NewDirHandler(config)
 	w := watcher.New(config)
 
 	go func() {
@@ -77,15 +80,16 @@ func main() {
 			app,
 			topmenu,
 			config,
-			ft,
+			fh,
+			dh,
 		},
 		EnumBind: []interface{}{
 			watcher.FsOps,
-			filetree.FTypes,
-			filetree.DTypes,
+			node.FTypes,
+			node.DTypes,
 		},
 		OnShutdown: func(ctx context.Context) {
-			ft.RecentFiles.SaveRecentlyOpended()
+			fh.RecentFiles.SaveRecentlyOpended()
 		},
 	})
 

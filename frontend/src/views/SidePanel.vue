@@ -12,11 +12,11 @@
       <template v-for="(file, index) in files" :key="file.name">
         <FileNode
           v-if="file.type === 'FILE'"
-          :node="file"
+          :fileNode="file"
           path=""
           :data-id="index"
         />
-        <DirNode v-else :node="file" path="" :data-id="index" />
+        <DirNode v-else :dirNode="file" path="" :data-id="index" />
       </template>
     </ul>
   </ScrollArea>

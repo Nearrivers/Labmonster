@@ -13,7 +13,7 @@
               :class="{ 'rotate-90': isOpen }"
             />
             <p>
-              {{ node.name }}
+              {{ dirNode.name }}
             </p>
           </div>
         </TooltipTrigger>
@@ -26,11 +26,11 @@
       <template v-for="(child, index) in files" :key="nodePath + child.name">
         <FileNode
           v-if="child.type == 'FILE'"
-          :node="child"
+          :fileNode="child"
           :path="nodePath"
           :data-id="index"
         />
-        <DirNode v-else :node="child" :path="nodePath" :data-id="index" />
+        <DirNode v-else :dirNode="child" :path="nodePath" :data-id="index" />
       </template>
     </ul>
   </li>
@@ -43,17 +43,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { filetree } from '$/models';
+import { node } from '$/models';
 import { toRef } from 'vue';
 import { ChevronRight } from 'lucide-vue-next';
-import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';
 import { useDirNode } from '@/composables/Nodes/useDirNode';
 
 const props = defineProps<{
-  node: filetree.Node;
+  dirNode: node.Node;
   path: string;
 }>();
 

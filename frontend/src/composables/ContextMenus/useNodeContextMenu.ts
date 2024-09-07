@@ -1,4 +1,4 @@
-import { DuplicateFile } from '$/filetree/FileTree';
+import { DuplicateFile } from '$/file_handler/FileHandler';
 import { AppDialog } from '@/types/AppDialog';
 import { nextTick, Ref } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';

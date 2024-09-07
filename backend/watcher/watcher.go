@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"flow-poc/backend/config"
-	"flow-poc/backend/filetree"
+	"flow-poc/backend/filesystem/node"
 	"fmt"
 	"log"
 	"os"
@@ -77,11 +77,11 @@ func (e Op) String() string {
 // complet du fichier
 type Event struct {
 	Op       `json:"op"`
-	Path     string            `json:"path"`
-	OldPath  string            `json:"oldPath"`
-	FilePath string            `json:"file"`
-	FileType filetree.FileType `json:"fileType"`
-	DataType filetree.DataType `json:"dataType"`
+	Path     string        `json:"path"`
+	OldPath  string        `json:"oldPath"`
+	FilePath string        `json:"file"`
+	FileType node.FileType `json:"fileType"`
+	DataType node.DataType `json:"dataType"`
 	os.FileInfo
 }
 
@@ -424,9 +424,9 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 				continue
 			}
 
-			var dType = filetree.FILE
+			var dType = node.FILE
 			if info1.IsDir() {
-				dType = filetree.DIR
+				dType = node.DIR
 			}
 
 			// The move operation is now treated as a delete => create by default because of the non-duplicate creation.
@@ -438,7 +438,7 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 				Path:     path2,
 				OldPath:  path1,
 				FileInfo: info1,
-				FileType: filetree.DetectFileType(filepath.Ext(path2)),
+				FileType: node.DetectFileType(filepath.Ext(path2)),
 				DataType: dType,
 			}
 
@@ -466,12 +466,12 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		case <-cancel:
 			return
 		default:
-			var dType = filetree.FILE
+			var dType = node.FILE
 			if info.IsDir() {
-				dType = filetree.DIR
+				dType = node.DIR
 			}
 			log.Println(path)
-			e := Event{Create, path, "", "", filetree.DetectFileType(filepath.Ext(path)), dType, info}
+			e := Event{Create, path, "", "", node.DetectFileType(filepath.Ext(path)), dType, info}
 			evt <- e
 		}
 	}
@@ -481,12 +481,12 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		case <-cancel:
 			return
 		default:
-			var dType = filetree.FILE
+			var dType = node.FILE
 			if info.IsDir() {
-				dType = filetree.DIR
+				dType = node.DIR
 			}
 			log.Println(path)
-			e := Event{Remove, path, path, "", filetree.DetectFileType(filepath.Ext(path)), dType, info}
+			e := Event{Remove, path, path, "", node.DetectFileType(filepath.Ext(path)), dType, info}
 			evt <- e
 		}
 	}

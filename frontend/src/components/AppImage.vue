@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { OpenMedia } from '$/filetree/FileTree';
+import { OpenMedia } from '$/file_handler/FileHandler';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import { computed, ref, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';

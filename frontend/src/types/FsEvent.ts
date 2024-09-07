@@ -1,4 +1,4 @@
-import { filetree, watcher } from "$/models"
+import { node, watcher } from "$/models"
 
 /**
  * Equivalent of the Event type in the watcher package of the golang side.
@@ -9,6 +9,6 @@ export type FsEvent = {
   path: string
   op: watcher.Op
   file: string
-  fileType: filetree.FileType
-  dataType: filetree.DataType
+  fileType: node.FileType
+  dataType: node.DataType
 }

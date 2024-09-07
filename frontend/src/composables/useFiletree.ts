@@ -1,7 +1,7 @@
-import { filetree, watcher } from "$/models";
+import { node, watcher } from "$/models";
 import { provide, Ref, ref } from "vue";
 import { EventsOn } from "../../wailsjs/runtime"
-import { DirPath, FiletreeProvide, ShortNode } from "@/types/filetreeProvide";
+import { DirPath, FiletreeProvide, ShortNode } from "@/types/FiletreeProvide";
 import { FsEvent } from "@/types/FsEvent";
 import { ShowToastFunc } from "./useShowErrorToast";
 
@@ -9,7 +9,7 @@ import { ShowToastFunc } from "./useShowErrorToast";
  * Composable that reconciles the in-app filetree and the 
  * user's machine filesystem
  */
-export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc: ShowToastFunc) {
+export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: ShowToastFunc) {
   /**
    * Map that holds the path to a directory as the key and 
    * the reference to that directory files array as value
@@ -79,7 +79,7 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
 
   function deleteFileFromSidePannelWithPath(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
-    let dir: filetree.Node[] | ShortNode[]
+    let dir: node.Node[] | ShortNode[]
     let oldFilepath: string
     if (e.path === '.') {
       // handle lab's root delete
@@ -115,7 +115,7 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
 
   function deleteFileFromSidePannelWithOldPath(e: FsEvent) {
     // If e.oldpath doesn't include '/', that means that the deletion happened at lab's root
-    let dir: filetree.Node[] | ShortNode[]
+    let dir: node.Node[] | ShortNode[]
     let oldFilepath: string
     if (!e.oldPath.includes('/')) {
       // handle lab's root delete

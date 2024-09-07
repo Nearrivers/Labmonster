@@ -1,12 +1,12 @@
 import { FlowExportObject, useVueFlow } from '@vue-flow/core';
 import { useEventListener } from '../useEventListener';
-import { OpenFile, SaveMedia } from '$/filetree/FileTree';
+import { OpenFile, SaveMedia } from '$/file_handler/FileHandler';
 import { CustomNodeData } from '@/types/CustomNodeData';
 import { useRoute, useRouter } from 'vue-router';
 import { computed, ref, watch } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
 import { FsEvent } from '@/types/FsEvent';
-import { filetree, watcher } from '$/models';
+import { node, watcher } from '$/models';
 import { Routes } from '@/types/Routes';
 
 export function useFlowChart() {
@@ -118,7 +118,7 @@ export function useFlowChart() {
   function onFsEvent(e: FsEvent) {
     lastOp.value = e
     console.log(e)
-    if (e.fileType != filetree.FileType.GRAPH) {
+    if (e.fileType != node.FileType.GRAPH) {
       return
     }
 

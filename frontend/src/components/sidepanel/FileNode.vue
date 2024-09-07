@@ -3,8 +3,8 @@
     class="mb-0.5 w-full"
     :data-path="nodePath"
     data-type="file"
-    :data-extension="node.extension"
-    :data-file="node.fileType"
+    :data-extension="fileNode.extension"
+    :data-file="fileNode.fileType"
     @keyup.stop="selectInput"
   >
     <TooltipProvider>
@@ -14,7 +14,7 @@
           :class="{ 'bg-accent text-accent-foreground': isActive }"
         >
           <div class="flex w-full items-center gap-x-1 pl-[14px] font-normal">
-            <NodeIcon :fileType="props.node.fileType" />
+            <NodeIcon :fileType="props.fileNode.fileType" />
             <input
               role="textbox"
               ref="input"
@@ -47,13 +47,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { filetree } from '$/models';
+import { node } from '$/models';
 import { useFileNode } from '@/composables/Nodes/useFileNode';
 import { toRef } from 'vue';
 import NodeIcon from './NodeIcon.vue';
 
 const props = defineProps<{
-  node: filetree.Node;
+  fileNode: node.Node;
   path: string;
 }>();
 

@@ -25,7 +25,7 @@
 import { Styles, useNode, useVueFlow } from '@vue-flow/core';
 import { computed, onMounted, ref } from 'vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
-import { OpenMedia } from '$/filetree/FileTree';
+import { OpenMedia } from '$/file_handler/FileHandler';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import GraphNode from '@/components/ui/GraphNode.vue';
 
