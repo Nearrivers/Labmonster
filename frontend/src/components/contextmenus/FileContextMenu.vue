@@ -53,7 +53,7 @@ import { Files } from 'lucide-vue-next';
 import { FolderTree, Trash2, PencilLine } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import DeleteFileDialog from '../AlertDialog/DeleteFileDialog.vue';
-import { useFileContextMenu } from '@/composables/ContextMenus/useNodeContextMenu';
+import { useFileContextMenu } from '@/composables/ContextMenus/useFileContextMenu';
 import MoveFileCommand from '../commands/MoveFileCommand.vue';
 import AppCtxMenu from '../ui/context-menu/AppCtxMenu.vue';
 import CtxSection from '../ui/context-menu/CtxSection.vue';

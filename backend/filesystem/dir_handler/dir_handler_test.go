@@ -2,6 +2,7 @@ package dirhandler
 
 import (
 	"flow-poc/backend/config"
+	"flow-poc/backend/filesystem/node"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,7 +26,7 @@ func createDirHelper(t testing.TB, tempDirPath, dirName string) {
 // Returns the path to the temporary dir and the filetree that resulted.
 // The function os.RemoveAll(dir) should be called with the defer keyword
 // to clean up after tests that use this helper function
-func createTempDir(t testing.TB, testDirName, testFileName string) (string, *DirHandler) {
+func createTempDir(t testing.TB, testDirName string) (string, *DirHandler) {
 	t.Helper()
 
 	tempDir := os.TempDir()
@@ -47,8 +48,7 @@ func createTempDir(t testing.TB, testDirName, testFileName string) (string, *Dir
 func TestGetLabDirs(t *testing.T) {
 	t.Run("get every directory of the lab", func(t *testing.T) {
 		subDir1 := "testDir1"
-		subFile1 := "testFile1"
-		dir, ft := createTempDir(t, "testNextLevel", subFile1)
+		dir, ft := createTempDir(t, "testNextLevel")
 		defer os.RemoveAll(dir)
 		createDirHelper(t, dir, subDir1)
 
@@ -63,5 +63,90 @@ func TestGetLabDirs(t *testing.T) {
 		if len(ft.Directories) != 3 {
 			t.Errorf("want 3 directories, got %d with %s", len(ft.Directories), strings.Join(ft.Directories, ", "))
 		}
+	})
+}
+
+func assertDirExistence(t testing.TB, absPath string) {
+	t.Helper()
+
+	stat, err := os.Stat(absPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			t.Fatalf("the directory was not created")
+		}
+
+		t.Fatalf("couldn't get dir stats: %v", err)
+	}
+
+	if !stat.IsDir() {
+		t.Fatal("the path doesn't point to a directory")
+	}
+}
+
+func TestCreateDir(t *testing.T) {
+	t.Run("Creating one directory", func(t *testing.T) {
+		subDir := "testDir"
+		dir, dh := createTempDir(t, "testCreateDir")
+		defer os.RemoveAll(dir)
+
+		n, err := dh.CreateDirectory(subDir)
+		if err != nil {
+			t.Fatalf("couldn't create folder: %v", err)
+		}
+
+		if n.Type != node.DIR {
+			t.Fatalf("the created node is not a directory")
+		}
+
+		if n.Name != subDir {
+			t.Fatalf("wrong node name received: got %s, want %s", n.Name, subDir)
+		}
+	})
+
+	t.Run("Creating multiple dirs in a row with the same name", func(t *testing.T) {
+		subDir := "testDirMultiple"
+		dir, dh := createTempDir(t, "testCreateDirMultiple")
+		defer os.RemoveAll(dir)
+
+		cpt := 0
+		for cpt < 3 {
+			_, cErr := dh.CreateDirectory(subDir)
+			if cErr != nil {
+				t.Fatalf("Couldn't create folder: %v", cErr)
+			}
+
+			cpt++
+		}
+
+		fp := filepath.Join(dir, subDir)
+		fp1 := filepath.Join(dir, subDir+" 1")
+		fp2 := filepath.Join(dir, subDir+" 2")
+		assertDirExistence(t, fp)
+		assertDirExistence(t, fp1)
+		assertDirExistence(t, fp2)
+	})
+
+	t.Run("Creating a dir then another inside it", func(t *testing.T) {
+		subDir := "testSubDir"
+		subSubDir := "testSubSubDir"
+		dir, dh := createTempDir(t, "testSubDir")
+		defer os.RemoveAll(dir)
+
+		_, c1Err := dh.CreateDirectory(subDir)
+		if c1Err != nil {
+			t.Fatalf("couldn't create first sub directory: %v", c1Err)
+		}
+
+		fp := filepath.Join(dir, subDir)
+		assertDirExistence(t, fp)
+
+		sP := filepath.Join(subDir, subSubDir)
+		_, c2Err := dh.CreateDirectory(sP)
+		if c2Err != nil {
+			t.Fatalf("couldn't create the last sub directory: %v", c2Err)
+		}
+
+		fp2 := filepath.Join(dir, subDir, subSubDir)
+		assertDirExistence(t, fp2)
 	})
 }

@@ -2,7 +2,9 @@ package dirhandler
 
 import (
 	"flow-poc/backend/config"
+	"flow-poc/backend/filesystem/node"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -54,4 +56,32 @@ func (dh *DirHandler) GetLabDirs() error {
 func (dh *DirHandler) GetDirectories() []string {
 	dh.GetLabDirs()
 	return dh.Directories
+}
+
+func (dh *DirHandler) CreateDirectory(pathFromLabRoot string) (node.Node, error) {
+	p := filepath.Join(dh.GetLabPath(), pathFromLabRoot)
+
+	if !doesDirExists(p) {
+		err := os.Mkdir(p, os.ModeAppend)
+		if err != nil {
+			return node.Node{}, err
+		}
+
+		name := filepath.Base(p)
+		n := node.NewNode(name, "", node.DIR)
+		return n, nil
+	}
+
+	name, dupErr := createNonDuplicateDir(p)
+	if dupErr != nil {
+		return node.Node{}, dupErr
+	}
+
+	n := node.NewNode(name, "", node.DIR)
+	return n, nil
+}
+
+func doesDirExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
 }

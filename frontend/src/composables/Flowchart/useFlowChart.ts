@@ -130,8 +130,6 @@ export function useFlowChart() {
     }
 
     if (
-      // We skip if the operation is a file creation
-      e.op === watcher.Op.CREATE || // OR
       // If the operation is a delete but the deleted file is not the one currently opened, we skip
       (filePath != routePath && e.op === watcher.Op.REMOVE) || // OR
       // If the operation is a move or a rename and the old path is different from the one of the file currently opened, we skip

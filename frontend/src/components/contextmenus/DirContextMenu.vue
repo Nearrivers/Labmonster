@@ -1,13 +1,13 @@
 <template>
   <AppCtxMenu :y="y" :x="x" popover-id="dirpopover" ref="ctxMenu">
     <CtxSection>
-      <CtxItem>
+      <CtxItem @click="createNewSetup(path)">
         <template #icon="{ strokeWidth, iconClass }">
           <SquarePen :stroke-width="strokeWidth" :class="iconClass" />
         </template>
         <template #text>Nouveau setup</template>
       </CtxItem>
-      <CtxItem>
+      <CtxItem @click="createNewDirectory(path)">
         <template #icon="{ strokeWidth, iconClass }">
           <FolderOpen :stroke-width="strokeWidth" :class="iconClass" />
         </template>
@@ -54,20 +54,26 @@ import {
   SquarePen,
   Trash2,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import AppCtxMenu from '../ui/context-menu/AppCtxMenu.vue';
 import CtxSection from '../ui/context-menu/CtxSection.vue';
 import CtxItem from '../ui/context-menu/CtxItem.vue';
+import { useDirContextMenu } from '@/composables/ContextMenus/useDirContextMenu';
 
-defineProps<{
+const props = defineProps<{
   x: number;
   y: number;
+  selectedNode: HTMLLIElement | null;
 }>();
 
 const ctxMenu = ref<InstanceType<typeof AppCtxMenu> | null>(null);
+const { showPopover, hidePopover, createNewSetup, createNewDirectory } =
+  useDirContextMenu(ctxMenu, null);
+
+const path = computed(() => props.selectedNode?.dataset.path || '');
 
 defineExpose({
-  showPopover: () => ctxMenu.value!.showPopover(),
-  hidePopover: () => ctxMenu.value!.hidePopover(),
+  showPopover,
+  hidePopover,
 });
 </script>

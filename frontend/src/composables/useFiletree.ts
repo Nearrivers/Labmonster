@@ -32,6 +32,7 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
   // On every "operation" that happens in the filesystem, the go side will launch an
   // event that gets caught here.
   EventsOn('fsop', function (e: FsEvent) {
+    console.log(e)
     switch (e.op) {
       case watcher.Op.CREATE:
         createFileInSidePanel(e)
@@ -64,13 +65,25 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       return
     }
 
-    const i = e.file.lastIndexOf('.')
-    const fileName = e.file.slice(0, i)
-    const extension = e.file.slice(i)
+    if (e.dataType === node.DataType.FILE) {
+      const i = e.file.lastIndexOf('.')
+      const fileName = e.file.slice(0, i)
+      const extension = e.file.slice(i)
+
+      dir.push({
+        name: fileName,
+        extension: extension,
+        fileType: e.fileType,
+        type: e.dataType,
+        updatedAt: new Date()
+      })
+
+      return
+    }
 
     dir.push({
-      name: fileName,
-      extension: extension,
+      name: e.file,
+      extension: "",
       fileType: e.fileType,
       type: e.dataType,
       updatedAt: new Date()

@@ -22,8 +22,6 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
 
 defineProps<{
   additionnalClasses?: string;

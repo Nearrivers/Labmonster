@@ -1,6 +1,9 @@
 <template>
   <section class="flex justify-center gap-[2px] py-2 text-muted-foreground">
-    <DataButtons @createFile="createNewFileAtRoot" />
+    <DataButtons
+      @createFile="createNewFileAtRoot"
+      @create-folder="createNewFolderAtRoot"
+    />
   </section>
   <ScrollArea class="b-4 h-[90svh]" data-path="/">
     <ul
@@ -26,7 +29,12 @@
     :y="contextMenuY"
     :selected-node="selectedNode"
   />
-  <DirContextMenu ref="dirContextMenu" :x="contextMenuX" :y="contextMenuY" />
+  <DirContextMenu
+    ref="dirContextMenu"
+    :x="contextMenuX"
+    :y="contextMenuY"
+    :selected-node="selectedNode"
+  />
 </template>
 
 <script setup lang="ts">
@@ -52,6 +60,7 @@ const {
   loadLabFiles,
   onRightClick,
   createNewFileAtRoot,
+  createNewFolderAtRoot,
   showToast,
   onLeftClick,
 } = useSidePanel();

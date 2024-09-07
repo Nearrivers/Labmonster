@@ -11,6 +11,8 @@ import { useRouter } from 'vue-router';
 import { Routes } from '@/types/Routes';
 import { SupportedFiles } from '@/types/SupportedFiles';
 import { useEventListener } from './useEventListener';
+import { CreateDirectory } from '$/dirhandler/DirHandler';
+import { NEW_DIR_NAME } from '@/constants/NEW_DIR_NAME';
 
 export function useSidePanel() {
   const files = ref<node.Node[]>([]);
@@ -35,13 +37,17 @@ export function useSidePanel() {
 
   async function createNewFileAtRoot() {
     try {
-      const file = await CreateFile(NEW_FILE_NAME);
-      router.push({
-        name: Routes.Flowchart,
-        params: { path: file.name },
-      });
+      await CreateFile(NEW_FILE_NAME);
     } catch (error) {
       showToast(error, 'Impossible de créer le fichier');
+    }
+  }
+
+  async function createNewDirAtRoot() {
+    try {
+      await CreateDirectory(NEW_DIR_NAME)
+    } catch (error) {
+      showToast(error, "Impossible de créer le dossier")
     }
   }
 
@@ -98,6 +104,7 @@ export function useSidePanel() {
     selectedNode,
     loadLabFiles,
     createNewFileAtRoot,
+    createNewFolderAtRoot: createNewDirAtRoot,
     onRightClick,
     onLeftClick,
     showToast,

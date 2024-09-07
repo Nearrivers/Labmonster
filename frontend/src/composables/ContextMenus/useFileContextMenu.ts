@@ -45,7 +45,6 @@ export function useFileContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> 
   }
 
   return {
-    ctxMenu,
     showPopover,
     hidePopover,
     onRenameClick,
