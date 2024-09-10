@@ -32,7 +32,7 @@ func main() {
 	topmenu := topmenu.NewTopMenu()
 	config := config.NewAppConfig()
 	fh := file_handler.NewFileHandler(config)
-	dh := dirhandler.NewDirHandler(config)
+	dh := dirhandler.NewDirHandler(config, fh.RecentFiles)
 	w := watcher.New(config)
 
 	go func() {

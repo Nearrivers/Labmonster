@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 )
 
 const (
@@ -119,6 +120,38 @@ func (r *RecentlyOpened) LoadRecentlyOpended() error {
 	}
 
 	return nil
+}
+
+// This function will try to open every recently opened file. If the file doesn't exists
+// anymore, it will remove it from the list. This function is called after deleting a directory
+// in order to check if any recent files were in that directory.
+func (r *RecentlyOpened) CheckIfRecentFileStillExists() {
+	labPath := r.getLabPath()
+
+	for _, recentFile := range r.FilePaths {
+		path := filepath.Join(labPath, recentFile)
+
+		f, err := os.Open(path)
+		if err != nil && os.IsNotExist(err) {
+			r.RemoveRecent(recentFile)
+		}
+
+		f.Close()
+	}
+}
+
+// Iterates over recently opened file list and replace every instance
+// of oldPathFromRoot with newPathFromRoot. This function is used after renaming a directory
+// to make sure every paths are still relevant with the user's machine.
+func (r *RecentlyOpened) ReconcilePaths(oldPathFromRoot, newPathFromRoot string) {
+	for i, recentFile := range r.FilePaths {
+		if !strings.Contains(recentFile, oldPathFromRoot) {
+			continue
+		}
+
+		line := strings.Replace(recentFile, oldPathFromRoot, newPathFromRoot, 1)
+		r.FilePaths[i] = line
+	}
 }
 
 func (r *RecentlyOpened) getLabmonsterDirPath() string {

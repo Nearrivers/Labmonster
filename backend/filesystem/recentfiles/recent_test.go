@@ -64,6 +64,26 @@ func assertContentMatchWithSaved(t testing.TB, tempDirPath string, r *RecentlyOp
 	}
 }
 
+// Returns a closure that deletes the file created
+func createPhysicalFile(t testing.TB, tempDirPath, fileName string) func() {
+	t.Helper()
+
+	path := filepath.Join(tempDirPath, fileName)
+
+	f, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("couldn't create file: %v", err)
+	}
+	f.Close()
+
+	return func() {
+		rErr := os.Remove(path)
+		if rErr != nil {
+			t.Fatalf("couln't remove %s: %v", fileName, rErr)
+		}
+	}
+}
+
 func TestSaveRecent(t *testing.T) {
 	r, dir := initRecentlyOpened(t, 10)
 	defer os.RemoveAll(dir)
@@ -151,4 +171,69 @@ func TestAddRecent(t *testing.T) {
 			t.Errorf("got %v, want %v", r.FilePaths, want)
 		}
 	})
+}
+
+func TestReplaceRecent(t *testing.T) {
+	t.Run("replace one element", func(t *testing.T) {
+		ro, dir := initRecentlyOpened(t, 1)
+		defer os.RemoveAll(dir)
+		path := "testReplace.json"
+		newPath := "testNewPath.json"
+
+		ro.AddRecentFile(path)
+
+		if ro.FilePaths[0] != path {
+			t.Fatalf("wrong path inserted. want %s, got %s", path, ro.FilePaths[0])
+		}
+
+		ro.ReplaceRecent(path, newPath)
+		if ro.FilePaths[0] != newPath {
+			t.Fatalf("wrong path replaced. want %s, got %s", newPath, ro.FilePaths[0])
+		}
+	})
+
+	t.Run("trying to replace a path that doesn't exists", func(t *testing.T) {
+		ro, dir := initRecentlyOpened(t, 1)
+		defer os.RemoveAll(dir)
+		path := "testReplace.json"
+		wrongPath := "wrongPath.json"
+		newPath := "testNewPath.json"
+
+		ro.AddRecentFile(path)
+
+		if ro.FilePaths[0] != path {
+			t.Fatalf("wrong path inserted. want %s, got %s", path, ro.FilePaths[0])
+		}
+
+		ro.ReplaceRecent(wrongPath, newPath)
+		if ro.FilePaths[0] != path {
+			t.Fatalf("wrong path replaced. want %s, got %s", path, ro.FilePaths[0])
+		}
+	})
+}
+
+func TestCheckIfRecentFileStillExists(t *testing.T) {
+	ro, dir := initRecentlyOpened(t, 2)
+	defer os.RemoveAll(dir)
+
+	file1 := "testFile1.json"
+	file2 := "testFileDelete.json"
+
+	createPhysicalFile(t, dir, file1)
+	removeCb := createPhysicalFile(t, dir, file2)
+
+	ro.AddRecentFile(file1)
+	ro.AddRecentFile(file2)
+
+	// deletes file2 from the machine
+	removeCb()
+
+	ro.CheckIfRecentFileStillExists()
+	if len(ro.FilePaths) > 1 {
+		t.Fatalf("no file was deleted: %v", ro.FilePaths)
+	}
+}
+
+func TestReconcilePaths(t *testing.T) {
+	// TODO: Implement
 }

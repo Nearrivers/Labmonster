@@ -35,13 +35,16 @@
         </template>
         <template #text>Renommer</template>
       </CtxItem>
-      <CtxItem class="text-red-500">
+      <CtxItem class="text-red-500" @click="onDeleteClick(path)">
         <template #icon="{ strokeWidth, iconClass }">
           <Trash2 :stroke-width="strokeWidth" :class="iconClass" />
         </template>
         <template #text>Supprimer</template>
       </CtxItem>
     </CtxSection>
+    <template #commands>
+      <DeleteDirDialog ref="deleteDialog" :path="selectedNode?.dataset.path" />
+    </template>
   </AppCtxMenu>
 </template>
 
@@ -59,6 +62,7 @@ import AppCtxMenu from '../ui/context-menu/AppCtxMenu.vue';
 import CtxSection from '../ui/context-menu/CtxSection.vue';
 import CtxItem from '../ui/context-menu/CtxItem.vue';
 import { useDirContextMenu } from '@/composables/ContextMenus/useDirContextMenu';
+import DeleteDirDialog from '../AlertDialog/DeleteDirDialog.vue';
 
 const props = defineProps<{
   x: number;
@@ -66,9 +70,15 @@ const props = defineProps<{
   selectedNode: HTMLLIElement | null;
 }>();
 
+const deleteDialog = ref<InstanceType<typeof DeleteDirDialog> | null>(null);
 const ctxMenu = ref<InstanceType<typeof AppCtxMenu> | null>(null);
-const { showPopover, hidePopover, createNewSetup, createNewDirectory } =
-  useDirContextMenu(ctxMenu, null);
+const {
+  showPopover,
+  hidePopover,
+  createNewSetup,
+  createNewDirectory,
+  onDeleteClick,
+} = useDirContextMenu(ctxMenu, deleteDialog);
 
 const path = computed(() => props.selectedNode?.dataset.path || '');
 

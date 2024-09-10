@@ -3,6 +3,7 @@ package dirhandler
 import (
 	"flow-poc/backend/config"
 	"flow-poc/backend/filesystem/node"
+	"flow-poc/backend/filesystem/recentfiles"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,11 +37,12 @@ func createTempDir(t testing.TB, testDirName string) (string, *DirHandler) {
 		t.Fatalf("an error occured while creating temporary directory: %v %s", err, tempDir)
 	}
 
-	dh := NewDirHandler(&config.AppConfig{
+	c := &config.AppConfig{
 		ConfigFile: config.ConfigFile{
 			LabPath: dir,
 		},
-	})
+	}
+	dh := NewDirHandler(c, recentfiles.NewRecentlyOpened(c, 5))
 
 	return dir, dh
 }
@@ -80,6 +82,15 @@ func assertDirExistence(t testing.TB, absPath string) {
 
 	if !stat.IsDir() {
 		t.Fatal("the path doesn't point to a directory")
+	}
+}
+
+func assertDirDoesNotExists(t testing.TB, absPath string) {
+	t.Helper()
+
+	_, err := os.Stat(absPath)
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatalf("wrong error received: %v", err)
 	}
 }
 
@@ -149,4 +160,32 @@ func TestCreateDir(t *testing.T) {
 		fp2 := filepath.Join(dir, subDir, subSubDir)
 		assertDirExistence(t, fp2)
 	})
+}
+
+func TestRemoveDir(t *testing.T) {
+	subDir := "removeDir"
+	dir, dh := createTempDir(t, "testRemove")
+	defer os.RemoveAll(dir)
+	createDirHelper(t, dir, subDir)
+
+	err := dh.DeleteDirectory(subDir)
+	if err != nil {
+		t.Errorf("couldn't delete the directory: %v", err)
+	}
+
+	fp := filepath.Join(dir, subDir)
+	assertDirDoesNotExists(t, fp)
+}
+
+func TestRenameDirectory(t *testing.T) {
+	subDir := "renameDir"
+	dir, dh := createTempDir(t, "testRename")
+	defer os.RemoveAll(dir)
+	createDirHelper(t, dir, subDir)
+
+	newSubDirName := "newNameDir"
+	err := dh.RenameDirectory(subDir, newSubDirName)
+	if err != nil {
+		t.Errorf("couldn't rename dir: %v", err)
+	}
 }

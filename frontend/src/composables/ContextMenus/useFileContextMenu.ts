@@ -4,7 +4,10 @@ import { nextTick, Ref } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
 import AppCtxMenu from '@/components/contextmenus/AppCtxMenu.vue';
 
-export function useFileContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>, deleteDialog: Ref<AppDialog | null>) {
+export function useFileContextMenu(
+  ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>,
+  deleteDialog: Ref<AppDialog | null>,
+) {
   const { showToast } = useShowErrorToast();
 
   function showPopover() {
@@ -24,7 +27,7 @@ export function useFileContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> 
       fileInput.toggleAttribute('readonly');
       fileInput.classList.remove('cursor-pointer');
       fileInput.classList.add('cursor-text');
-      fileInput.select()
+      fileInput.select();
       fileInput.focus();
     }
   }

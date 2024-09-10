@@ -3,6 +3,7 @@ package dirhandler
 import (
 	"flow-poc/backend/config"
 	"flow-poc/backend/filesystem/node"
+	"flow-poc/backend/filesystem/recentfiles"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -12,11 +13,13 @@ import (
 type DirHandler struct {
 	Cfg         *config.AppConfig
 	Directories []string `json:"directories"`
+	recent      *recentfiles.RecentlyOpened
 }
 
-func NewDirHandler(cfg *config.AppConfig) *DirHandler {
+func NewDirHandler(cfg *config.AppConfig, recent *recentfiles.RecentlyOpened) *DirHandler {
 	dh := &DirHandler{
-		Cfg: cfg,
+		Cfg:    cfg,
+		recent: recent,
 	}
 
 	return dh
@@ -79,6 +82,29 @@ func (dh *DirHandler) CreateDirectory(pathFromLabRoot string) (node.Node, error)
 
 	n := node.NewNode(name, "", node.DIR)
 	return n, nil
+}
+
+func (dh *DirHandler) DeleteDirectory(pathFromLabRoot string) error {
+	p := filepath.Join(dh.GetLabPath(), pathFromLabRoot)
+
+	err := os.RemoveAll(p)
+	if err != nil {
+		return err
+	}
+
+	dh.recent.CheckIfRecentFileStillExists()
+
+	return nil
+}
+
+func (dh *DirHandler) RenameDirectory(oldPathFromRoot, newPathFromRoot string) error {
+	labPath := dh.GetLabPath()
+	p := filepath.Join(labPath, oldPathFromRoot)
+	np := filepath.Join(labPath, newPathFromRoot)
+
+	dh.recent.ReconcilePaths(oldPathFromRoot, newPathFromRoot)
+
+	return os.Rename(p, np)
 }
 
 func doesDirExists(path string) bool {

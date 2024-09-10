@@ -117,7 +117,6 @@ export function useFlowChart() {
 
   function onFsEvent(e: FsEvent) {
     lastOp.value = e
-    console.log(e)
     if (e.fileType != node.FileType.GRAPH) {
       return
     }

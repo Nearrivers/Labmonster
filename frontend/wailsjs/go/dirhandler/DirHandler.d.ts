@@ -4,8 +4,12 @@ import {node} from '../models';
 
 export function CreateDirectory(arg1:string):Promise<node.Node>;
 
+export function DeleteDirectory(arg1:string):Promise<void>;
+
 export function GetDirectories():Promise<Array<string>>;
 
 export function GetLabDirs():Promise<void>;
 
 export function GetLabPath():Promise<string>;
+
+export function RenameDirectory(arg1:string,arg2:string):Promise<void>;

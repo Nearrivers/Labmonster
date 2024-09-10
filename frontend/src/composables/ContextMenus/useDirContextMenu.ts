@@ -1,13 +1,13 @@
 import AppCtxMenu from "@/components/ui/context-menu/AppCtxMenu.vue";
 import { AppDialog } from "@/types/AppDialog";
-import { Ref } from "vue";
+import { nextTick, Ref } from "vue";
 import { useShowErrorToast } from "../useShowErrorToast";
 import { CreateDirectory } from "$/dirhandler/DirHandler";
 import { NEW_DIR_NAME } from "@/constants/NEW_DIR_NAME";
 import { NEW_FILE_NAME } from "@/constants/NEW_FILE_NAME";
 import { CreateFile } from "$/file_handler/FileHandler";
 
-export function useDirContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>, deleteDialog: AppDialog | null) {
+export function useDirContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>, deleteDialog: Ref<AppDialog | null>) {
   const { showToast } = useShowErrorToast()
 
   function showPopover() {
@@ -21,9 +21,11 @@ export function useDirContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> |
   async function createNewSetup(path: string) {
     try {
       const newFile = path + "/" + NEW_FILE_NAME
-      const file = await CreateFile(newFile)
+      await CreateFile(newFile)
     } catch (error) {
       showToast(error)
+    } finally {
+      hidePopover()
     }
   }
 
@@ -36,10 +38,17 @@ export function useDirContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> |
     }
   }
 
+  async function onDeleteClick(path: string) {
+    hidePopover()
+    await nextTick()
+    deleteDialog.value?.openDialog(path)
+  }
+
   return {
     showPopover,
     hidePopover,
     createNewDirectory,
-    createNewSetup
+    createNewSetup,
+    onDeleteClick
   }
 }

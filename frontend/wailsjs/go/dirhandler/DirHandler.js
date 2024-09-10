@@ -6,6 +6,10 @@ export function CreateDirectory(arg1) {
   return window['go']['dirhandler']['DirHandler']['CreateDirectory'](arg1);
 }
 
+export function DeleteDirectory(arg1) {
+  return window['go']['dirhandler']['DirHandler']['DeleteDirectory'](arg1);
+}
+
 export function GetDirectories() {
   return window['go']['dirhandler']['DirHandler']['GetDirectories']();
 }
@@ -16,4 +20,8 @@ export function GetLabDirs() {
 
 export function GetLabPath() {
   return window['go']['dirhandler']['DirHandler']['GetLabPath']();
+}
+
+export function RenameDirectory(arg1, arg2) {
+  return window['go']['dirhandler']['DirHandler']['RenameDirectory'](arg1, arg2);
 }

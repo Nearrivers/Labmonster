@@ -19,12 +19,12 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
       : props.value.fileNode.name,
   );
 
+
   const isActive = computed(
     () =>
       route.params.path &&
-      decodeURI(route.params.path as string).includes(
-        nodePath.value + props.value.fileNode.extension,
-      ),
+      decodeURI(route.params.path as string) ===
+      nodePath.value + props.value.fileNode.extension,
   );
 
   const nodePathWithoutSpaces = computed(() =>
