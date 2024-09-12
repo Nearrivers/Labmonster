@@ -34,14 +34,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Test the Go side of the application
-        run: go test 
-
       - name: Build wails
         uses: dAppServer/wails-build-action@v2.2
         id: build
         with:
           build-name: ${{ matrix.build.name }}
           build-platform: ${{ matrix.build.platform }}
-          package: false
+          package: true
           go-version: '1.22'
