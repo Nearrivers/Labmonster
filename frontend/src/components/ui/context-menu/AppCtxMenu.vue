@@ -3,7 +3,7 @@
     :id="$props.popoverId"
     popover
     ref="menu"
-    class="fixed z-10 min-w-52 origin-top-left animate-command-show rounded-lg border border-border bg-background text-xs text-primary"
+    class="fixed z-10 min-w-52 origin-top-left animate-command-show rounded-lg border border-accent bg-secondary text-xs dark:text-primary"
     :style="{ top: y + 'px', left: x + 'px' }"
   >
     <slot></slot>

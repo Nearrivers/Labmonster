@@ -1,15 +1,17 @@
-import { filetree, watcher } from "$/models";
-import { provide, Ref, ref } from "vue";
+import { node, watcher } from "$/models";
+import { nextTick, provide, Ref, ref } from "vue";
 import { EventsOn } from "../../wailsjs/runtime"
-import { DirPath, FiletreeProvide, ShortNode } from "@/types/filetreeProvide";
+import { DirPath, FiletreeProvide, ShortNode } from "@/types/FiletreeProvide";
 import { FsEvent } from "@/types/FsEvent";
 import { ShowToastFunc } from "./useShowErrorToast";
+import { useInputToggle } from "./ContextMenus/useInputToggle";
 
 /**
  * Composable that reconciles the in-app filetree and the 
  * user's machine filesystem
  */
-export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc: ShowToastFunc) {
+export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: ShowToastFunc) {
+  const { toggleInput } = useInputToggle()
   /**
    * Map that holds the path to a directory as the key and 
    * the reference to that directory files array as value
@@ -32,12 +34,13 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
   // On every "operation" that happens in the filesystem, the go side will launch an
   // event that gets caught here.
   EventsOn('fsop', function (e: FsEvent) {
+    console.log(e)
     switch (e.op) {
       case watcher.Op.CREATE:
         createFileInSidePanel(e)
         break;
       case watcher.Op.REMOVE:
-        deleteFileFromSidePannelWithPath(e)
+        deleteElementFromSidePannelWithPath(e)
         break
       case watcher.Op.RENAME:
         renameFileInSidePannel(e)
@@ -46,10 +49,9 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
         moveFileInSidePannel(e)
         break
     }
-    console.log(e)
   });
 
-  function createFileInSidePanel(e: FsEvent) {
+  async function createFileInSidePanel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: Array<object>
     if (e.path === '.') {
@@ -65,41 +67,65 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
       return
     }
 
-    const i = e.file.lastIndexOf('.')
-    const fileName = e.file.slice(0, i)
-    const extension = e.file.slice(i)
+    if (e.dataType === node.DataType.FILE) {
+      const i = e.file.lastIndexOf('.')
+      const fileName = e.file.slice(0, i)
+      const extension = e.file.slice(i)
+
+      dir.push({
+        name: fileName,
+        extension: extension,
+        fileType: e.fileType,
+        type: e.dataType,
+        updatedAt: new Date()
+      })
+
+      return
+    }
 
     dir.push({
-      name: fileName,
-      extension: extension,
+      name: e.file,
+      extension: "",
       fileType: e.fileType,
       type: e.dataType,
       updatedAt: new Date()
     })
+
+    if (e.dataType === node.DataType.DIR) {
+      await nextTick()
+      toggleInput(e.file, "dir")
+    }
   }
 
-  function deleteFileFromSidePannelWithPath(e: FsEvent) {
+  function deleteElementFromSidePannelWithPath(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
-    let dir: filetree.Node[] | ShortNode[]
+    let dir: node.Node[] | ShortNode[]
     let oldFilepath: string
     if (e.path === '.') {
       // handle lab's root delete
       dir = rootFiles.value
+
       oldFilepath = e.file.slice(0, e.file.lastIndexOf('.'))
+      if (e.dataType === node.DataType.DIR) {
+        oldFilepath = e.file
+      }
     } else {
       dir = dirs.value.get(e.path as DirPath) as ShortNode[]
       // Removing the extension
       oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+      if (e.dataType === node.DataType.DIR) {
+        oldFilepath = e.oldPath
+      }
     }
 
     if (!dir) {
       return
     }
 
+    console.log(oldFilepath)
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {
-      showErrorToastFunc("Element not found")
       return
     }
 
@@ -116,7 +142,7 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
 
   function deleteFileFromSidePannelWithOldPath(e: FsEvent) {
     // If e.oldpath doesn't include '/', that means that the deletion happened at lab's root
-    let dir: filetree.Node[] | ShortNode[]
+    let dir: node.Node[] | ShortNode[]
     let oldFilepath: string
     if (!e.oldPath.includes('/')) {
       // handle lab's root delete
@@ -136,7 +162,6 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {
-      showErrorToastFunc("Element not found")
       return
     }
 
@@ -173,11 +198,9 @@ export function useFiletree(rootFiles: Ref<filetree.Node[]>, showErrorToastFunc:
 
     // Removing the extension
     const oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
-    console.log(oldFilepath)
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {
-      showErrorToastFunc("Element not found")
       return
     }
 

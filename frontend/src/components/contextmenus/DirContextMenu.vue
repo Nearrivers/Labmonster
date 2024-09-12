@@ -1,13 +1,13 @@
 <template>
   <AppCtxMenu :y="y" :x="x" popover-id="dirpopover" ref="ctxMenu">
     <CtxSection>
-      <CtxItem>
+      <CtxItem @click="createNewSetup(path)">
         <template #icon="{ strokeWidth, iconClass }">
           <SquarePen :stroke-width="strokeWidth" :class="iconClass" />
         </template>
         <template #text>Nouveau setup</template>
       </CtxItem>
-      <CtxItem>
+      <CtxItem @click="createNewDirectory(path)">
         <template #icon="{ strokeWidth, iconClass }">
           <FolderOpen :stroke-width="strokeWidth" :class="iconClass" />
         </template>
@@ -29,19 +29,22 @@
       </CtxItem>
     </CtxSection>
     <CtxSection>
-      <CtxItem>
+      <CtxItem @click="toggleInput(path, 'dir')">
         <template #icon="{ strokeWidth, iconClass }">
           <PencilLine :stroke-width="strokeWidth" :class="iconClass" />
         </template>
         <template #text>Renommer</template>
       </CtxItem>
-      <CtxItem class="text-red-500">
+      <CtxItem class="text-red-500" @click="onDeleteClick(path)">
         <template #icon="{ strokeWidth, iconClass }">
           <Trash2 :stroke-width="strokeWidth" :class="iconClass" />
         </template>
         <template #text>Supprimer</template>
       </CtxItem>
     </CtxSection>
+    <template #commands>
+      <DeleteDirDialog ref="deleteDialog" :path="selectedNode?.dataset.path" />
+    </template>
   </AppCtxMenu>
 </template>
 
@@ -54,20 +57,34 @@ import {
   SquarePen,
   Trash2,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import AppCtxMenu from '../ui/context-menu/AppCtxMenu.vue';
 import CtxSection from '../ui/context-menu/CtxSection.vue';
 import CtxItem from '../ui/context-menu/CtxItem.vue';
+import { useDirContextMenu } from '@/composables/ContextMenus/useDirContextMenu';
+import DeleteDirDialog from '../AlertDialog/DeleteDirDialog.vue';
 
-defineProps<{
+const props = defineProps<{
   x: number;
   y: number;
+  selectedNode: HTMLLIElement | null;
 }>();
 
+const deleteDialog = ref<InstanceType<typeof DeleteDirDialog> | null>(null);
 const ctxMenu = ref<InstanceType<typeof AppCtxMenu> | null>(null);
+const {
+  showPopover,
+  hidePopover,
+  createNewSetup,
+  createNewDirectory,
+  onDeleteClick,
+  toggleInput,
+} = useDirContextMenu(ctxMenu, deleteDialog);
+
+const path = computed(() => props.selectedNode?.dataset.path || '');
 
 defineExpose({
-  showPopover: () => ctxMenu.value!.showPopover(),
-  hidePopover: () => ctxMenu.value!.hidePopover(),
+  showPopover,
+  hidePopover,
 });
 </script>

@@ -5,6 +5,11 @@ type GraphNodePosition struct {
 	Y float64 `json:"y"`
 }
 
+type GraphNodeStyle struct {
+	Width  any `json:"width"`
+	Height any `json:"height"`
+}
+
 type GraphViewport struct {
 	X    float64 `json:"x"`
 	Y    float64 `json:"y"`
@@ -23,6 +28,7 @@ type GraphNode struct {
 	Initialized bool              `json:"initialized"`
 	Position    GraphNodePosition `json:"position"`
 	NodeType    string            `json:"type"`
+	Style       GraphNodeStyle    `json:"style"`
 }
 
 type EdgeMarker struct {
@@ -64,6 +70,10 @@ func GetInitGraph() Graph {
 				Position: GraphNodePosition{
 					X: 25,
 					Y: 90,
+				},
+				Style: GraphNodeStyle{
+					Width:  "250",
+					Height: "60",
 				},
 				NodeType: "custom",
 				Data: GraphNodeData{

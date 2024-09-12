@@ -1,58 +1,3 @@
-export namespace filetree {
-	
-	export enum DataType {
-	    FILE = "FILE",
-	    DIR = "DIR",
-	}
-	export enum FileType {
-	    GRAPH = "GRAPH",
-	    SHEET = "SHEET",
-	    VIDEO = "VIDEO",
-	    IMAGE = "IMAGE",
-	    UNSUPPORTED = "UNSUPPORTED",
-	}
-	export class Node {
-	    name: string;
-	    type: DataType;
-	    // Go type: time
-	    updatedAt: any;
-	    extension: string;
-	    fileType: FileType;
-	
-	    static createFrom(source: any = {}) {
-	        return new Node(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.name = source["name"];
-	        this.type = source["type"];
-	        this.updatedAt = this.convertValues(source["updatedAt"], null);
-	        this.extension = source["extension"];
-	        this.fileType = source["fileType"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-
-}
-
 export namespace graph {
 	
 	export class EdgeMarker {
@@ -143,6 +88,20 @@ export namespace graph {
 		    return a;
 		}
 	}
+	export class GraphNodeStyle {
+	    width: any;
+	    height: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new GraphNodeStyle(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.width = source["width"];
+	        this.height = source["height"];
+	    }
+	}
 	export class GraphNodePosition {
 	    x: number;
 	    y: number;
@@ -179,6 +138,7 @@ export namespace graph {
 	    initialized: boolean;
 	    position: GraphNodePosition;
 	    type: string;
+	    style: GraphNodeStyle;
 	
 	    static createFrom(source: any = {}) {
 	        return new GraphNode(source);
@@ -191,6 +151,7 @@ export namespace graph {
 	        this.initialized = source["initialized"];
 	        this.position = this.convertValues(source["position"], GraphNodePosition);
 	        this.type = source["type"];
+	        this.style = this.convertValues(source["style"], GraphNodeStyle);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -249,6 +210,62 @@ export namespace graph {
 	
 	
 	
+	
+
+}
+
+export namespace node {
+	
+	export enum FileType {
+	    GRAPH = "GRAPH",
+	    SHEET = "SHEET",
+	    VIDEO = "VIDEO",
+	    IMAGE = "IMAGE",
+	    UNSUPPORTED = "UNSUPPORTED",
+	}
+	export enum DataType {
+	    FILE = "FILE",
+	    DIR = "DIR",
+	}
+	export class Node {
+	    name: string;
+	    type: DataType;
+	    // Go type: time
+	    updatedAt: any;
+	    extension: string;
+	    fileType: FileType;
+	
+	    static createFrom(source: any = {}) {
+	        return new Node(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.type = source["type"];
+	        this.updatedAt = this.convertValues(source["updatedAt"], null);
+	        this.extension = source["extension"];
+	        this.fileType = source["fileType"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 
 }
 

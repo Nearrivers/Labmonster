@@ -6,11 +6,12 @@
       collapsible
       ref="resizablePanel"
       id="sidePanel"
+      class="bg-secondary"
     >
       <SidePanel />
     </ResizablePanel>
     <ResizableHandle
-      class="w-[2px] transition-all hover:bg-primary hover:ring-1 hover:ring-primary"
+      class="w-[2px] bg-secondary transition-all hover:bg-primary hover:ring-1 hover:ring-primary"
       :hit-area-margins="{ fine: 0, coarse: 1 }"
     />
     <ResizablePanel class="h-full">

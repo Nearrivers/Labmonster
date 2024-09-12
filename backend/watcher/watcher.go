@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"flow-poc/backend/config"
-	"flow-poc/backend/filetree"
+	"flow-poc/backend/filesystem/node"
 	"fmt"
 	"log"
 	"os"
@@ -77,11 +77,11 @@ func (e Op) String() string {
 // complet du fichier
 type Event struct {
 	Op       `json:"op"`
-	Path     string            `json:"path"`
-	OldPath  string            `json:"oldPath"`
-	FilePath string            `json:"file"`
-	FileType filetree.FileType `json:"fileType"`
-	DataType filetree.DataType `json:"dataType"`
+	Path     string        `json:"path"`
+	OldPath  string        `json:"oldPath"`
+	FilePath string        `json:"file"`
+	FileType node.FileType `json:"fileType"`
+	DataType node.DataType `json:"dataType"`
 	os.FileInfo
 }
 
@@ -420,13 +420,13 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 	// a été déplacé / renommé
 	for path1, info1 := range removes {
 		for path2, info2 := range creates {
-			if !sameFile(info1, info2) || filepath.Dir(path1) != filepath.Dir(path2) {
+			if !sameFile(info1, info2) {
 				continue
 			}
 
-			var dType = filetree.FILE
+			var dType = node.FILE
 			if info1.IsDir() {
-				dType = filetree.DIR
+				dType = node.DIR
 			}
 
 			// The move operation is now treated as a delete => create by default because of the non-duplicate creation.
@@ -434,18 +434,18 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 			// will create a brand new file with a different name, making the sameFile function just above say that the file
 			// we just moved is different from the original.
 			e := Event{
-				Op:       Rename,
+				Op:       Move,
 				Path:     path2,
 				OldPath:  path1,
 				FileInfo: info1,
-				FileType: filetree.DetectFileType(filepath.Ext(path2)),
+				FileType: node.DetectFileType(filepath.Ext(path2)),
 				DataType: dType,
 			}
 
 			// Si l'élément est toujours dans le même dossier, alors il a été renommé et non pas déplacé
-			// if {
-			// 	e.Op = Rename
-			// }
+			if filepath.Dir(path1) == filepath.Dir(path2) {
+				e.Op = Rename
+			}
 
 			delete(removes, path1)
 			delete(creates, path2)
@@ -466,12 +466,12 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		case <-cancel:
 			return
 		default:
-			var dType = filetree.FILE
+			var dType = node.FILE
 			if info.IsDir() {
-				dType = filetree.DIR
+				dType = node.DIR
 			}
 			log.Println(path)
-			e := Event{Create, path, "", "", filetree.DetectFileType(filepath.Ext(path)), dType, info}
+			e := Event{Create, path, "", "", node.DetectFileType(filepath.Ext(path)), dType, info}
 			evt <- e
 		}
 	}
@@ -481,12 +481,12 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 		case <-cancel:
 			return
 		default:
-			var dType = filetree.FILE
+			var dType = node.FILE
 			if info.IsDir() {
-				dType = filetree.DIR
+				dType = node.DIR
 			}
 			log.Println(path)
-			e := Event{Remove, path, path, "", filetree.DetectFileType(filepath.Ext(path)), dType, info}
+			e := Event{Remove, path, path, "", node.DetectFileType(filepath.Ext(path)), dType, info}
 			evt <- e
 		}
 	}

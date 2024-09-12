@@ -10,6 +10,7 @@ export function useTopMenuActions() {
       position: { x: 150, y: 50 },
       data: { hello: `Node ${id}` },
       type: 'custom',
+      style: { width: 250, height: 60 }
     }
 
     return newNode

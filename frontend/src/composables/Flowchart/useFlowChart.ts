@@ -1,14 +1,19 @@
-import { FlowExportObject, useVueFlow } from "@vue-flow/core";
-import { useEventListener } from "../useEventListener";
-import { OpenFile, SaveMedia } from "$/filetree/FileTree";
-import { CustomNodeData } from "@/types/CustomNodeData";
-import { useRoute } from "vue-router";
-import { computed, ref, watch } from "vue";
-import { useShowErrorToast } from "../useShowErrorToast";
+import { FlowExportObject, useVueFlow } from '@vue-flow/core';
+import { useEventListener } from '../useEventListener';
+import { OpenFile, SaveMedia } from '$/file_handler/FileHandler';
+import { CustomNodeData } from '@/types/CustomNodeData';
+import { useRoute, useRouter } from 'vue-router';
+import { computed, ref, watch } from 'vue';
+import { useShowErrorToast } from '../useShowErrorToast';
+import { FsEvent } from '@/types/FsEvent';
+import { node, watcher } from '$/models';
+import { Routes } from '@/types/Routes';
 
 export function useFlowChart() {
-  const path = ref('')
-  const route = useRoute()
+  const path = ref('');
+  const route = useRoute();
+  const router = useRouter()
+  const lastOp = ref<FsEvent | null>(null)
   const { updateNode, fromObject } = useVueFlow();
   const { showToast } = useShowErrorToast();
   useEventListener(window, 'paste', onPaste);
@@ -16,7 +21,6 @@ export function useFlowChart() {
   watch(
     () => route.params.path,
     async () => {
-      console.log(route.fullPath)
       path.value = route.params.path as string;
       await loadGraph();
     },
@@ -45,22 +49,18 @@ export function useFlowChart() {
     }
 
     if (!e.clipboardData.files || e.clipboardData.files.length === 0) {
-      return
+      return;
     }
 
     const file = e.clipboardData.files[0];
     const mimeType = e.clipboardData.files[0].type;
 
-    if (
-      file.type.startsWith('image/')
-    ) {
-      handleImagePaste(id, mimeType, file)
-      return
+    if (file.type.startsWith('image/')) {
+      handleImagePaste(id, mimeType, file);
+      return;
     }
 
-    if (
-      file.type.startsWith('video/')
-    ) {
+    if (file.type.startsWith('video/')) {
       const reader = new FileReader();
       reader.onload = async function (e) {
         try {
@@ -115,8 +115,40 @@ export function useFlowChart() {
     reader.readAsDataURL(file);
   }
 
+  function onFsEvent(e: FsEvent) {
+    lastOp.value = e
+    if (e.fileType != node.FileType.GRAPH) {
+      return
+    }
+
+    const routePath = route.params.path as string
+
+    let filePath = e.path + '/' + e.file
+    if (e.path === '.') {
+      filePath = e.file
+    }
+
+    if (
+      // If the operation is a delete but the deleted file is not the one currently opened, we skip
+      (filePath != routePath && e.op === watcher.Op.REMOVE) || // OR
+      // If the operation is a move or a rename and the old path is different from the one of the file currently opened, we skip
+      (e.oldPath != routePath.replace('./', '') &&
+        (e.op === watcher.Op.MOVE || e.op === watcher.Op.RENAME))
+    ) {
+      return;
+    }
+
+    if (e.op === watcher.Op.REMOVE) {
+      router.push({ name: Routes.NotOpened });
+      return;
+    }
+
+    router.push({ name: Routes.Flowchart, params: { path: filePath } });
+  }
+
   return {
     path,
-    fileName
-  }
+    fileName,
+    onFsEvent
+  };
 }

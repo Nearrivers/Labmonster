@@ -3,7 +3,7 @@
     <Tooltip>
       <TooltipTrigger as-child>
         <button
-          class="block p-2 hover:bg-secondary dark:hover:bg-zinc-700"
+          class="block bg-secondary p-2 hover:bg-accent"
           @click="emit('click')"
         >
           <slot />
