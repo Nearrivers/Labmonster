@@ -3,8 +3,8 @@ name: Wails build
 on:
   push:
     branches:
-      - main
-      - ci/cd
+      - 'main'
+      - 'ci/cd'
 
 env:
   # Necessary for most environments as build failure can occur due to OOM issues
@@ -36,6 +36,7 @@ jobs:
 
       - name: Test the Go side of the application
         run: go test ./...
+
       - name: Build wails
         uses: dAppServer/wails-build-action@v2.2
         id: build
