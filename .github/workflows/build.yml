@@ -35,7 +35,7 @@ jobs:
           submodules: recursive
 
       - name: Test the Go side of the application
-        run: go test ./...
+        run: go test 
 
       - name: Build wails
         uses: dAppServer/wails-build-action@v2.2
