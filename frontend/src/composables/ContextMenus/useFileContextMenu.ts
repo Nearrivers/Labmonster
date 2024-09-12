@@ -35,13 +35,15 @@ export function useFileContextMenu(
   async function onDuplicateClick(filepath: string, extension: string) {
     hidePopover();
     try {
-      const file = await DuplicateFile(filepath, extension);
+      await DuplicateFile(filepath, extension);
     } catch (error) {
       showToast(error);
     }
   }
 
   async function onDeleteClick(filePath: string, extension: string) {
+    console.log(filePath, extension)
+
     hidePopover();
     await nextTick();
     deleteDialog.value?.openDialog(filePath + extension);

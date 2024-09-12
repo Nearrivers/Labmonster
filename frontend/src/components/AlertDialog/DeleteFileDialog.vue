@@ -66,7 +66,7 @@ function closeDialog() {
 
 async function onDeleteFile() {
   try {
-    await DeleteFile(props.path + props.extension!);
+    await DeleteFile(fileTitle.value);
     toast({
       description: `Fichier "${fileTitle.value}" supprimé avec succès`,
       duration: 5000,

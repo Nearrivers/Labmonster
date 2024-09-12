@@ -73,7 +73,7 @@ async function onDeleteFile() {
   try {
     await DeleteDirectory(props.path!);
     toast({
-      description: `Fichier "${fileTitle.value}" supprimé avec succès`,
+      description: `Dossier "${fileTitle.value}" supprimé avec succès`,
       duration: 5000,
     });
   } catch (error) {

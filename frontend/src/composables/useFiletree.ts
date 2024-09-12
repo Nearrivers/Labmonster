@@ -38,7 +38,7 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
         createFileInSidePanel(e)
         break;
       case watcher.Op.REMOVE:
-        deleteFileFromSidePannelWithPath(e)
+        deleteElementFromSidePannelWithPath(e)
         break
       case watcher.Op.RENAME:
         renameFileInSidePannel(e)
@@ -90,28 +90,35 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     })
   }
 
-  function deleteFileFromSidePannelWithPath(e: FsEvent) {
+  function deleteElementFromSidePannelWithPath(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: node.Node[] | ShortNode[]
     let oldFilepath: string
     if (e.path === '.') {
       // handle lab's root delete
       dir = rootFiles.value
+
       oldFilepath = e.file.slice(0, e.file.lastIndexOf('.'))
+      if (e.dataType === node.DataType.DIR) {
+        oldFilepath = e.file
+      }
     } else {
       dir = dirs.value.get(e.path as DirPath) as ShortNode[]
       // Removing the extension
       oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+      if (e.dataType === node.DataType.DIR) {
+        oldFilepath = e.oldPath
+      }
     }
 
     if (!dir) {
       return
     }
 
+    console.log(oldFilepath)
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {
-      showErrorToastFunc("Element not found")
       return
     }
 
@@ -148,7 +155,6 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {
-      showErrorToastFunc("Element not found")
       return
     }
 
@@ -188,7 +194,6 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {
-      showErrorToastFunc("Element not found")
       return
     }
 
@@ -210,5 +215,9 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       type: e.dataType,
       updatedAt: new Date()
     })
+  }
+
+  return {
+    deleteFileFromSidePannelWithPath: deleteElementFromSidePannelWithPath,
   }
 }

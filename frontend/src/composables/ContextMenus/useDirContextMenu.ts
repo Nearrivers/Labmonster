@@ -35,6 +35,8 @@ export function useDirContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> |
       await CreateDirectory(newDir)
     } catch (error) {
       showToast(error)
+    } finally {
+      hidePopover()
     }
   }
 
