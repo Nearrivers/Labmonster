@@ -3,11 +3,13 @@ import { AppDialog } from '@/types/AppDialog';
 import { nextTick, Ref } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
 import AppCtxMenu from '@/components/contextmenus/AppCtxMenu.vue';
+import { useInputToggle } from './useInputToggle';
 
 export function useFileContextMenu(
   ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>,
   deleteDialog: Ref<AppDialog | null>,
 ) {
+  const { toggleInput } = useInputToggle(hidePopover)
   const { showToast } = useShowErrorToast();
 
   function showPopover() {
@@ -16,20 +18,6 @@ export function useFileContextMenu(
 
   function hidePopover() {
     ctxMenu.value?.hidePopover();
-  }
-
-  async function onRenameClick(filePath: string) {
-    hidePopover();
-    const inputPath = filePath.replaceAll(' ', '-');
-    const fileInput = document.getElementById(inputPath) as HTMLInputElement;
-
-    if (fileInput) {
-      fileInput.toggleAttribute('readonly');
-      fileInput.classList.remove('cursor-pointer');
-      fileInput.classList.add('cursor-text');
-      fileInput.select();
-      fileInput.focus();
-    }
   }
 
   async function onDuplicateClick(filepath: string, extension: string) {
@@ -52,7 +40,7 @@ export function useFileContextMenu(
   return {
     showPopover,
     hidePopover,
-    onRenameClick,
+    toggleInput,
     onDeleteClick,
     onDuplicateClick,
   };

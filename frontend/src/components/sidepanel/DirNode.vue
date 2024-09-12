@@ -12,9 +12,18 @@
               class="w-[14px] transition-transform"
               :class="{ 'rotate-90': isOpen }"
             />
-            <p>
-              {{ dirNode.name }}
-            </p>
+            <input
+              role="textbox"
+              ref="input"
+              class="w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap bg-transparent outline-none"
+              :id="nodePathWithoutSpaces"
+              @blur.stop="onBlur"
+              @keyup.enter="input?.blur()"
+              spellcheck="false"
+              autocomplete="off"
+              v-model="dirName"
+              readonly
+            />
           </div>
         </TooltipTrigger>
         <TooltipContent :side="'right'" :side-offset="30">
@@ -55,5 +64,15 @@ const props = defineProps<{
   path: string;
 }>();
 
-const { files, isOpen, isFolder, nodePath, toggle } = useDirNode(toRef(props));
+const {
+  input,
+  files,
+  isOpen,
+  isFolder,
+  nodePath,
+  toggle,
+  dirName,
+  nodePathWithoutSpaces,
+  onBlur,
+} = useDirNode(toRef(props));
 </script>

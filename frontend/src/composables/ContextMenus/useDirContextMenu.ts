@@ -6,8 +6,10 @@ import { CreateDirectory } from "$/dirhandler/DirHandler";
 import { NEW_DIR_NAME } from "@/constants/NEW_DIR_NAME";
 import { NEW_FILE_NAME } from "@/constants/NEW_FILE_NAME";
 import { CreateFile } from "$/file_handler/FileHandler";
+import { useInputToggle } from "./useInputToggle";
 
 export function useDirContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>, deleteDialog: Ref<AppDialog | null>) {
+  const { toggleInput } = useInputToggle(hidePopover)
   const { showToast } = useShowErrorToast()
 
   function showPopover() {
@@ -51,6 +53,7 @@ export function useDirContextMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> |
     hidePopover,
     createNewDirectory,
     createNewSetup,
-    onDeleteClick
+    onDeleteClick,
+    toggleInput
   }
 }

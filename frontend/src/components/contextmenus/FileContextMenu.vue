@@ -17,7 +17,7 @@
       </CtxItem>
     </CtxSection>
     <CtxSection>
-      <CtxItem @click="onRenameClick(selectedNode?.dataset.path!)">
+      <CtxItem @click="toggleInput(selectedNode?.dataset.path!, 'file')">
         <template #icon="{ strokeWidth, iconClass }">
           <PencilLine :stroke-width="strokeWidth" :class="iconClass" />
         </template>
@@ -76,7 +76,7 @@ const deleteFileDialog = ref<InstanceType<typeof DeleteFileDialog> | null>(
 const {
   showPopover,
   hidePopover,
-  onRenameClick,
+  toggleInput,
   onDeleteClick,
   onDuplicateClick,
 } = useFileContextMenu(ctxMenu, deleteFileDialog);

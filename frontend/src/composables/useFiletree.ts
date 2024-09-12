@@ -1,15 +1,17 @@
 import { node, watcher } from "$/models";
-import { provide, Ref, ref } from "vue";
+import { nextTick, provide, Ref, ref } from "vue";
 import { EventsOn } from "../../wailsjs/runtime"
 import { DirPath, FiletreeProvide, ShortNode } from "@/types/FiletreeProvide";
 import { FsEvent } from "@/types/FsEvent";
 import { ShowToastFunc } from "./useShowErrorToast";
+import { useInputToggle } from "./ContextMenus/useInputToggle";
 
 /**
  * Composable that reconciles the in-app filetree and the 
  * user's machine filesystem
  */
 export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: ShowToastFunc) {
+  const { toggleInput } = useInputToggle()
   /**
    * Map that holds the path to a directory as the key and 
    * the reference to that directory files array as value
@@ -49,7 +51,7 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     }
   });
 
-  function createFileInSidePanel(e: FsEvent) {
+  async function createFileInSidePanel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: Array<object>
     if (e.path === '.') {
@@ -88,6 +90,11 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       type: e.dataType,
       updatedAt: new Date()
     })
+
+    if (e.dataType === node.DataType.DIR) {
+      await nextTick()
+      toggleInput(e.file, "dir")
+    }
   }
 
   function deleteElementFromSidePannelWithPath(e: FsEvent) {
@@ -215,9 +222,5 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       type: e.dataType,
       updatedAt: new Date()
     })
-  }
-
-  return {
-    deleteFileFromSidePannelWithPath: deleteElementFromSidePannelWithPath,
   }
 }

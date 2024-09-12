@@ -28,7 +28,7 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
   );
 
   const nodePathWithoutSpaces = computed(() =>
-    nodePath.value.replaceAll(' ', '-'),
+    nodePath.value.replaceAll(' ', '-') + "-file",
   );
 
   const updatedAt = computed(() => {

@@ -29,7 +29,7 @@
       </CtxItem>
     </CtxSection>
     <CtxSection>
-      <CtxItem>
+      <CtxItem @click="toggleInput(path, 'dir')">
         <template #icon="{ strokeWidth, iconClass }">
           <PencilLine :stroke-width="strokeWidth" :class="iconClass" />
         </template>
@@ -78,6 +78,7 @@ const {
   createNewSetup,
   createNewDirectory,
   onDeleteClick,
+  toggleInput,
 } = useDirContextMenu(ctxMenu, deleteDialog);
 
 const path = computed(() => props.selectedNode?.dataset.path || '');
