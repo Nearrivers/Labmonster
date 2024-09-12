@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - 'main'
-      - 'ci/cd'
+      # - 'ci/cd'
 
 env:
   # Necessary for most environments as build failure can occur due to OOM issues
@@ -23,9 +23,9 @@ jobs:
           - name: 'App'
             platform:  'windows/amd64'
             os: 'windows-latest'
-          - name: 'App'
-            platform:  'darwin/universal'
-            os: 'macos-latest'
+          # - name: 'App'
+          #   platform:  'darwin/universal'
+          #   os: 'macos-latest'
 
     runs-on: ${{ matrix.build.os }}
     steps:
