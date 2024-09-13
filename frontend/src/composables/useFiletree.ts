@@ -54,7 +54,8 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
   async function createFileInSidePanel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: Array<object>
-    if (e.path === '.') {
+    const wasDeletionAtRoot = e.path === '.'
+    if (wasDeletionAtRoot) {
       // handle lab's root delete
       dir = rootFiles.value
     } else {
@@ -91,10 +92,13 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       updatedAt: new Date()
     })
 
-    if (e.dataType === node.DataType.DIR) {
-      await nextTick()
+    await nextTick()
+    if (wasDeletionAtRoot) {
       toggleInput(e.file, "dir")
+      return
     }
+
+    toggleInput(e.path + "/" + e.file, "dir")
   }
 
   function deleteElementFromSidePannelWithPath(e: FsEvent) {

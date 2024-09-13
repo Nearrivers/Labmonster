@@ -65,7 +65,7 @@ func (dh *DirHandler) CreateDirectory(pathFromLabRoot string) (node.Node, error)
 	p := filepath.Join(dh.GetLabPath(), pathFromLabRoot)
 
 	if !doesDirExists(p) {
-		err := os.Mkdir(p, os.ModeAppend)
+		err := os.Mkdir(p, os.ModeDir)
 		if err != nil {
 			return node.Node{}, err
 		}

@@ -63,7 +63,10 @@ export function useDirNode(
 
     try {
       const newName = dirName.value;
-      await RenameDirectory(props.value.path, newName);
+
+      props.value.path
+        ? await RenameDirectory(nodePath.value, props.value.path + "/" + newName)
+        : await RenameDirectory(nodePath.value, newName)
     } catch (error) {
       showToast(error);
     }
