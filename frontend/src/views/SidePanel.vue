@@ -18,8 +18,15 @@
           :fileNode="file"
           path=""
           :data-id="index"
+          :offset="14.5"
         />
-        <DirNode v-else :dirNode="file" path="" :data-id="index" />
+        <DirNode
+          v-else
+          :dirNode="file"
+          path=""
+          :data-id="index"
+          :offset="18.5"
+        />
       </template>
     </ul>
   </ScrollArea>

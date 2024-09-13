@@ -1,10 +1,10 @@
 import { RenameFile } from '$/file_handler/FileHandler';
-import { ref, computed, Ref } from 'vue';
+import { ref, computed, Ref, reactive } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
 import { useRoute } from 'vue-router';
 import { node } from '$/models';
 
-export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
+export function useFileNode(props: Ref<{ fileNode: node.Node; path: string, offset?: number }>) {
   const route = useRoute();
   const { showToast } = useShowErrorToast();
   const fileName = ref(props.value.fileNode.name);
@@ -12,6 +12,10 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
   const ext = computed(() =>
     props.value.fileNode.extension.replace('.', '').toLocaleUpperCase(),
   );
+
+  const nodeStyle = reactive({
+    paddingLeft: `${props.value.offset}px`
+  })
 
   const nodePath = ref(
     props.value.path
@@ -74,6 +78,7 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
 
   return {
     nodePath,
+    nodeStyle,
     nodePathWithoutSpaces,
     input,
     onBlur,

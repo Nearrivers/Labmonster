@@ -2,24 +2,24 @@
   <AlertDialog :open="isDialogOpen">
     <AlertDialogContent>
       <AlertDialogHeader class="!text-center">
-        <AlertDialogTitle>LabMonster</AlertDialogTitle>
-        <AlertDialogDescription>Version 0.0.1</AlertDialogDescription>
+        <AlertDialogTitle>Labmonster</AlertDialogTitle>
+        <AlertDialogDescription>Version 0.1.0</AlertDialogDescription>
       </AlertDialogHeader>
-      <div class="grid gap-4 py-4" v-if="!dir">
+      <div class="grid gap-4 pt-4" v-if="!dir">
         <div class="grid grid-cols-4 items-center gap-4">
           <div class="col-span-3">
             <p class="leading-7 [&:not(:first-child)]:mt-6">
               Créer un nouveau Lab
             </p>
-            <p class="text-sm text-muted-foreground">
-              Crée un nouveau "Lab" dans un dossier
+            <p class="text-xs text-muted-foreground">
+              Sélectionnez un emplacement où mettre vos fichiers
             </p>
           </div>
-          <Button @click="getLabDirectory">Créer</Button>
+          <Button @click="getLabDirectory"> Parcourir </Button>
         </div>
       </div>
-      <div class="flex items-center justify-between gap-4 py-4" v-else>
-        <div class="col-span-3">
+      <div class="flex items-center justify-between gap-4 pt-4" v-else>
+        <div>
           <p class="leading-7 text-muted-foreground [&:not(:first-child)]:mt-6">
             Emplacement
           </p>
@@ -27,8 +27,18 @@
             {{ dir }}
           </p>
         </div>
-        <Button @click="createConfigFile(dir)">Valider</Button>
+        <div class="flex gap-2">
+          <Button @click="getLabDirectory" variant="outline">
+            Parcourir
+          </Button>
+          <Button @click="createConfigFile(dir)">Valider</Button>
+        </div>
       </div>
+      <footer class="mt-4 flex w-full justify-center text-sm">
+        <button @click="Quit()" class="hover:underline">
+          Quitter l'application
+        </button>
+      </footer>
     </AlertDialogContent>
   </AlertDialog>
 </template>
@@ -47,6 +57,7 @@ import { ref } from 'vue';
 import { OpenCreateLabDialog } from '$/config/AppConfig';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import { configFileLoaded } from '@/events/ReloadFileExplorer';
+import { Quit } from '../../../wailsjs/runtime/runtime';
 
 const dir = ref('');
 const { showToast } = useShowErrorToast();

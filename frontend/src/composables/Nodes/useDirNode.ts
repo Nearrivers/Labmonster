@@ -1,6 +1,6 @@
 import { GetSubDirAndFiles } from '$/file_handler/FileHandler';
 import { node } from '$/models';
-import { computed, inject, ref, Ref } from 'vue';
+import { computed, inject, reactive, ref, Ref } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
 import { FiletreeProvide } from '@/types/FiletreeProvide';
 import { RenameDirectory } from '$/dirhandler/DirHandler';
@@ -9,6 +9,7 @@ export function useDirNode(
   props: Ref<{
     dirNode: node.Node;
     path: string;
+    offset: number
   }>,
 ) {
   const files = ref<node.Node[]>([]);
@@ -18,6 +19,10 @@ export function useDirNode(
   const input = ref<HTMLInputElement | null>(null);
   const { showToast } = useShowErrorToast();
   const { addDir } = inject<FiletreeProvide>('dirs')!;
+
+  const nodeStyle = reactive({
+    paddingLeft: `${props.value.offset}px`
+  })
 
   const nodePath = computed(() =>
     props.value.path
@@ -75,6 +80,7 @@ export function useDirNode(
   return {
     input,
     files,
+    nodeStyle,
     isOpen,
     isFolder,
     nodePath,

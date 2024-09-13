@@ -6,7 +6,10 @@
           class="h-7 w-full justify-start rounded-md hover:bg-accent hover:text-accent-foreground"
           @click="toggle"
         >
-          <div class="flex items-center gap-x-1 pl-[14px] font-normal">
+          <div
+            class="flex items-center gap-x-1 pl-[14px] font-normal"
+            :style="nodeStyle"
+          >
             <ChevronRight
               v-if="isFolder"
               class="w-[14px] transition-transform"
@@ -31,15 +34,22 @@
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-    <ul v-show="isOpen" class="w-full pl-[18.5px]">
+    <ul v-show="isOpen" class="w-full">
       <template v-for="(child, index) in files" :key="nodePath + child.name">
         <FileNode
           v-if="child.type == 'FILE'"
           :fileNode="child"
           :path="nodePath"
           :data-id="index"
+          :offset="offset + 14.5"
         />
-        <DirNode v-else :dirNode="child" :path="nodePath" :data-id="index" />
+        <DirNode
+          v-else
+          :dirNode="child"
+          :path="nodePath"
+          :data-id="index"
+          :offset="offset + 14.5"
+        />
       </template>
     </ul>
   </li>
@@ -62,12 +72,14 @@ import { useDirNode } from '@/composables/Nodes/useDirNode';
 const props = defineProps<{
   dirNode: node.Node;
   path: string;
+  offset: number;
 }>();
 
 const {
   input,
   files,
   isOpen,
+  nodeStyle,
   isFolder,
   nodePath,
   toggle,
