@@ -25,7 +25,7 @@
           :dirNode="file"
           path=""
           :data-id="index"
-          :offset="18.5"
+          :offset="14.5"
         />
       </template>
     </ul>

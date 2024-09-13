@@ -41,14 +41,14 @@
           :fileNode="child"
           :path="nodePath"
           :data-id="index"
-          :offset="offset + 14.5"
+          :offset="offset + 18.5"
         />
         <DirNode
           v-else
           :dirNode="child"
           :path="nodePath"
           :data-id="index"
-          :offset="offset + 14.5"
+          :offset="offset + 18.5"
         />
       </template>
     </ul>
