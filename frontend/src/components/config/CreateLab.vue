@@ -65,7 +65,11 @@ const isDialogOpen = ref(true);
 
 async function getLabDirectory() {
   try {
-    dir.value = await OpenCreateLabDialog();
+    const path = await OpenCreateLabDialog();
+
+    if (!dir.value) {
+      dir.value = path;
+    }
   } catch (error) {
     showToast(error);
   }
