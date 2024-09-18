@@ -7,9 +7,10 @@
     @resizeEnd="rememberDimensions"
   />
   <div
-    class="relative h-full rounded-lg bg-background text-popover ring-2 ring-accent transition-all"
+    class="relative h-full rounded-lg bg-background p-2 text-popover ring-2 ring-accent transition-all"
     :class="[{ '!ring-popover': isNodeSelected }, props.class]"
   >
+    <TitlePart />
     <slot :isNodeSelected="isNodeSelected"></slot>
     <FrameData v-if="data.hasFrameDataSection" />
     <Transition
@@ -25,40 +26,19 @@
       />
     </Transition>
   </div>
-  <Handle
-    :id="props.id + 'top'"
-    type="source"
-    :position="Position.Top"
-    :class="'z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
-  />
-  <Handle
-    :id="props.id + 'right'"
-    type="source"
-    :position="Position.Right"
-    :class="'z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
-  />
-  <Handle
-    :id="props.id + 'left'"
-    type="source"
-    :position="Position.Left"
-    :class="'z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
-  />
-  <Handle
-    :id="props.id + 'bot'"
-    type="source"
-    :position="Position.Bottom"
-    :class="'z-30 h-4 w-4 !cursor-pointer bg-accent-foreground opacity-0 hover:opacity-100'"
-  />
+  <NodeHandles :nodeId="id" />
 </template>
 
 <script setup lang="ts">
-import { Handle, Position, useNode, useVueFlow } from '@vue-flow/core';
+import '@vue-flow/node-resizer/dist/style.css';
+import { useNode, useVueFlow } from '@vue-flow/core';
 import { computed, ref } from 'vue';
 import { CustomNodeData } from '@/types/CustomNodeData';
 import NodeToolbar from '../flowchart/NodeToolbar.vue';
 import FrameData from '../flowchart/FrameData.vue';
 import { NodeResizer, OnResizeStart } from '@vue-flow/node-resizer';
-import '@vue-flow/node-resizer/dist/style.css';
+import TitlePart from '../flowchart/Nodes/Parts/TitlePart.vue';
+import NodeHandles from './NodeHandles.vue';
 
 const props = defineProps<{
   id: string;

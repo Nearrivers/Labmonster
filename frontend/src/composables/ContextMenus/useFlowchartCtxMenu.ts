@@ -6,7 +6,8 @@ import AppCtxMenu from "@/components/ui/context-menu/AppCtxMenu.vue";
 enum NodeType {
   Text = 'custom',
   Image = 'image',
-  Video = 'video'
+  Video = 'video',
+  Common = 'common'
 }
 
 export function useFlowchartCtxMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu> | null>) {
@@ -18,7 +19,7 @@ export function useFlowchartCtxMenu(ctxMenu: Ref<InstanceType<typeof AppCtxMenu>
   }
 
   function addTextNode(e: MouseEvent) {
-    addNode(e.clientX, e.clientY, NodeType.Text)
+    addNode(e.clientX, e.clientY, NodeType.Common)
   }
 
   function addImageNode(e: MouseEvent) {

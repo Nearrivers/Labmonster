@@ -1,7 +1,7 @@
 <template>
   <VueFlow
     :nodes="nodes"
-    class="h-full"
+    class="h-full transition-transform"
     auto-connect
     :edges="edges"
     :default-edge-options="{
@@ -37,6 +37,10 @@
         :data="props.data"
         v-model:text="props.data.text"
       />
+    </template>
+
+    <template #node-common="props">
+      <CommonNode :id="props.id" :data="props.data" />
     </template>
 
     <template #node-image="props">
@@ -76,6 +80,7 @@ import { EventsOn } from '../../wailsjs/runtime/runtime';
 import TextNode from './flowchart/Nodes/TextNode.vue';
 import VideoNode from './flowchart/Nodes/VideoNode.vue';
 import ImageNode from './flowchart/Nodes/ImageNode.vue';
+import CommonNode from './flowchart/Nodes/CommonNode.vue';
 
 const edges = ref<Edge[]>([]);
 const contextMenuX = ref(100);

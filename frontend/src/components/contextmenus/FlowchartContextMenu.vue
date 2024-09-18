@@ -5,19 +5,19 @@
         <template #icon="{ strokeWidth, iconClass }">
           <Plus :stroke-width="strokeWidth" :class="iconClass" />
         </template>
-        <template #text>Ajouter un noeud texte</template>
+        <template #text>Ajouter un noeud avec du texte</template>
       </CtxItem>
       <CtxItem @click="addImageNode">
         <template #icon="{ strokeWidth, iconClass }">
           <ImagePlus :stroke-width="strokeWidth" :class="iconClass" />
         </template>
-        <template #text>Ajouter un noeud image</template>
+        <template #text>Ajouter un noeud avec une image</template>
       </CtxItem>
       <CtxItem @click="addVideoNode">
         <template #icon="{ strokeWidth, iconClass }">
           <Video :stroke-width="strokeWidth" :class="iconClass" />
         </template>
-        <template #text>Ajouter un noeud vidéo</template>
+        <template #text>Ajouter un noeud avec une vidéo</template>
       </CtxItem>
     </CtxSection>
   </AppCtxMenu>

@@ -14,7 +14,7 @@ import { Toaster } from '@/components/ui/toast';
 import RecentlyOpenedFileCommand from './components/commands/RecentlyOpenedFileCommand.vue';
 
 const isConfigFilePresent = ref(false);
-// const mode = useColorMode();
+const mode = useColorMode();
 
 onMounted(async () => {
   try {
