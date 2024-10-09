@@ -1,9 +1,10 @@
 package node
 
 import (
+	"fmt"
 	"io/fs"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 )
@@ -54,26 +55,16 @@ type Node struct {
 
 type Nodes []*Node
 
-func (n Nodes) Len() int {
-	return len(n)
-}
-
-func (n Nodes) Less(i, j int) bool {
-	iNode, jNode := n[i], n[j]
-
-	if iNode.Type == jNode.Type {
-		return iNode.Name < jNode.Name
+func (n Nodes) String() string {
+	s := "["
+	for i, node := range n {
+		if i > 0 {
+			s += ", "
+		}
+		s += fmt.Sprintf("%v", node)
 	}
 
-	if iNode.Type == DIR {
-		return true
-	}
-
-	return false
-}
-
-func (n Nodes) Swap(i, j int) {
-	n[i], n[j] = n[j], n[i]
+	return s + "]"
 }
 
 func NewNode(name, extension string, nodeType DataType) Node {
@@ -90,7 +81,7 @@ func NewNode(name, extension string, nodeType DataType) Node {
 // This function ignore any element that starts with a dot (.git or .labmonster for example) as
 // it contains config files that are not relevant to the user
 func CreateNodesFromDirEntries(entries []fs.DirEntry) (Nodes, error) {
-	dirNames := make([]*Node, 0)
+	dirNames := make(Nodes, 0)
 	for _, entry := range entries {
 		ext := filepath.Ext(entry.Name())
 		if entry.Name() == ext {
@@ -118,7 +109,18 @@ func CreateNodesFromDirEntries(entries []fs.DirEntry) (Nodes, error) {
 		dirNames = append(dirNames, &newNode)
 	}
 
-	sort.Sort(Nodes(dirNames))
+	slices.SortStableFunc(dirNames, func(iNode, jNode *Node) int {
+		if iNode.Type == jNode.Type {
+			return strings.Compare(strings.ToLower(iNode.Name), strings.ToLower(jNode.Name))
+		}
+
+		if iNode.Type == DIR {
+			return -1
+		}
+
+		return 1
+	})
+
 	return dirNames, nil
 }
 

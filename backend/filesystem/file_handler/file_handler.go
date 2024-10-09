@@ -158,6 +158,7 @@ func (fh *FileHandler) RenameFile(pathFromRootOfTheLab, oldName, newName string)
 		return err
 	}
 
+	// TODO: Renommer l'entrée qui va avec dans les fichiers récents
 	return nil
 }
 

@@ -34,7 +34,6 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
   // On every "operation" that happens in the filesystem, the go side will launch an
   // event that gets caught here.
   EventsOn('fsop', function (e: FsEvent) {
-    console.log(e)
     switch (e.op) {
       case watcher.Op.CREATE:
         createFileInSidePanel(e)
@@ -53,11 +52,11 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
 
   async function createFileInSidePanel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
-    let dir: Array<object>
+    let dir: Array<ShortNode>
     const wasDeletionAtRoot = e.path === '.'
     if (wasDeletionAtRoot) {
       // handle lab's root delete
-      dir = rootFiles.value
+      dir = rootFiles.value as ShortNode[]
     } else {
       dir = dirs.value.get(e.path as DirPath) as ShortNode[]
     }
@@ -73,24 +72,24 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       const fileName = e.file.slice(0, i)
       const extension = e.file.slice(i)
 
-      dir.push({
+      add({
         name: fileName,
         extension: extension,
         fileType: e.fileType,
         type: e.dataType,
         updatedAt: new Date()
-      })
+      }, dir)
 
       return
     }
 
-    dir.push({
+    add({
       name: e.file,
       extension: "",
       fileType: e.fileType,
       type: e.dataType,
       updatedAt: new Date()
-    })
+    }, dir)
 
     await nextTick()
     if (wasDeletionAtRoot) {
@@ -126,7 +125,6 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       return
     }
 
-    console.log(oldFilepath)
     // Finding the element using its path
     const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
     if (!el) {
@@ -187,7 +185,7 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
 
   function renameFileInSidePannel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
-    let dir: Array<object>
+    let dir: Array<ShortNode>
     if (!e.oldPath.includes('/')) {
       // handle lab's root delete
       dir = rootFiles.value
@@ -219,12 +217,48 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     const fileName = e.file.slice(0, i)
     const extension = e.file.slice(i)
 
-    dir.splice(index, 1, {
+    dir.splice(index, 1)
+
+    add({
       name: fileName,
       extension,
       fileType: e.fileType,
       type: e.dataType,
       updatedAt: new Date()
-    })
+    }, dir)
+  }
+
+  function add(event: ShortNode, dirs: ShortNode[]) {
+    dirs.splice(findIndex(event, dirs) + 1, 0, event)
+  }
+
+  function findIndex(event: ShortNode, dirs: ShortNode[], low?: number, high?: number): number {
+    low = low || 0
+    high = high || dirs.length
+    let pivot = Math.floor(low + (high - low) / 2)
+
+    if (high - low <= 1 || (dirs[pivot].name === event.name && dirs[pivot].extension === event.extension)) {
+      return pivot
+    }
+
+    if (less(dirs, pivot, event)) {
+      return findIndex(event, dirs, pivot, high)
+    } else {
+      return findIndex(event, dirs, low, pivot)
+    }
+  }
+
+  function less(dir: ShortNode[], i: number, event: ShortNode): boolean {
+    const el = dir[i]
+
+    if (el.type === event.type) {
+      return new Intl.Collator().compare(el.name, event.name) < 0
+    }
+
+    if (el.type === node.DataType.DIR) {
+      return true
+    }
+
+    return false
   }
 }
