@@ -3,6 +3,7 @@ package node
 import (
 	"io/fs"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
@@ -51,6 +52,30 @@ type Node struct {
 	FileType  FileType  `json:"fileType"`
 }
 
+type Nodes []*Node
+
+func (n Nodes) Len() int {
+	return len(n)
+}
+
+func (n Nodes) Less(i, j int) bool {
+	iNode, jNode := n[i], n[j]
+
+	if iNode.Type == jNode.Type {
+		return iNode.Name < jNode.Name
+	}
+
+	if iNode.Type == DIR {
+		return true
+	}
+
+	return false
+}
+
+func (n Nodes) Swap(i, j int) {
+	n[i], n[j] = n[j], n[i]
+}
+
 func NewNode(name, extension string, nodeType DataType) Node {
 	return Node{
 		Name:      name,
@@ -61,9 +86,10 @@ func NewNode(name, extension string, nodeType DataType) Node {
 	}
 }
 
-// Takes an array of fs.DirEntry to create an array of type *Node and returns it
-// This function ignore any .labmonster directory as it might contain config files that are not relevant to the user
-func CreateNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
+// Takes an array of fs.DirEntry to create an array of type *Node and returns it.
+// This function ignore any element that starts with a dot (.git or .labmonster for example) as
+// it contains config files that are not relevant to the user
+func CreateNodesFromDirEntries(entries []fs.DirEntry) (Nodes, error) {
 	dirNames := make([]*Node, 0)
 	for _, entry := range entries {
 		ext := filepath.Ext(entry.Name())
@@ -92,6 +118,7 @@ func CreateNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
 		dirNames = append(dirNames, &newNode)
 	}
 
+	sort.Sort(Nodes(dirNames))
 	return dirNames, nil
 }
 
