@@ -35,7 +35,7 @@ func moveFile(oldPath, newPath string) (string, error) {
 	}
 	defer newFile.Close()
 
-	_, err = io.Copy(oldFile, newFile)
+	_, err = io.Copy(newFile, oldFile)
 	if err != nil {
 		return "", err
 	}
