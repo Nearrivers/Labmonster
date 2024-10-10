@@ -17,12 +17,6 @@
     <CtxSection>
       <CtxItem>
         <template #icon="{ strokeWidth, iconClass }">
-          <Files :stroke-width="strokeWidth" :class="iconClass" />
-        </template>
-        <template #text>Dupliquer</template>
-      </CtxItem>
-      <CtxItem>
-        <template #icon="{ strokeWidth, iconClass }">
           <FolderTree :stroke-width="strokeWidth" :class="iconClass" />
         </template>
         <template #text>Déplacer le dossier vers...</template>

@@ -199,7 +199,9 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     }
 
     // Removing the extension
-    const oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+    const oldFilepath = e.dataType === node.DataType.FILE
+      ? e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+      : e.oldPath
 
     let selector = `[data-path="${oldFilepath}"]`
     if (e.dataType === node.DataType.FILE) {
@@ -221,15 +223,27 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       return
     }
 
-    const i = e.file.lastIndexOf('.')
-    const fileName = e.file.slice(0, i)
-    const extension = e.file.slice(i)
-
     dir.splice(index, 1)
 
+    if (e.dataType === node.DataType.FILE) {
+      const i = e.file.lastIndexOf('.')
+      const fileName = e.file.slice(0, i)
+      const extension = e.file.slice(i)
+
+      add({
+        name: fileName,
+        extension,
+        fileType: e.fileType,
+        type: e.dataType,
+        updatedAt: new Date()
+      }, dir)
+
+      return
+    }
+
     add({
-      name: fileName,
-      extension,
+      name: e.file,
+      extension: "",
       fileType: e.fileType,
       type: e.dataType,
       updatedAt: new Date()
