@@ -3,7 +3,7 @@
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
-          class="h-7 w-full justify-start rounded-md hover:bg-accent hover:text-accent-foreground"
+          class="h-7 w-full cursor-default justify-start rounded-md hover:bg-accent hover:text-accent-foreground"
           @click="toggle"
         >
           <div
@@ -18,7 +18,7 @@
             <input
               role="textbox"
               ref="input"
-              class="w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap bg-transparent outline-none"
+              class="w-full cursor-default overflow-hidden text-ellipsis whitespace-nowrap bg-transparent outline-none"
               :id="nodePathWithoutSpaces"
               @blur.stop="onBlur"
               @keyup.enter="input?.blur()"

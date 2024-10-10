@@ -63,7 +63,7 @@ export function useDirNode(
     }
 
     input.value.toggleAttribute('readonly');
-    input.value.classList.add('cursor-pointer');
+    input.value.classList.add('cursor-default');
     input.value.classList.remove('cursor-text');
 
     try {
