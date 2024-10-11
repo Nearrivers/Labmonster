@@ -2,7 +2,10 @@ import { useShowErrorToast } from "./useShowErrorToast";
 import { SaveMedia } from "$/file_handler/FileHandler";
 
 export function useScreenRecorder() {
-  const chunks: Blob[] = []
+  let stream: MediaStream;
+  let mediaRecorder: MediaRecorder
+
+  let chunks: Blob[] = []
   const mime = 'video/webm; codecs=h264'
   const { showToast } = useShowErrorToast();
   const trackConstraints: MediaTrackConstraints = {
@@ -21,21 +24,19 @@ export function useScreenRecorder() {
   }
 
   async function startScreenRecording() {
-    const stream = await navigator.mediaDevices.getDisplayMedia({
+    stream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
       audio: true,
     });
 
-    const mediaRecorder = new MediaRecorder(stream, {
+    mediaRecorder = new MediaRecorder(stream, {
       mimeType: mime,
     });
 
     const track = stream.getVideoTracks()[0];
     await track.applyConstraints(trackConstraints);
 
-    const audioTracks = stream.getAudioTracks()
-    console.log(audioTracks[0])
-
+    chunks = []
     mediaRecorder.addEventListener('dataavailable', pipeStreamData);
     mediaRecorder.addEventListener('stop', outputStreamIntoFile);
     mediaRecorder.start();
@@ -46,6 +47,8 @@ export function useScreenRecorder() {
   }
 
   function outputStreamIntoFile() {
+    mediaRecorder.removeEventListener('dataavailable', pipeStreamData);
+    mediaRecorder.removeEventListener('stop', outputStreamIntoFile);
     const blob = new Blob(chunks, {
       type: 'video/webm',
     });

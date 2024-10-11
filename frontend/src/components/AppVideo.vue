@@ -10,7 +10,6 @@
         alt="Fichier vidéo"
         class="block max-w-full"
         :src="src"
-        autoplay
       ></video>
     </div>
   </main>
