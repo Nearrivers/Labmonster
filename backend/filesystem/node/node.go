@@ -131,7 +131,7 @@ func DetectFileType(extension string) FileType {
 		return IMAGE
 	case ".json":
 		return GRAPH
-	case ".mp4", ".mpeg":
+	case ".mp4", ".mpeg", ".webm":
 		return VIDEO
 	default:
 		return UNSUPPORTED

@@ -10,13 +10,14 @@
         alt="Fichier vidéo"
         class="block max-w-full"
         :src="src"
+        autoplay
       ></video>
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-import { OpenMedia, OpenMediaConc } from '$/file_handler/FileHandler';
+import { OpenMedia } from '$/file_handler/FileHandler';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 import { computed, ref, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
@@ -31,9 +32,7 @@ const path = computed(() =>
 
 watchEffect(async () => {
   try {
-    console.time('open media');
     src.value = await OpenMedia(route.params.path as string);
-    console.timeEnd('open media');
   } catch (error) {
     showToast(error);
   }
