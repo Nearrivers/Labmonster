@@ -107,6 +107,8 @@ func (fh *FileHandler) createFileName(pathFromLabRoot, mimetype string) (string,
 		return path + ".mp4", nil
 	case "video/mpeg":
 		return path + ".mpeg", nil
+	case "video/webm":
+		return path + ".webm", nil
 	default:
 		return "", ErrMediaNotSupported
 	}

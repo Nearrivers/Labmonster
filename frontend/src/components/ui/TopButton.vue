@@ -8,7 +8,7 @@
       >
         <slot name="icon" />
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent :side="tooltipSide">
         <p><slot name="tooltip" /></p>
       </TooltipContent>
     </Tooltip>
@@ -22,10 +22,17 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
+import { Side } from 'radix-vue/dist/Popper';
 
-defineProps<{
-  additionnalClasses?: string;
-}>();
+withDefaults(
+  defineProps<{
+    additionnalClasses?: string;
+    tooltipSide?: Side;
+  }>(),
+  {
+    tooltipSide: 'top',
+  },
+);
 
 const emit = defineEmits<{
   (e: 'click'): void;

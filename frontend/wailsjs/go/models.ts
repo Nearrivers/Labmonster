@@ -1,3 +1,20 @@
+export namespace config {
+	
+	export class ConfigFile {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new ConfigFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
+
+}
+
 export namespace graph {
 	
 	export class EdgeMarker {
@@ -216,16 +233,16 @@ export namespace graph {
 
 export namespace node {
 	
-	export enum DataType {
-	    FILE = "FILE",
-	    DIR = "DIR",
-	}
 	export enum FileType {
 	    GRAPH = "GRAPH",
 	    SHEET = "SHEET",
 	    VIDEO = "VIDEO",
 	    IMAGE = "IMAGE",
 	    UNSUPPORTED = "UNSUPPORTED",
+	}
+	export enum DataType {
+	    FILE = "FILE",
+	    DIR = "DIR",
 	}
 	export class Node {
 	    name: string;
