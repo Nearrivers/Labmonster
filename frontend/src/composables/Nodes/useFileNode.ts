@@ -61,11 +61,15 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string, offs
     }
 
     input.value.toggleAttribute('readonly');
-    input.value.classList.add('cursor-pointer');
+    input.value.classList.add('cursor-default');
     input.value.classList.remove('cursor-text');
 
+    // We don't rename 
+    const newName = fileName.value.trim()
+      ? fileName.value + props.value.fileNode.extension
+      : props.value.fileNode.name + props.value.fileNode.extension
+
     try {
-      const newName = fileName.value + props.value.fileNode.extension;
       await RenameFile(
         props.value.path,
         props.value.fileNode.name + props.value.fileNode.extension,
@@ -73,6 +77,12 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string, offs
       );
     } catch (error) {
       showToast(error);
+    } finally {
+      if (fileName.value.trim()) {
+        return
+      }
+
+      input.value.value = props.value.fileNode.name
     }
   }
 

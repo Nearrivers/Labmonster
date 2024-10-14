@@ -36,21 +36,21 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
   EventsOn('fsop', function (e: FsEvent) {
     switch (e.op) {
       case watcher.Op.CREATE:
-        createFileInSidePanel(e)
+        addElementInSidePanel(e)
         break;
       case watcher.Op.REMOVE:
         deleteElementFromSidePannelWithPath(e)
         break
       case watcher.Op.RENAME:
-        renameFileInSidePannel(e)
+        renameElementInSidePannel(e)
         break;
       case watcher.Op.MOVE:
-        moveFileInSidePannel(e)
+        moveElementInSidePannel(e)
         break
     }
   });
 
-  async function createFileInSidePanel(e: FsEvent) {
+  async function addElementInSidePanel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: Array<ShortNode>
     const wasDeletionAtRoot = e.path === '.'
@@ -178,12 +178,12 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     dir.splice(index, 1)
   }
 
-  function moveFileInSidePannel(e: FsEvent) {
+  function moveElementInSidePannel(e: FsEvent) {
     deleteFileFromSidePannelWithOldPath(e)
-    createFileInSidePanel(e)
+    addElementInSidePanel(e)
   }
 
-  function renameFileInSidePannel(e: FsEvent) {
+  function renameElementInSidePannel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: Array<ShortNode>
     if (!e.oldPath.includes('/')) {
@@ -199,9 +199,19 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     }
 
     // Removing the extension
-    const oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+    const oldFilepath = e.dataType === node.DataType.FILE
+      ? e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+      : e.oldPath
+
+    let selector = `[data-path="${oldFilepath}"]`
+    if (e.dataType === node.DataType.FILE) {
+      selector += '[data-type="file"]'
+    } else {
+      selector += '[data-type="directory"]'
+    }
+
     // Finding the element using its path
-    const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
+    const el = document.querySelector(selector) as HTMLLIElement
     if (!el) {
       return
     }
@@ -213,15 +223,27 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       return
     }
 
-    const i = e.file.lastIndexOf('.')
-    const fileName = e.file.slice(0, i)
-    const extension = e.file.slice(i)
-
     dir.splice(index, 1)
 
+    if (e.dataType === node.DataType.FILE) {
+      const i = e.file.lastIndexOf('.')
+      const fileName = e.file.slice(0, i)
+      const extension = e.file.slice(i)
+
+      add({
+        name: fileName,
+        extension,
+        fileType: e.fileType,
+        type: e.dataType,
+        updatedAt: new Date()
+      }, dir)
+
+      return
+    }
+
     add({
-      name: fileName,
-      extension,
+      name: e.file,
+      extension: "",
       fileType: e.fileType,
       type: e.dataType,
       updatedAt: new Date()
