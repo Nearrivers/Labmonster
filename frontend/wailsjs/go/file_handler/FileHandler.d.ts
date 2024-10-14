@@ -21,10 +21,8 @@ export function OpenFile(arg1:string):Promise<graph.Graph>;
 
 export function OpenMedia(arg1:string):Promise<string>;
 
-export function OpenMediaConc(arg1:string):Promise<Array<number>>;
-
 export function RenameFile(arg1:string,arg2:string,arg3:string):Promise<void>;
 
 export function SaveFile(arg1:string,arg2:graph.Graph):Promise<void>;
 
-export function SaveMedia(arg1:string,arg2:string,arg3:string):Promise<string>;
+export function SaveMedia(arg1:string,arg2:string,arg3:string,arg4:string):Promise<string>;

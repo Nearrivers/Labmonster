@@ -1,9 +1,11 @@
 import { useShowErrorToast } from "./useShowErrorToast";
 import { SaveMedia } from "$/file_handler/FileHandler";
+import { onUnmounted, ref } from "vue";
 
 export function useScreenRecorder() {
+  let wasRecordCanceled = false
   let stream: MediaStream;
-  let mediaRecorder: MediaRecorder
+  const mediaRecorder = ref<MediaRecorder>()
 
   let chunks: Blob[] = []
   const mime = 'video/webm; codecs=h264'
@@ -23,13 +25,25 @@ export function useScreenRecorder() {
     },
   }
 
+  onUnmounted(() => {
+    if (!mediaRecorder.value) {
+      return
+    }
+
+    mediaRecorder.value.removeEventListener('dataavailable', pipeStreamData);
+    mediaRecorder.value.removeEventListener('stop', outputStreamIntoFile);
+    mediaRecorder.value.addEventListener('pause', pauseRecorderState)
+  })
+
+  const mediaRecorderState = ref<RecordingState>('inactive')
+
   async function startScreenRecording() {
     stream = await navigator.mediaDevices.getDisplayMedia({
       video: true,
       audio: true,
     });
 
-    mediaRecorder = new MediaRecorder(stream, {
+    mediaRecorder.value = new MediaRecorder(stream, {
       mimeType: mime,
     });
 
@@ -37,9 +51,34 @@ export function useScreenRecorder() {
     await track.applyConstraints(trackConstraints);
 
     chunks = []
-    mediaRecorder.addEventListener('dataavailable', pipeStreamData);
-    mediaRecorder.addEventListener('stop', outputStreamIntoFile);
-    mediaRecorder.start();
+    mediaRecorder.value.addEventListener('dataavailable', pipeStreamData);
+    mediaRecorder.value.addEventListener('pause', pauseRecorderState)
+    mediaRecorder.value.addEventListener('stop', outputStreamIntoFile);
+
+    try {
+      mediaRecorder.value.start();
+      mediaRecorderState.value = "recording"
+    } catch (error) {
+      showToast("Impossible de lancer l'enregistrement")
+    }
+  }
+
+  function stopScreenRecording() {
+    if (mediaRecorderState.value != 'inactive') {
+      stream.getTracks().forEach((track) => track.stop())
+      return
+    }
+
+    showToast("Aucun enregistrement en cours")
+  }
+
+  function cancelScreenRecording() {
+    wasRecordCanceled = true
+    stopScreenRecording()
+  }
+
+  function pauseRecorderState() {
+    mediaRecorderState.value = 'paused'
   }
 
   function pipeStreamData(e: BlobEvent) {
@@ -47,8 +86,17 @@ export function useScreenRecorder() {
   }
 
   function outputStreamIntoFile() {
-    mediaRecorder.removeEventListener('dataavailable', pipeStreamData);
-    mediaRecorder.removeEventListener('stop', outputStreamIntoFile);
+    if (!mediaRecorder.value || wasRecordCanceled) {
+      wasRecordCanceled = false
+      mediaRecorderState.value = 'inactive'
+      return
+    }
+
+    const fileName = prompt("Entrez un nom pour votre vidéo", "")
+
+    mediaRecorder.value.removeEventListener('dataavailable', pipeStreamData);
+    mediaRecorder.value.removeEventListener('stop', outputStreamIntoFile);
+    mediaRecorder.value.addEventListener('pause', pauseRecorderState)
     const blob = new Blob(chunks, {
       type: 'video/webm',
     });
@@ -56,7 +104,9 @@ export function useScreenRecorder() {
     const reader = new FileReader();
     reader.onload = async function (e) {
       try {
-        await SaveMedia('root', 'video/webm', e.target?.result as string);
+        await SaveMedia(fileName!, 'root', 'video/webm', e.target?.result as string);
+        mediaRecorderState.value = 'inactive'
+        chunks = []
       } catch (error) {
         showToast(error);
       }
@@ -70,6 +120,9 @@ export function useScreenRecorder() {
   }
 
   return {
-    startScreenRecording
+    mediaRecorderState,
+    startScreenRecording,
+    stopScreenRecording,
+    cancelScreenRecording
   }
 }

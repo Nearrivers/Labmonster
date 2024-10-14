@@ -11,17 +11,8 @@
         <template #tooltip> Basculer </template>
       </TopButton>
     </header>
-    <section class="flex flex-1 flex-col p-1">
-      <TopButton
-        @click="startScreenRecording"
-        :additionnalClasses="'text-muted-foreground hover:text-accent-foreground hover:bg-accent !p-1'"
-        :tooltipSide="'right'"
-      >
-        <template #icon>
-          <TvMinimalPlay class="h-5 w-5" />
-        </template>
-        <template #tooltip> Démarrer une capture d'écran </template>
-      </TopButton>
+    <section class="flex flex-1 flex-col gap-1 p-1">
+      <ScreenrecordIcons />
       <TopButton
         :additionnalClasses="'text-muted-foreground mt-auto hover:text-accent-foreground hover:bg-accent !p-1'"
       >
@@ -35,12 +26,10 @@
 </template>
 
 <script lang="ts" setup>
+import ScreenrecordIcons from '@/components/AppRibbon/ScreenrecordIcons.vue';
 import TopButton from '@/components/ui/TopButton.vue';
-import { useScreenRecorder } from '@/composables/useScreenRecorder';
 import { sidePanelToggled } from '@/events/ToggleSidePanel';
-import { PanelLeft, Settings, TvMinimalPlay } from 'lucide-vue-next';
-
-const { startScreenRecording } = useScreenRecorder();
+import { PanelLeft, Settings } from 'lucide-vue-next';
 
 function toggleSidePanel() {
   sidePanelToggled.sidePanelToggled();

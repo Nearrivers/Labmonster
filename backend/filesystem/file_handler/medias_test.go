@@ -58,7 +58,7 @@ func TestSaveMedia(t *testing.T) {
 		defer os.RemoveAll(dir)
 		s := openPngImageFile(t)
 
-		path, err := ft.SaveMedia("", "image/png", s)
+		path, err := ft.SaveMedia("", "", "image/png", s)
 		if err != nil {
 			t.Fatalf("got an unexpected error: %v", err)
 		}

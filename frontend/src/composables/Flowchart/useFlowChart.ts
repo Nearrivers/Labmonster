@@ -65,6 +65,7 @@ export function useFlowChart() {
       reader.onload = async function (e) {
         try {
           const imagePath = await SaveMedia(
+            "",
             path.value,
             mimeType,
             e.target?.result as string,
@@ -93,6 +94,7 @@ export function useFlowChart() {
     reader.onload = async function (e) {
       try {
         const imagePath = await SaveMedia(
+          "",
           path.value,
           mimeType,
           e.target?.result as string,
