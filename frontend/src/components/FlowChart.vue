@@ -76,7 +76,6 @@ import FilePanel from './flowchart/FilePanel.vue';
 import { useHandleFlowchartChanges } from '@/composables/Flowchart/useHandleFlowchartChanges';
 import { useFlowChart } from '@/composables/Flowchart/useFlowChart';
 import FlowchartContextMenu from './contextmenus/FlowchartContextMenu.vue';
-import { EventsOn } from '../../wailsjs/runtime/runtime';
 import TextNode from './flowchart/Nodes/TextNode.vue';
 import VideoNode from './flowchart/Nodes/VideoNode.vue';
 import ImageNode from './flowchart/Nodes/ImageNode.vue';
@@ -88,7 +87,7 @@ const contextMenuY = ref(100);
 const nodes = ref<Node<CustomNodeData>[]>([]);
 const { addNodes } = useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions();
-const { path, fileName, onFsEvent } = useFlowChart();
+const { path, fileName } = useFlowChart();
 const { isSaving } = useHandleFlowchartChanges(path);
 const ctxMenu = ref<InstanceType<typeof FlowchartContextMenu> | null>(null);
 
@@ -97,8 +96,6 @@ function onFlowRightClick(e: MouseEvent) {
   contextMenuY.value = e.clientY;
   ctxMenu.value?.showPopover();
 }
-
-EventsOn('fsop', onFsEvent);
 
 function onAddNode() {
   addNodes(createNewNode());

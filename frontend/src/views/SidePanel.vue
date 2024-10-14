@@ -81,7 +81,7 @@ watch(F2, (v) => {
     return;
   }
 
-  console.log('test');
+  // console.log('test');
 });
 
 onMounted(async () => {
@@ -92,6 +92,7 @@ onMounted(async () => {
       await loadLabFiles();
     }
   } catch (error) {
+    console.error(error);
     showToast(String(error));
   }
 });

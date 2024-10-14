@@ -7,6 +7,7 @@ export function useShowErrorToast() {
   const { toast } = useToast();
 
   const showToast: ShowToastFunc = (error: unknown, title?: string) => {
+    console.error(error)
     let description = String(error);
 
     if (error instanceof Error) {
