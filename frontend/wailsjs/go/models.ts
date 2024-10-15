@@ -273,8 +273,7 @@ export namespace repository {
 	
 	export class AddGameParams {
 	    name: string;
-	    // Go type: sql
-	    iconpath: any;
+	    iconpath: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new AddGameParams(source);
@@ -283,32 +282,13 @@ export namespace repository {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
-	        this.iconpath = this.convertValues(source["iconpath"], null);
+	        this.iconpath = source["iconpath"];
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 	export class Game {
 	    id: number;
 	    name: string;
-	    // Go type: sql
-	    iconpath: any;
+	    iconpath: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Game(source);
@@ -318,26 +298,8 @@ export namespace repository {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.name = source["name"];
-	        this.iconpath = this.convertValues(source["iconpath"], null);
+	        this.iconpath = source["iconpath"];
 	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice && a.map) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
 	}
 
 }
