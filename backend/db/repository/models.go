@@ -4,12 +4,8 @@
 
 package repository
 
-import (
-	"database/sql"
-)
-
 type Game struct {
-	ID       int64          `json:"id"`
-	Name     string         `json:"name"`
-	Iconpath sql.NullString `json:"iconpath"`
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Iconpath string `json:"iconpath"`
 }

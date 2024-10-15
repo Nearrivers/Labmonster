@@ -7,7 +7,6 @@ package repository
 
 import (
 	"context"
-	"database/sql"
 )
 
 const addGame = `-- name: AddGame :one
@@ -20,8 +19,8 @@ RETURNING id, name, iconpath
 `
 
 type AddGameParams struct {
-	Name     string         `json:"name"`
-	Iconpath sql.NullString `json:"iconpath"`
+	Name     string `json:"name"`
+	Iconpath string `json:"iconpath"`
 }
 
 func (q *Queries) AddGame(ctx context.Context, arg AddGameParams) (Game, error) {
