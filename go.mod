@@ -6,6 +6,7 @@ toolchain go1.21.4
 
 require (
 	github.com/BurntSushi/toml v1.4.0
+	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/wailsapp/wails/v2 v2.8.2
 )
 
