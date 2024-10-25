@@ -43,6 +43,7 @@ function onFsEvent(e: FsEvent) {
 
   if (e.op === watcher.Op.REMOVE) {
     router.push({ name: Routes.NotOpened });
+    return;
   }
 
   router.push({ name: Routes.Flowchart, params: { path: filePath } });
