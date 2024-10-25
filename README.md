@@ -8,7 +8,9 @@ Labmonster is a desktop software for fighting games enthusiasts. Especially thos
 - You can create character sheets on a game-to-game basis and recreate your own [Dustloop wiki](https://www.dustloop.com/w/Main_Page) equivalent
 - You can tell the software who are you playing and it will remember it. The next time you'll create a move of _another_ character that is punishable, the application will tell you how your character will be able to punish that move. You can rank punishes by what YOU prioritize in a game. Is it damage ? [Corner carry](https://glossary.infil.net/?t=Corner%20Carry) ? [Oki](https://glossary.infil.net/?t=RPS) and so on... The software will tell you "here, this punish does more damage but this one has better Oki".
 - You can launch a screen record and save the replay in the app
-- Mostly inspired by [Obsidian](https://obsidian.md/), most elements in the app will be linkable between each other.
+- Hugely inspired by [Obsidian](https://obsidian.md/):
+  - Elements in the app will be linkable between each other.
+  - Everything is a file located on your machine. I can't and will never be able to see them.
 
 ## 🔨 Installation
 ### Download
