@@ -285,6 +285,22 @@ export namespace repository {
 	        this.iconpath = source["iconpath"];
 	    }
 	}
+	export class EditGameParams {
+	    name: string;
+	    iconpath: string;
+	    id: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new EditGameParams(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.iconpath = source["iconpath"];
+	        this.id = source["id"];
+	    }
+	}
 	export class Game {
 	    id: number;
 	    name: string;

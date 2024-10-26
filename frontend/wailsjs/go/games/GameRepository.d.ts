@@ -4,6 +4,10 @@ import {repository} from '../models';
 
 export function AddGame(arg1:repository.AddGameParams):Promise<repository.Game>;
 
+export function DeleteGame(arg1:number):Promise<void>;
+
 export function GetOneGame(arg1:number):Promise<repository.Game>;
 
 export function ListGames():Promise<Array<repository.Game>>;
+
+export function UpdateGame(arg1:number,arg2:repository.EditGameParams):Promise<void>;

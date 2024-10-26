@@ -13,3 +13,11 @@ INSERT INTO games(
   ?, ?
 )
 RETURNING *;
+
+-- name: EditGame :exec
+UPDATE games SET name = ?, iconPath = ?
+WHERE id = ?;
+
+-- name: DeleteGame :exec
+DELETE FROM games
+WHERE id = ?;

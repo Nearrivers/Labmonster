@@ -6,10 +6,18 @@ export function AddGame(arg1) {
   return window['go']['games']['GameRepository']['AddGame'](arg1);
 }
 
+export function DeleteGame(arg1) {
+  return window['go']['games']['GameRepository']['DeleteGame'](arg1);
+}
+
 export function GetOneGame(arg1) {
   return window['go']['games']['GameRepository']['GetOneGame'](arg1);
 }
 
 export function ListGames() {
   return window['go']['games']['GameRepository']['ListGames']();
+}
+
+export function UpdateGame(arg1, arg2) {
+  return window['go']['games']['GameRepository']['UpdateGame'](arg1, arg2);
 }

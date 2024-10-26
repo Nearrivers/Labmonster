@@ -47,3 +47,25 @@ func (gr *GameRepository) ListGames() ([]repository.Game, error) {
 
 	return games, err
 }
+
+func (gr *GameRepository) UpdateGame(id int64, editedGame repository.EditGameParams) error {
+	ctx := context.Background()
+
+	err := gr.q.EditGame(ctx, editedGame)
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (gr *GameRepository) DeleteGame(id int64) error {
+	ctx := context.Background()
+
+	err := gr.q.DeleteGame(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return err
+}

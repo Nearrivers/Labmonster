@@ -7,7 +7,7 @@
   </section>
   <ScrollArea class="b-4 h-[90svh]" data-path="/">
     <ul
-      class="w-full px-2 text-sm text-muted-foreground"
+      class="w-full px-1 text-sm text-muted-foreground"
       v-if="files.length > 0"
       @click.right.prevent="onRightClick"
       @click.left="onLeftClick"

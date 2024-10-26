@@ -30,6 +30,32 @@ func (q *Queries) AddGame(ctx context.Context, arg AddGameParams) (Game, error) 
 	return i, err
 }
 
+const deleteGame = `-- name: DeleteGame :exec
+DELETE FROM games
+WHERE id = ?
+`
+
+func (q *Queries) DeleteGame(ctx context.Context, id int64) error {
+	_, err := q.db.ExecContext(ctx, deleteGame, id)
+	return err
+}
+
+const editGame = `-- name: EditGame :exec
+UPDATE games SET name = ?, iconPath = ?
+WHERE id = ?
+`
+
+type EditGameParams struct {
+	Name     string `json:"name"`
+	Iconpath string `json:"iconpath"`
+	ID       int64  `json:"id"`
+}
+
+func (q *Queries) EditGame(ctx context.Context, arg EditGameParams) error {
+	_, err := q.db.ExecContext(ctx, editGame, arg.Name, arg.Iconpath, arg.ID)
+	return err
+}
+
 const getOneGame = `-- name: GetOneGame :one
 SELECT id, name, iconpath FROM games
 WHERE id = ? LIMIT 1
