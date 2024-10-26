@@ -48,7 +48,7 @@ func (gr *GameRepository) ListGames() ([]repository.Game, error) {
 	return games, err
 }
 
-func (gr *GameRepository) UpdateGame(id int64, editedGame repository.EditGameParams) error {
+func (gr *GameRepository) UpdateGame(editedGame repository.EditGameParams) error {
 	ctx := context.Background()
 
 	err := gr.q.EditGame(ctx, editedGame)

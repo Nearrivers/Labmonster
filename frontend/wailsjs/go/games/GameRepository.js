@@ -18,6 +18,6 @@ export function ListGames() {
   return window['go']['games']['GameRepository']['ListGames']();
 }
 
-export function UpdateGame(arg1, arg2) {
-  return window['go']['games']['GameRepository']['UpdateGame'](arg1, arg2);
+export function UpdateGame(arg1) {
+  return window['go']['games']['GameRepository']['UpdateGame'](arg1);
 }

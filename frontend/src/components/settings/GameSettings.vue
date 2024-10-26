@@ -1,9 +1,9 @@
 <template>
   <SettingsTitle> Jeux </SettingsTitle>
   <SettingsSection v-for="game in games" :key="game.id">
-    <GameSection :game="game" @change="loadGames" />
+    <GameSection :game="game" @delete="loadGames" @edit="onEdit" />
   </SettingsSection>
-  <GameForm v-if="isEditing" @cancel="isEditing = false" @submit="loadGames" />
+  <GameForm @submit="loadGames" v-model="isEditing" :game="gameToEdit" />
   <div
     v-if="games.length === 0 && !isEditing"
     class="flex items-center justify-between py-4 text-sm"
@@ -28,7 +28,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import SettingsTitle from './ui/SettingsTitle.vue';
 import { Game } from '@/types/models/Game';
 import { ListGames } from '$/games/GameRepository';
@@ -39,21 +39,29 @@ import GameSection from './game/GameSection.vue';
 
 const games = ref<Game[]>([]);
 const isEditing = ref(false);
+const gameToEdit = ref<Game>({ id: 0, name: '', iconpath: '' });
 
 onMounted(async () => {
   await loadGames();
 });
 
 async function loadGames() {
-  isEditing.value = false;
   games.value = await ListGames();
 
   if (!games.value) {
     games.value = [];
   }
+  isEditing.value = false;
 }
 
-function editNewGame() {
+async function editNewGame() {
+  gameToEdit.value = { id: 0, name: '', iconpath: '' };
+  await nextTick();
+  isEditing.value = true;
+}
+
+function onEdit(game: Game) {
+  gameToEdit.value = game;
   isEditing.value = true;
 }
 </script>

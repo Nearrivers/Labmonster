@@ -10,7 +10,7 @@
     </Input>
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger tabindex="-1">
           <label for="iconpath">
             <Button
               @click.prevent="fileInput?.click()"
@@ -28,6 +28,7 @@
             name="iconpath"
             id="iconpath"
             @change="selectFile"
+            tabindex="-1"
           />
         </TooltipTrigger>
         <TooltipContent :side="'top'"> Chercher un fichier </TooltipContent>

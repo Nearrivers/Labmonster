@@ -10,7 +10,7 @@
       {{ game.name }}
     </p>
 
-    <div class="ml-auto flex gap-1 text-muted-foreground">
+    <div class="ml-auto flex gap-2 text-muted-foreground">
       <TopButton :additionnal-classes="'!p-0'" :tooltip-side="'bottom'">
         <template #icon>
           <Settings class="h-6 w-6 p-1" />
@@ -20,7 +20,7 @@
       <TopButton
         :additionnal-classes="'!p-0'"
         :tooltip-side="'bottom'"
-        @click="emit('change')"
+        @click="emit('edit', game)"
       >
         <template #icon>
           <Pencil class="h-6 w-6 p-1" />
@@ -55,13 +55,14 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'change'): void;
+  (e: 'edit', game: Game): void;
+  (e: 'delete'): void;
 }>();
 
 async function removeGame() {
   try {
     await DeleteGame(props.game.id);
-    emit('change');
+    emit('delete');
   } catch (error) {}
 }
 </script>
