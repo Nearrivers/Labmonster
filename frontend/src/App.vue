@@ -18,7 +18,7 @@ import { useShowErrorToast } from './composables/useShowErrorToast';
 
 const { showToast } = useShowErrorToast();
 const isConfigFilePresent = ref(false);
-// const mode = useColorMode();
+const mode = useColorMode();
 
 onMounted(async () => {
   try {

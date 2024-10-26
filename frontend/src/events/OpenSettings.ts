@@ -1,3 +1,4 @@
+import { SETTINGS_OPENED } from "@/constants/event-names/SETTINGS_OPENED"
 
 class OpenSettingsEvent extends EventTarget {
 
@@ -5,11 +6,11 @@ class OpenSettingsEvent extends EventTarget {
     super()
   }
 
-  private _settingsOpened = new Event('settingsOpened')
+  private _settingsOpened = new Event(SETTINGS_OPENED)
 
   public openSettings() {
     this.dispatchEvent(this._settingsOpened)
   }
 }
 
-export const openSettingEvent = new OpenSettingsEvent()
+export const settingsOpened = new OpenSettingsEvent()

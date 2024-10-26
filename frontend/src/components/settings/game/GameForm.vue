@@ -2,7 +2,7 @@
   <Dialog v-model:open="isDialogOpen">
     <DialogContent class="max-w-xl">
       <DialogHeader>
-        <DialogTitle v-if="game">Modifier un jeu</DialogTitle>
+        <DialogTitle v-if="game.name">Modifier un jeu</DialogTitle>
         <DialogTitle v-else>Ajouter un jeu</DialogTitle>
         <DialogDescription>
           Créez ou modifiez votre jeu. Cliquez sur "Valider" une fois que vous
@@ -28,7 +28,7 @@
             ordinateur
           </template>
         </SelectFileInput>
-        <!-- Résultat -->
+        <!-- Résultat / Preview-->
         <section class="flex items-center gap-4 py-2">
           <span class="text-sm text-muted-foreground"> Résultat: </span>
           <Avatar>
@@ -53,6 +53,14 @@
 </template>
 
 <script lang="ts" setup>
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogDescription,
+  DialogTitle,
+  DialogClose,
+} from '@/components/ui/dialog';
 import { AddGame, UpdateGame } from '$/games/GameRepository';
 import { repository } from '$/models';
 import Button from '@/components/ui/button/Button.vue';
@@ -64,13 +72,7 @@ import AvatarImage from '@/components/ui/avatar/AvatarImage.vue';
 import Avatar from '@/components/ui/avatar/Avatar.vue';
 import AvatarFallback from '@/components/ui/avatar/AvatarFallback.vue';
 import { Gamepad2 } from 'lucide-vue-next';
-import Dialog from '@/components/ui/dialog/Dialog.vue';
-import DialogContent from '@/components/ui/dialog/DialogContent.vue';
-import DialogHeader from '@/components/ui/dialog/DialogHeader.vue';
-import DialogDescription from '@/components/ui/dialog/DialogDescription.vue';
 import { Game } from '@/types/models/Game';
-import DialogTitle from '@/components/ui/dialog/DialogTitle.vue';
-import DialogClose from '@/components/ui/dialog/DialogClose.vue';
 import { useShowErrorToast } from '@/composables/useShowErrorToast';
 
 const props = defineProps<{

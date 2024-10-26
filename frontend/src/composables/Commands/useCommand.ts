@@ -1,4 +1,4 @@
-import { computed, onMounted, Ref, ref, watch } from "vue";
+import { computed, Ref, ref, watch } from "vue";
 import Fuse from 'fuse.js'
 
 // Used with dialog elements.

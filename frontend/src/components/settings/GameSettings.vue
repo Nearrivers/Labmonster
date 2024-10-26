@@ -1,6 +1,16 @@
 <template>
   <SettingsTitle> Jeux </SettingsTitle>
-  <SettingsSection v-for="game in games" :key="game.id">
+  <div
+    class="mb-2 mt-4 flex items-center rounded-md border border-border px-2 ring-ring has-[:focus-visible]:ring-2"
+  >
+    <Search class="w-4 text-muted-foreground" />
+    <Input
+      class="border-none !ring-0 focus-within:ring-offset-transparent focus-visible:ring-offset-0"
+      placeholder="Recherchez un jeu"
+      v-model="gameSearch"
+    />
+  </div>
+  <SettingsSection v-for="game in fuzzyFilteredGameList" :key="game.id">
     <GameSection :game="game" @delete="loadGames" @edit="onEdit" />
   </SettingsSection>
   <GameForm @submit="loadGames" v-model="isEditing" :game="gameToEdit" />
@@ -28,7 +38,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { nextTick, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import SettingsTitle from './ui/SettingsTitle.vue';
 import { Game } from '@/types/models/Game';
 import { ListGames } from '$/games/GameRepository';
@@ -36,10 +46,21 @@ import SettingsSection from './ui/SettingsSection.vue';
 import Button from '../ui/button/Button.vue';
 import GameForm from './game/GameForm.vue';
 import GameSection from './game/GameSection.vue';
+import Input from '../ui/input/Input.vue';
+import { Search } from 'lucide-vue-next';
+import Fuse from 'fuse.js';
 
 const games = ref<Game[]>([]);
 const isEditing = ref(false);
 const gameToEdit = ref<Game>({ id: 0, name: '', iconpath: '' });
+const gameSearch = ref('');
+
+const fuzzyFilteredGameList = computed(() => {
+  const fuse = new Fuse(games.value, { threshold: 0.35, keys: ['name'] });
+  return gameSearch.value
+    ? fuse.search(gameSearch.value).map((f) => f.item)
+    : games.value;
+});
 
 onMounted(async () => {
   await loadGames();

@@ -1,5 +1,5 @@
 <template>
-  <Dialog :open="true">
+  <Dialog v-model:open="isDialogOpen">
     <DialogContent class="flex h-[70%] max-w-5xl gap-0 overflow-hidden p-0">
       <DialogTitle class="sr-only">Paramètres</DialogTitle>
       <DialogDescription class="sr-only">
@@ -36,28 +36,10 @@ import {
   DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { FunctionalComponent, ref } from 'vue';
-import GameSettings from '../settings/GameSettings.vue';
-import MediaSettings from '../settings/MediaSettings.vue';
-import { Gamepad2, GitFork, MonitorPlay, Wrench } from 'lucide-vue-next';
-import GeneralSettings from '../settings/GeneralSettings.vue';
-import { DefinedComponent } from '@vue/test-utils/dist/types';
-import GraphSettings from '../settings/GraphSettings.vue';
 import ScrollArea from '../ui/scroll-area/ScrollArea.vue';
+import { useSettingsDialog } from '@/composables/Dialogs/useSettingsDialog';
 
-type SettingsTab = {
-  icon: FunctionalComponent;
-  tab: DefinedComponent;
-};
-
-const currentTab = ref('Jeux');
-const tabs = new Map<string, SettingsTab>();
-tabs.set(GeneralSettings.name!, { icon: Wrench, tab: GeneralSettings });
-tabs.set(GameSettings.name!, { icon: Gamepad2, tab: GameSettings });
-tabs.set(MediaSettings.name!, { icon: MonitorPlay, tab: MediaSettings });
-tabs.set(GraphSettings.name!, { icon: GitFork, tab: GraphSettings });
-
-const isDialogOpen = ref(true);
+const { isDialogOpen, currentTab, tabs } = useSettingsDialog(openDialog);
 
 function openDialog() {
   isDialogOpen.value = true;

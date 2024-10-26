@@ -15,6 +15,7 @@
       <ScreenrecordIcons />
       <TopButton
         :additionnalClasses="'text-muted-foreground mt-auto hover:text-accent-foreground hover:bg-accent !p-1'"
+        @click="settingsOpened.openSettings()"
       >
         <template #icon>
           <Settings class="h-5 w-5" />
@@ -28,6 +29,7 @@
 <script lang="ts" setup>
 import ScreenrecordIcons from '@/components/AppRibbon/ScreenrecordIcons.vue';
 import TopButton from '@/components/ui/TopButton.vue';
+import { settingsOpened } from '@/events/OpenSettings';
 import { sidePanelToggled } from '@/events/ToggleSidePanel';
 import { PanelLeft, Settings } from 'lucide-vue-next';
 
