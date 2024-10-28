@@ -4,6 +4,7 @@ import (
 	"flow-poc/backend/config"
 	"flow-poc/backend/filesystem/node"
 	"flow-poc/backend/filesystem/recentfiles"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,13 +15,16 @@ import (
 // string arg should be the path to the temp dir and the second the path
 // to the new dir. os.MkDirAll is used so it will create any dir necessary
 // to reach the path given in the last arg
-func createDirHelper(t testing.TB, tempDirPath, dirName string) {
+func createDirHelper(t testing.TB, tempDirPath, dirName string) string {
 	t.Helper()
 
-	err := os.MkdirAll(filepath.Join(tempDirPath, dirName), 0750)
+	newDir := filepath.Join(tempDirPath, dirName)
+	err := os.MkdirAll(newDir, fs.ModeDir)
 	if err != nil {
 		t.Fatalf("couldn't create the first subdirectory: %v", err)
 	}
+
+	return newDir
 }
 
 // Creates temporary dir, sets it as lab's root and creates a file at root.
@@ -187,5 +191,32 @@ func TestRenameDirectory(t *testing.T) {
 	err := dh.RenameDirectory(subDir, newSubDirName)
 	if err != nil {
 		t.Errorf("couldn't rename dir: %v", err)
+	}
+}
+
+func TestMoveDirectory(t *testing.T) {
+	dir, dh := createTempDir(t, "testRename")
+	defer os.RemoveAll(dir)
+	srcDir := createDirHelper(t, dir, "srcDir")
+	createDirHelper(t, dir, "destDir")
+	subDir := createDirHelper(t, srcDir, "subDir")
+
+	fName := filepath.Join(srcDir, "test.json")
+	f, err := os.Create(fName)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer f.Close()
+
+	subFile := filepath.Join(subDir, "otherFile.json")
+	f2, err := os.Create(subFile)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer f2.Close()
+
+	mErr := dh.MoveDir("srcDir", "destDir")
+	if mErr != nil {
+		t.Errorf("%v", mErr)
 	}
 }

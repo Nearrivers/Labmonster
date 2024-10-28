@@ -15,7 +15,7 @@
 import AppHeader from '@/components/AppHeader.vue';
 import { RouterView, useRoute, useRouter } from 'vue-router';
 import { EventsOn } from '../../wailsjs/runtime/runtime';
-import { watcher } from '$/models';
+import { node, watcher } from '$/models';
 import { FsEvent } from '@/types/FsEvent';
 import { Routes } from '@/types/Routes';
 
@@ -24,6 +24,10 @@ const router = useRouter();
 EventsOn('fsop', onFsEvent);
 
 function onFsEvent(e: FsEvent) {
+  if (e.dataType === node.DataType.DIR) {
+    return;
+  }
+
   const routePath = route.params.path as string;
 
   let filePath = e.path + '/' + e.file;

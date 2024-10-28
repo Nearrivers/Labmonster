@@ -4,6 +4,7 @@ import (
 	"flow-poc/backend/config"
 	"flow-poc/backend/filesystem/node"
 	"flow-poc/backend/filesystem/recentfiles"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -110,4 +111,73 @@ func (dh *DirHandler) RenameDirectory(oldPathFromRoot, newPathFromRoot string) e
 func doesDirExists(path string) bool {
 	_, err := os.Stat(path)
 	return !os.IsNotExist(err)
+}
+
+// Prevent the user to move a parent folder into one of its subfolders
+func (dh *DirHandler) MoveDir(oldPathFromRoot, newPathFromRoot string) error {
+	labPath := dh.GetLabPath()
+
+	p := filepath.Join(labPath, oldPathFromRoot)
+	np := filepath.Join(labPath, newPathFromRoot)
+	dirName := filepath.Base(p)
+
+	err := filepath.WalkDir(p, func(path string, file fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		rel, relErr := filepath.Rel(p, path)
+		if relErr != nil {
+			return relErr
+		}
+
+		var newPath string
+
+		if rel == "." {
+			newPath = filepath.Join(np, dirName)
+			mkErr := os.Mkdir(newPath, fs.ModeDir)
+			if mkErr != nil {
+				return mkErr
+			}
+
+			return nil
+		}
+
+		newPath = filepath.Join(np, dirName, rel)
+
+		if file.IsDir() {
+			mkErr := os.Mkdir(newPath, fs.ModeDir)
+			if mkErr != nil {
+				return mkErr
+			}
+
+			return nil
+		}
+
+		newFile, fErr := os.Create(newPath)
+		if fErr != nil {
+			return fErr
+		}
+		defer newFile.Close()
+
+		oldFile, Oerr := os.Open(path)
+		if Oerr != nil {
+			return Oerr
+		}
+		defer oldFile.Close()
+
+		_, cErr := io.Copy(newFile, oldFile)
+		if cErr != nil {
+			return cErr
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		// os.RemoveAll(newDir)
+		return err
+	}
+
+	return nil
 }
