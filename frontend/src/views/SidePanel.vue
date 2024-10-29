@@ -35,17 +35,20 @@
     :x="contextMenuX"
     :y="contextMenuY"
     :selected-node="selectedNode"
+    @move="onMoveClick"
   />
   <DirContextMenu
     ref="dirContextMenu"
     :x="contextMenuX"
     :y="contextMenuY"
     :selected-node="selectedNode"
+    @move="onMoveClick"
   />
+  <MoveElementCommand :selectedNode="selectedNode" ref="moveElementCommand" />
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';
@@ -56,6 +59,11 @@ import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
 import { useFiletree } from '@/composables/useFiletree';
 import { useMagicKeys } from '@vueuse/core';
 import DataButtons from '@/components/sidepanel/DataButtons.vue';
+import MoveElementCommand from '../components/commands/MoveElementCommand.vue';
+
+const moveElementCommand = ref<InstanceType<typeof MoveElementCommand> | null>(
+  null,
+);
 
 const {
   files,
@@ -92,8 +100,11 @@ onMounted(async () => {
       await loadLabFiles();
     }
   } catch (error) {
-    console.error(error);
-    showToast(String(error));
+    showToast(error);
   }
 });
+
+async function onMoveClick() {
+  await moveElementCommand.value?.showModal();
+}
 </script>

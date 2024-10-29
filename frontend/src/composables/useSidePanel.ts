@@ -13,6 +13,7 @@ import { SupportedFiles } from '@/types/SupportedFiles';
 import { useEventListener } from './useEventListener';
 import { CreateDirectory } from '$/dirhandler/DirHandler';
 import { NEW_DIR_NAME } from '@/constants/NEW_DIR_NAME';
+import { NodeElement } from '../types/NodeElement';
 
 export function useSidePanel() {
   const files = ref<node.Node[]>([]);
@@ -20,7 +21,7 @@ export function useSidePanel() {
   const { showToast } = useShowErrorToast();
   const contextMenuX = ref(100);
   const contextMenuY = ref(100);
-  const selectedNode = ref<HTMLLIElement | null>(null);
+  const selectedNode = ref<NodeElement | null>(null);
   const fileContextMenu = ref<InstanceType<typeof FileContextMenu> | null>(
     null,
   );
@@ -45,16 +46,18 @@ export function useSidePanel() {
 
   async function createNewDirAtRoot() {
     try {
-      await CreateDirectory(NEW_DIR_NAME)
+      await CreateDirectory(NEW_DIR_NAME);
     } catch (error) {
-      showToast(error, "Impossible de créer le dossier")
+      showToast(error, 'Impossible de créer le dossier');
     }
   }
 
   async function onRightClick(event: MouseEvent) {
     contextMenuX.value = event.clientX;
     contextMenuY.value = event.clientY;
-    selectedNode.value = (event.target as HTMLElement).closest('li');
+    selectedNode.value = (event.target as HTMLElement).closest(
+      'li',
+    ) as unknown as NodeElement;
     await nextTick();
 
     if (selectedNode.value?.dataset.type === 'file') {
@@ -66,7 +69,9 @@ export function useSidePanel() {
   }
 
   function onLeftClick(event: MouseEvent) {
-    const node = (event.target as HTMLElement).closest('li');
+    const node = (event.target as HTMLElement).closest(
+      'li',
+    ) as unknown as NodeElement;
 
     if (!node || node.dataset.type === 'directory') {
       return;

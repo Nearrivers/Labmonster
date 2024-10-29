@@ -1,15 +1,19 @@
 package dirhandler
 
 import (
+	"errors"
 	"flow-poc/backend/config"
 	"flow-poc/backend/filesystem/node"
 	"flow-poc/backend/filesystem/recentfiles"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var ErrMoveParentIntoChild = errors.New("impossible de déplacer un dossier parent dans un de ses enfants")
 
 type DirHandler struct {
 	Cfg         *config.AppConfig
@@ -34,6 +38,7 @@ func (dh *DirHandler) GetLabPath() string {
 // of the FileTreeExplorer struct
 func (dh *DirHandler) GetLabDirs() error {
 	dh.Directories = make([]string, 0)
+	fmt.Println(dh.Directories)
 
 	dh.Directories = append(dh.Directories, "/")
 	err := filepath.WalkDir(dh.GetLabPath(), func(path string, d fs.DirEntry, err error) error {
@@ -41,7 +46,11 @@ func (dh *DirHandler) GetLabDirs() error {
 			return err
 		}
 
-		if !d.IsDir() || d.Name() == ".labmonster" || path == dh.GetLabPath() {
+		if d.Name() == ".labmonster" {
+			return filepath.SkipDir
+		}
+
+		if !d.IsDir() || path == dh.GetLabPath() {
 			return nil
 		}
 
@@ -121,6 +130,17 @@ func (dh *DirHandler) MoveDir(oldPathFromRoot, newPathFromRoot string) error {
 	np := filepath.Join(labPath, newPathFromRoot)
 	dirName := filepath.Base(p)
 
+	// You cannot move a parent folder into one of its subfolders
+	r, relErr := filepath.Rel(p, np)
+	if relErr != nil  {
+		// filepath.Rel's error is nil if the paths are relatives so we leave if that's the case
+		return relErr
+	}
+
+	if !strings.Contains(r, "..") {
+		return ErrMoveParentIntoChild
+	}
+
 	err := filepath.WalkDir(p, func(path string, file fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -175,9 +195,12 @@ func (dh *DirHandler) MoveDir(oldPathFromRoot, newPathFromRoot string) error {
 	})
 
 	if err != nil {
-		// os.RemoveAll(newDir)
 		return err
 	}
 
+	rAllErr := os.RemoveAll(p)
+	if rAllErr != nil {
+		return rAllErr
+	}
 	return nil
 }

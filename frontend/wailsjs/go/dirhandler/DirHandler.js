@@ -22,6 +22,10 @@ export function GetLabPath() {
   return window['go']['dirhandler']['DirHandler']['GetLabPath']();
 }
 
+export function MoveDir(arg1, arg2) {
+  return window['go']['dirhandler']['DirHandler']['MoveDir'](arg1, arg2);
+}
+
 export function RenameDirectory(arg1, arg2) {
   return window['go']['dirhandler']['DirHandler']['RenameDirectory'](arg1, arg2);
 }

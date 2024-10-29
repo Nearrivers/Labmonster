@@ -51,6 +51,49 @@ func createTempDir(t testing.TB, testDirName string) (string, *DirHandler) {
 	return dir, dh
 }
 
+func assertDirExistence(t testing.TB, absPath string) {
+	t.Helper()
+
+	stat, err := os.Stat(absPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			t.Fatalf("the directory was not created")
+		}
+
+		t.Fatalf("couldn't get dir stats: %v", err)
+	}
+
+	if !stat.IsDir() {
+		t.Fatal("the path doesn't point to a directory")
+	}
+}
+
+func assertFileExistence(t testing.TB, absPath string) {
+	t.Helper()
+
+	stat, err := os.Stat(absPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			t.Fatalf("the file was not created")
+		}
+
+		t.Fatalf("couldn't get file stats: %v", err)
+	}
+
+	if stat.IsDir() {
+		t.Fatal("the path doesn't point to a file")
+	}
+}
+
+func assertDirDoesNotExists(t testing.TB, absPath string) {
+	t.Helper()
+
+	_, err := os.Stat(absPath)
+	if err != nil && !os.IsNotExist(err) {
+		t.Fatalf("wrong error received: %v", err)
+	}
+}
+
 func TestGetLabDirs(t *testing.T) {
 	t.Run("get every directory of the lab", func(t *testing.T) {
 		subDir1 := "testDir1"
@@ -70,32 +113,6 @@ func TestGetLabDirs(t *testing.T) {
 			t.Errorf("want 3 directories, got %d with %s", len(ft.Directories), strings.Join(ft.Directories, ", "))
 		}
 	})
-}
-
-func assertDirExistence(t testing.TB, absPath string) {
-	t.Helper()
-
-	stat, err := os.Stat(absPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			t.Fatalf("the directory was not created")
-		}
-
-		t.Fatalf("couldn't get dir stats: %v", err)
-	}
-
-	if !stat.IsDir() {
-		t.Fatal("the path doesn't point to a directory")
-	}
-}
-
-func assertDirDoesNotExists(t testing.TB, absPath string) {
-	t.Helper()
-
-	_, err := os.Stat(absPath)
-	if err != nil && !os.IsNotExist(err) {
-		t.Fatalf("wrong error received: %v", err)
-	}
 }
 
 func TestCreateDir(t *testing.T) {
@@ -195,28 +212,66 @@ func TestRenameDirectory(t *testing.T) {
 }
 
 func TestMoveDirectory(t *testing.T) {
-	dir, dh := createTempDir(t, "testRename")
-	defer os.RemoveAll(dir)
-	srcDir := createDirHelper(t, dir, "srcDir")
-	createDirHelper(t, dir, "destDir")
-	subDir := createDirHelper(t, srcDir, "subDir")
+	t.Run("moving a directory in an unrelated one", func(t *testing.T) {
+		dir, dh := createTempDir(t, "testMove")
+		defer os.RemoveAll(dir)
+		srcDir := createDirHelper(t, dir, "srcDir")
+		destDir := createDirHelper(t, dir, "destDir")
+		subDir := createDirHelper(t, srcDir, "subDir")
 
-	fName := filepath.Join(srcDir, "test.json")
-	f, err := os.Create(fName)
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-	defer f.Close()
+		fName := filepath.Join(srcDir, "test.json")
+		f, err := os.Create(fName)
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+		defer f.Close()
 
-	subFile := filepath.Join(subDir, "otherFile.json")
-	f2, err := os.Create(subFile)
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-	defer f2.Close()
+		subFile := filepath.Join(subDir, "otherFile.json")
+		f2, err := os.Create(subFile)
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+		defer f2.Close()
 
-	mErr := dh.MoveDir("srcDir", "destDir")
-	if mErr != nil {
-		t.Errorf("%v", mErr)
-	}
+		mErr := dh.MoveDir("srcDir", "destDir")
+		if mErr != nil {
+			t.Errorf("%v", mErr)
+		}
+
+		srcDirNewPath := filepath.Join(destDir, "srcDir")
+		assertDirExistence(t, srcDirNewPath)
+
+		subDirNewPath := filepath.Join(srcDirNewPath, "subDir")
+		assertDirExistence(t, subDirNewPath)
+
+		subFileNewPath := filepath.Join(subDirNewPath, "otherFile.json")
+		assertFileExistence(t, subFileNewPath)
+	})
+
+	t.Run("trying to move a parent directory into one of its children should return an error", func(t *testing.T) {
+		dir, dh := createTempDir(t, "testMoveRelated")
+		defer os.RemoveAll(dir)
+		srcDir := createDirHelper(t, dir, "srcDir")
+		subDir := createDirHelper(t, srcDir, "subDir")
+
+		fName := filepath.Join(srcDir, "test.json")
+		f, err := os.Create(fName)
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+		defer f.Close()
+
+		subFile := filepath.Join(subDir, "otherFile.json")
+		f2, err := os.Create(subFile)
+		if err != nil {
+			t.Fatalf("%v", err)
+		}
+		defer f2.Close()
+
+		newPath := filepath.Join("srcDir", "subDir")
+		mErr := dh.MoveDir("srcDir", newPath)
+		if mErr != ErrMoveParentIntoChild {
+			t.Errorf("didn't get expected error. Got %v, want %v", mErr, ErrMoveParentIntoChild)
+		}
+	})
 }

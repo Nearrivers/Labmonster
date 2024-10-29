@@ -34,11 +34,6 @@
       </CtxItem>
     </CtxSection>
     <template #commands>
-      <MoveFileCommand
-        ref="moveFileCommand"
-        :key="props.x"
-        :selected-node="selectedNode"
-      />
       <DeleteFileDialog
         ref="deleteFileDialog"
         :path="selectedNode?.dataset.path"
@@ -54,21 +49,24 @@ import { FolderTree, Trash2, PencilLine } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import DeleteFileDialog from '../AlertDialog/DeleteFileDialog.vue';
 import { useFileContextMenu } from '@/composables/ContextMenus/useFileContextMenu';
-import MoveFileCommand from '../commands/MoveFileCommand.vue';
 import AppCtxMenu from '../ui/context-menu/AppCtxMenu.vue';
 import CtxSection from '../ui/context-menu/CtxSection.vue';
 import CtxItem from '../ui/context-menu/CtxItem.vue';
+import { NodeElement } from '@/types/NodeElement';
 
 const props = defineProps<{
   x: number;
   y: number;
-  selectedNode: HTMLLIElement | null;
+  selectedNode: NodeElement | null;
+}>();
+
+const emit = defineEmits<{
+  (e: 'move'): void;
 }>();
 
 const ctxMenu = ref<InstanceType<typeof AppCtxMenu> | null>(null);
 const extension = computed(() => props.selectedNode?.dataset.extension || '');
 
-const moveFileCommand = ref<InstanceType<typeof MoveFileCommand> | null>(null);
 const deleteFileDialog = ref<InstanceType<typeof DeleteFileDialog> | null>(
   null,
 );
@@ -82,7 +80,7 @@ const {
 } = useFileContextMenu(ctxMenu, deleteFileDialog);
 
 function onMoveClick() {
-  moveFileCommand.value?.showModal();
+  emit('move');
   hidePopover();
 }
 
