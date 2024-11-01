@@ -99,7 +99,6 @@ func (r *RecentlyOpened) RemoveRecent(pathFromLabRoot string) {
 // Read the recentFile.txt and load each line inside the RecentlyOpened.FilePaths array
 func (r *RecentlyOpened) LoadRecentlyOpended() error {
 	p := r.getLabmonsterDirPath()
-	fmt.Println(p)
 	f, err := os.Open(p)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {

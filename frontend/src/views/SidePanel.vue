@@ -44,7 +44,11 @@
     :selected-node="selectedNode"
     @move="onMoveClick"
   />
-  <MoveElementCommand :selectedNode="selectedNode" ref="moveElementCommand" />
+  <MoveElementCommand
+    :selectedNode="selectedNode"
+    :key="contextMenuX"
+    ref="moveElementCommand"
+  />
 </template>
 
 <script setup lang="ts">
@@ -60,10 +64,6 @@ import { useFiletree } from '@/composables/useFiletree';
 import { useMagicKeys } from '@vueuse/core';
 import DataButtons from '@/components/sidepanel/DataButtons.vue';
 import MoveElementCommand from '../components/commands/MoveElementCommand.vue';
-
-const moveElementCommand = ref<InstanceType<typeof MoveElementCommand> | null>(
-  null,
-);
 
 const {
   files,
@@ -83,6 +83,9 @@ const {
 useFiletree(files, showToast);
 const keys = useMagicKeys();
 const F2 = keys['F2'];
+const moveElementCommand = ref<InstanceType<typeof MoveElementCommand> | null>(
+  null,
+);
 
 watch(F2, (v) => {
   if (!v) {

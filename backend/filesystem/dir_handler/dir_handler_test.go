@@ -224,14 +224,14 @@ func TestMoveDirectory(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%v", err)
 		}
-		defer f.Close()
+		f.Close()
 
 		subFile := filepath.Join(subDir, "otherFile.json")
 		f2, err := os.Create(subFile)
 		if err != nil {
 			t.Fatalf("%v", err)
 		}
-		defer f2.Close()
+		f2.Close()
 
 		mErr := dh.MoveDir("srcDir", "destDir")
 		if mErr != nil {
@@ -246,6 +246,8 @@ func TestMoveDirectory(t *testing.T) {
 
 		subFileNewPath := filepath.Join(subDirNewPath, "otherFile.json")
 		assertFileExistence(t, subFileNewPath)
+
+		assertDirDoesNotExists(t, srcDir)
 	})
 
 	t.Run("trying to move a parent directory into one of its children should return an error", func(t *testing.T) {

@@ -73,6 +73,8 @@ export function useSidePanel() {
       'li',
     ) as unknown as NodeElement;
 
+    selectedNode.value = node
+
     if (!node || node.dataset.type === 'directory') {
       return;
     }

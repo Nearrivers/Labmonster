@@ -104,11 +104,13 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: node.Node[] | ShortNode[]
     let oldFilepath: string
+    let extension: string
     if (e.path === '.') {
       // handle lab's root delete
       dir = rootFiles.value
 
       oldFilepath = e.file.slice(0, e.file.lastIndexOf('.'))
+      extension = e.file.slice(e.file.lastIndexOf('.'))
       if (e.dataType === node.DataType.DIR) {
         oldFilepath = e.file
       }
@@ -116,8 +118,10 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       dir = dirs.value.get(e.path as DirPath) as ShortNode[]
       // Removing the extension
       oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+      extension = e.oldPath.slice(e.oldPath.lastIndexOf('.'))
       if (e.dataType === node.DataType.DIR) {
         oldFilepath = e.oldPath
+        extension = ""
       }
     }
 
@@ -125,15 +129,16 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       return
     }
 
-    // Finding the element using its path
-    const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
-    if (!el) {
-      return
-    }
+    const index = findElement(oldFilepath, e.dataType, extension, dir)
+    // // Finding the element using its path
+    // const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
+    // if (!el) {
+    //   return
+    // }
 
-    // Using the data-id attribute
-    const index = parseInt(el.dataset.id!)
-    if (isNaN(index)) {
+    // // Using the data-id attribute
+    // const index = parseInt(el.dataset.id!)
+    if (index === -1) {
       showErrorToastFunc("Element index not found")
       return
     }
@@ -146,14 +151,17 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     // If e.oldpath doesn't include '/', that means that the deletion happened at lab's root
     let dir: node.Node[] | ShortNode[]
     let oldFilepath: string
+    let extension: string
     if (!e.oldPath.includes('/')) {
       // handle lab's root delete
       dir = rootFiles.value
       // Removing the extension
       oldFilepath = e.file.slice(0, e.file.lastIndexOf('.'))
+      extension = e.file.slice(e.file.lastIndexOf('.'))
     } else {
       // Removing the extension
       oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
+      extension = e.file.slice(e.file.lastIndexOf('.'))
       dir = dirs.value.get(e.oldPath.slice(0, e.oldPath.lastIndexOf('/'))) as ShortNode[]
     }
 
@@ -161,15 +169,8 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
       return
     }
 
-    // Finding the element using its path
-    const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
-    if (!el) {
-      return
-    }
-
-    // Using the data-id attribute
-    const index = parseInt(el.dataset.id!)
-    if (isNaN(index)) {
+    const index = findElement(oldFilepath, e.dataType, extension, dir)
+    if (index === -1) {
       showErrorToastFunc("Element index not found")
       return
     }
@@ -199,26 +200,37 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     }
 
     // Removing the extension
-    const oldFilepath = e.dataType === node.DataType.FILE
-      ? e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
-      : e.oldPath
+    let oldFilepath: string
+    let extension: string
 
-    let selector = `[data-path="${oldFilepath}"]`
     if (e.dataType === node.DataType.FILE) {
-      selector += '[data-type="file"]'
+      const i = e.oldPath.lastIndexOf('.')
+      oldFilepath = e.oldPath.slice(0, i)
+      extension = e.oldPath.slice(i)
     } else {
-      selector += '[data-type="directory"]'
+      oldFilepath = e.oldPath
+      extension = ''
     }
 
-    // Finding the element using its path
-    const el = document.querySelector(selector) as HTMLLIElement
-    if (!el) {
-      return
-    }
+    const index = findElement(oldFilepath, e.dataType, extension, dir)
+    // selecting the element in the DOM was faster
+    // but hard to test so I used a binary search instead
+    // let selector = `[data-path="${oldFilepath}"]`
+    // if (e.dataType === node.DataType.FILE) {
+    //   selector += '[data-type="file"]'
+    // } else {
+    //   selector += '[data-type="directory"]'
+    // }
 
-    // Using the data-id attribute
-    const index = parseInt(el.dataset.id!)
-    if (isNaN(index)) {
+    // // Finding the element using its path
+    // const el = document.querySelector(selector) as HTMLLIElement
+    // if (!el) {
+    //   return
+    // }
+
+    // // Using the data-id attribute
+    // const index = parseInt(el.dataset.id!)
+    if (index === -1) {
       showErrorToastFunc("Element index not found")
       return
     }
@@ -251,22 +263,26 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
   }
 
   function add(event: ShortNode, dirs: ShortNode[]) {
-    dirs.splice(findIndex(event, dirs) + 1, 0, event)
+    const i = findIndexToInsertAt(event, dirs)
+    dirs.splice(i + 1, 0, event)
   }
 
-  function findIndex(event: ShortNode, dirs: ShortNode[], low?: number, high?: number): number {
+  function findIndexToInsertAt(event: ShortNode, dirs: ShortNode[], low?: number, high?: number): number {
     low = low || 0
     high = high || dirs.length
-    let pivot = Math.floor(low + (high - low) / 2)
+    let median = Math.floor(low + (high - low) / 2)
 
-    if (high - low <= 1 || (dirs[pivot].name === event.name && dirs[pivot].extension === event.extension)) {
-      return pivot
+    if (high - low <= 1) {
+      if (median === 0) {
+        return -1
+      }
+      return median
     }
 
-    if (less(dirs, pivot, event)) {
-      return findIndex(event, dirs, pivot, high)
+    if (less(dirs, median, event)) {
+      return findIndexToInsertAt(event, dirs, median, high)
     } else {
-      return findIndex(event, dirs, low, pivot)
+      return findIndexToInsertAt(event, dirs, low, median)
     }
   }
 
@@ -282,5 +298,61 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     }
 
     return false
+  }
+
+  /**
+   * @param name - Name of the element we're looking for
+   * @param type - Directory or File
+   * @param extension - File extension. Dir's ext = ""
+   * @param dirs - Elements array to search into
+   * @returns the index of the found element or -1 if not found
+   */
+  function findElement(name: string, type: node.DataType, extension: string, dirs: ShortNode[], low?: number, high?: number): number {
+    low = low || 0
+    high = high || dirs.length
+    const median = Math.floor(low + (high - low) / 2)
+
+    const dir = dirs[median]
+    if (dir.name === name && dir.type === type && dir.extension === extension) {
+      return median
+    }
+
+    if (high - low <= 1) {
+      if (dirs[median].name === name && dirs[median].type === type && dir.extension === extension) {
+        return median
+      }
+
+      return -1
+    }
+
+    if (compare(dirs, median, name, type, extension)) {
+      return findElement(name, type, extension, dirs, median, high)
+    } else {
+      return findElement(name, type, extension, dirs, low, median)
+    }
+  }
+
+  function compare(dirs: ShortNode[], i: number, name: string, type: node.DataType, extension: string): boolean {
+    const el = dirs[i]
+
+    if (el.type === type) {
+      return new Intl.Collator().compare(el.name + el.extension, name + extension) < 0
+    }
+
+    if (el.type === node.DataType.DIR) {
+      return true
+    }
+
+    return false
+  }
+
+  return {
+    dirs,
+    addDir,
+    addElementInSidePanel,
+    renameElementInSidePannel,
+    moveElementInSidePannel,
+    deleteElementFromSidePannelWithPath,
+    deleteFileFromSidePannelWithOldPath,
   }
 }

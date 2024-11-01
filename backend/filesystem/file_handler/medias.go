@@ -3,7 +3,6 @@ package file_handler
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"mime"
 	"os"
 	"path/filepath"
@@ -63,7 +62,6 @@ func (fh *FileHandler) SaveMedia(fileName, pathToFile, mimetype, base64File stri
 
 	var f *os.File
 
-	fmt.Println(fileName)
 	if doesFileExist(fileName) {
 		f, _, err = createNonDuplicateFile(fileName)
 	} else {
