@@ -4,8 +4,6 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { useFiletree } from "../useFiletree";
 import { toRef } from "vue";
 
-function mockShowErrorToastFunc(err: unknown, title?: string): void {}
-
 describe("useFiletree composable", () => {
   beforeAll(() => {
     vi.mock('../../../wailsjs/runtime')
@@ -24,7 +22,7 @@ describe("useFiletree composable", () => {
 
       const rootFiles: node.Node[] = []
 
-      const { addElementInSidePanel } = useFiletree(toRef(rootFiles), mockShowErrorToastFunc)
+      const { addElementInSidePanel } = useFiletree(toRef(rootFiles))
       await addElementInSidePanel(e)
 
       const file = rootFiles[0]
@@ -47,7 +45,7 @@ describe("useFiletree composable", () => {
       }
 
       const rootFiles: node.Node[] = []
-      const { addElementInSidePanel } = useFiletree(toRef(rootFiles), mockShowErrorToastFunc)
+      const { addElementInSidePanel } = useFiletree(toRef(rootFiles))
       // adding the first element
       await addElementInSidePanel(e)
 
@@ -71,7 +69,7 @@ describe("useFiletree composable", () => {
       }
 
       const rootFiles: node.Node[] = []
-      const { addElementInSidePanel } = useFiletree(toRef(rootFiles), mockShowErrorToastFunc)
+      const { addElementInSidePanel } = useFiletree(toRef(rootFiles))
       // adding the first element
       await addElementInSidePanel(e)
 
@@ -105,7 +103,7 @@ describe("useFiletree composable", () => {
       }
 
       const rootFiles: node.Node[] = []
-      const { addElementInSidePanel } = useFiletree(toRef(rootFiles), mockShowErrorToastFunc)
+      const { addElementInSidePanel } = useFiletree(toRef(rootFiles))
       await addElementInSidePanel(e)
 
       e.file = "newDir"
@@ -128,7 +126,7 @@ describe("useFiletree composable", () => {
       }
 
       const rootFiles: node.Node[] = []
-      const { addElementInSidePanel } = useFiletree(toRef(rootFiles), mockShowErrorToastFunc)
+      const { addElementInSidePanel } = useFiletree(toRef(rootFiles))
       await addElementInSidePanel(e)
 
       e.file = "newDir"
@@ -160,7 +158,7 @@ describe("useFiletree composable", () => {
       const newDirName = "newDir"
 
       const rootFiles: node.Node[] = []
-      const { dirs, addDir, addElementInSidePanel } = useFiletree(toRef(rootFiles), mockShowErrorToastFunc)
+      const { dirs, addDir, addElementInSidePanel } = useFiletree(toRef(rootFiles))
       await addElementInSidePanel(e)
 
       e.file = newDirName
@@ -203,7 +201,7 @@ describe("useFiletree composable", () => {
     }
 
     const rootFiles: node.Node[] = []
-    const fileTreeComposable = useFiletree(toRef(rootFiles), mockShowErrorToastFunc)
+    const fileTreeComposable = useFiletree(toRef(rootFiles))
     await fileTreeComposable.addElementInSidePanel(e)
 
     return {
@@ -287,6 +285,40 @@ describe("useFiletree composable", () => {
       const dir = rootFiles[0]
       expect(dir.name).toBe(newDirName)
     })
+
+    it('should rename outside of root', async () => {
+      const parentDirName = "test"
+      const {
+        fileTreeComposable
+      } = await addElementHelper(parentDirName, node.DataType.DIR)
+      const { dirs, addDir, addElementInSidePanel, renameElementInSidePannel } = fileTreeComposable
+      addDir(parentDirName, [])
+
+      const subDirName = "subDir"
+
+      const e: FsEvent = {
+        dataType: node.DataType.DIR,
+        file: subDirName,
+        fileType: node.FileType.GRAPH,
+        oldPath: "",
+        op: watcher.Op.CREATE,
+        path: parentDirName
+      }
+      addElementInSidePanel(e)
+      addDir(subDirName, [])
+
+      const newName = "newName"
+      e.file = newName
+      e.oldPath = parentDirName + "/" + subDirName
+      e.op = watcher.Op.RENAME
+      e.dataType = node.DataType.DIR
+      e.path = parentDirName
+      renameElementInSidePannel(e)
+
+      const parentDir = dirs.value.get(parentDirName)!
+      expect(parentDir).toBeDefined()
+      expect(parentDir[0].name).toBe(newName)
+    })
   })
 
   describe("deleteElementFromSidePannelWithPath tests", () => {
@@ -359,6 +391,41 @@ describe("useFiletree composable", () => {
       expect(rootFiles.length).toBe(0)
     })
 
+    it('should delete even outside of root', async () => {
+      const parentDirName = "test"
+      const {
+        fileTreeComposable
+      } = await addElementHelper(parentDirName, node.DataType.DIR)
+      const { dirs, addDir, addElementInSidePanel, deleteFileFromSidePannelWithOldPath } = fileTreeComposable
+      addDir(parentDirName, [])
+
+      const subDirName = "subDir"
+
+      const e: FsEvent = {
+        dataType: node.DataType.DIR,
+        file: subDirName,
+        fileType: node.FileType.GRAPH,
+        oldPath: "",
+        op: watcher.Op.CREATE,
+        path: parentDirName
+      }
+      addElementInSidePanel(e)
+      addDir(subDirName, [])
+
+      const newName = "newName"
+      e.file = newName
+      e.oldPath = parentDirName + "/" + subDirName
+      e.op = watcher.Op.MOVE
+      e.dataType = node.DataType.DIR
+      e.path = parentDirName
+
+      deleteFileFromSidePannelWithOldPath(e)
+
+      const parentDir = dirs.value.get(parentDirName)!
+      expect(parentDir).toBeDefined()
+      expect(parentDir.length).toBe(0)
+    })
+
     it('should not remove an element that does not exists', async () => {
       const elementToDelete = "graph.json"
       const {
@@ -425,6 +492,47 @@ describe("useFiletree composable", () => {
       expect(subDir).toBeDefined()
       expect(subDir.length).toBe(1)
       expect(subDir[0].name).toBe(fileName)
+    })
+
+    it('should move an element from a directory to root', async () => {
+      const dirToMoveFrom = "newDir"
+      const {
+        rootFiles,
+        fileTreeComposable
+      } = await addElementHelper(dirToMoveFrom, node.DataType.DIR)
+      const {
+        dirs,
+        addDir,
+        addElementInSidePanel,
+        moveElementInSidePannel
+      } = fileTreeComposable
+
+      addDir(dirToMoveFrom, [])
+
+      const fileToMove = "graph.json"
+      const fileMoveName = fileToMove.split('.')[0]
+      const e: FsEvent = {
+        dataType: node.DataType.FILE,
+        file: fileToMove,
+        fileType: node.FileType.GRAPH,
+        oldPath: "",
+        op: watcher.Op.CREATE,
+        path: dirToMoveFrom
+      }
+      addElementInSidePanel(e)
+
+      e.op = watcher.Op.MOVE
+      e.file = fileToMove
+      e.oldPath = dirToMoveFrom + "/" + fileToMove
+      e.path = "."
+      moveElementInSidePannel(e)
+
+      const subDir = dirs.value.get(dirToMoveFrom)
+      expect(subDir).toBeDefined()
+      expect(subDir?.length).toBe(0)
+
+      expect(rootFiles.length).toBe(2)
+      expect(rootFiles[1].name).toBe(fileMoveName)
     })
   })
 

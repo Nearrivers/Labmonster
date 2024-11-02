@@ -24,6 +24,7 @@ const router = useRouter();
 EventsOn('fsop', onFsEvent);
 
 function onFsEvent(e: FsEvent) {
+  console.log(e);
   if (e.dataType === node.DataType.DIR) {
     return;
   }
@@ -33,6 +34,10 @@ function onFsEvent(e: FsEvent) {
   let filePath = e.path + '/' + e.file;
   if (e.path === '.') {
     filePath = e.file;
+  }
+
+  if (e.op === watcher.Op.CREATE) {
+    router.push({ name: Routes.Flowchart, params: { path: filePath } });
   }
 
   if (
@@ -49,7 +54,5 @@ function onFsEvent(e: FsEvent) {
     router.push({ name: Routes.NotOpened });
     return;
   }
-
-  router.push({ name: Routes.Flowchart, params: { path: filePath } });
 }
 </script>

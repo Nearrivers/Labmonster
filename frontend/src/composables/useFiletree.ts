@@ -3,14 +3,13 @@ import { nextTick, provide, Ref, ref } from "vue";
 import { EventsOn } from "../../wailsjs/runtime"
 import { DirPath, FiletreeProvide, ShortNode } from "@/types/FiletreeProvide";
 import { FsEvent } from "@/types/FsEvent";
-import { ShowToastFunc } from "./useShowErrorToast";
 import { useInputToggle } from "./ContextMenus/useInputToggle";
 
 /**
  * Composable that reconciles the in-app filetree and the 
  * user's machine filesystem
  */
-export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: ShowToastFunc) {
+export function useFiletree(rootFiles: Ref<node.Node[]>) {
   const { toggleInput } = useInputToggle()
   /**
    * Map that holds the path to a directory as the key and 
@@ -33,10 +32,10 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
 
   // On every "operation" that happens in the filesystem, the go side will launch an
   // event that gets caught here.
-  EventsOn('fsop', function (e: FsEvent) {
+  EventsOn('fsop', async function (e: FsEvent) {
     switch (e.op) {
       case watcher.Op.CREATE:
-        addElementInSidePanel(e)
+        await addElementInSidePanel(e)
         break;
       case watcher.Op.REMOVE:
         deleteElementFromSidePannelWithPath(e)
@@ -45,7 +44,7 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
         renameElementInSidePannel(e)
         break;
       case watcher.Op.MOVE:
-        moveElementInSidePannel(e)
+        await moveElementInSidePannel(e)
         break
     }
   });
@@ -53,8 +52,8 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
   async function addElementInSidePanel(e: FsEvent) {
     // If e.path === '.' means that the deletion happened at lab's root
     let dir: Array<ShortNode>
-    const wasDeletionAtRoot = e.path === '.'
-    if (wasDeletionAtRoot) {
+    const wasAdditionAtRoot = e.path === '.'
+    if (wasAdditionAtRoot) {
       // handle lab's root delete
       dir = rootFiles.value as ShortNode[]
     } else {
@@ -92,7 +91,7 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     }, dir)
 
     await nextTick()
-    if (wasDeletionAtRoot) {
+    if (wasAdditionAtRoot) {
       toggleInput(e.file, "dir")
       return
     }
@@ -130,16 +129,8 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     }
 
     const index = findElement(oldFilepath, e.dataType, extension, dir)
-    // // Finding the element using its path
-    // const el = document.querySelector(`[data-path="${oldFilepath}"`) as HTMLLIElement
-    // if (!el) {
-    //   return
-    // }
-
-    // // Using the data-id attribute
-    // const index = parseInt(el.dataset.id!)
     if (index === -1) {
-      showErrorToastFunc("Element index not found")
+      console.error("Element index not found")
       return
     }
 
@@ -148,30 +139,13 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
   }
 
   function deleteFileFromSidePannelWithOldPath(e: FsEvent) {
-    // If e.oldpath doesn't include '/', that means that the deletion happened at lab's root
-    let dir: node.Node[] | ShortNode[]
-    let oldFilepath: string
-    let extension: string
-    if (!e.oldPath.includes('/')) {
-      // handle lab's root delete
-      dir = rootFiles.value
-      // Removing the extension
-      oldFilepath = e.file.slice(0, e.file.lastIndexOf('.'))
-      extension = e.file.slice(e.file.lastIndexOf('.'))
-    } else {
-      // Removing the extension
-      oldFilepath = e.oldPath.slice(0, e.oldPath.lastIndexOf('.'))
-      extension = e.file.slice(e.file.lastIndexOf('.'))
-      dir = dirs.value.get(e.oldPath.slice(0, e.oldPath.lastIndexOf('/'))) as ShortNode[]
-    }
+    const { dir, index } = getDirAndIndexWithOldPath(e)
 
     if (!dir) {
       return
     }
 
-    const index = findElement(oldFilepath, e.dataType, extension, dir)
     if (index === -1) {
-      showErrorToastFunc("Element index not found")
       return
     }
 
@@ -179,59 +153,20 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     dir.splice(index, 1)
   }
 
-  function moveElementInSidePannel(e: FsEvent) {
+  async function moveElementInSidePannel(e: FsEvent) {
     deleteFileFromSidePannelWithOldPath(e)
-    addElementInSidePanel(e)
+    await addElementInSidePanel(e)
   }
 
   function renameElementInSidePannel(e: FsEvent) {
-    // If e.path === '.' means that the deletion happened at lab's root
-    let dir: Array<ShortNode>
-    if (!e.oldPath.includes('/')) {
-      // handle lab's root delete
-      dir = rootFiles.value
-    } else {
-      // Removing the extension
-      dir = dirs.value.get(e.oldPath.slice(0, e.oldPath.lastIndexOf('/'))) as ShortNode[]
-    }
+    const { dir, index } = getDirAndIndexWithOldPath(e)
 
     if (!dir) {
       return
     }
 
-    // Removing the extension
-    let oldFilepath: string
-    let extension: string
-
-    if (e.dataType === node.DataType.FILE) {
-      const i = e.oldPath.lastIndexOf('.')
-      oldFilepath = e.oldPath.slice(0, i)
-      extension = e.oldPath.slice(i)
-    } else {
-      oldFilepath = e.oldPath
-      extension = ''
-    }
-
-    const index = findElement(oldFilepath, e.dataType, extension, dir)
-    // selecting the element in the DOM was faster
-    // but hard to test so I used a binary search instead
-    // let selector = `[data-path="${oldFilepath}"]`
-    // if (e.dataType === node.DataType.FILE) {
-    //   selector += '[data-type="file"]'
-    // } else {
-    //   selector += '[data-type="directory"]'
-    // }
-
-    // // Finding the element using its path
-    // const el = document.querySelector(selector) as HTMLLIElement
-    // if (!el) {
-    //   return
-    // }
-
-    // // Using the data-id attribute
-    // const index = parseInt(el.dataset.id!)
     if (index === -1) {
-      showErrorToastFunc("Element index not found")
+      console.error("Element index not found")
       return
     }
 
@@ -262,21 +197,113 @@ export function useFiletree(rootFiles: Ref<node.Node[]>, showErrorToastFunc: Sho
     }, dir)
   }
 
+  function getDirAndIndexWithOldPath(e: FsEvent) {
+    let dir: Array<ShortNode>
+    const lastIndexOfSlash = e.oldPath.lastIndexOf('/')
+
+    const opAtRoot = !e.oldPath.includes('/')
+    if (opAtRoot) {
+      // handle lab's root delete
+      dir = rootFiles.value
+
+      if (!dir) {
+        return {
+          dir: undefined,
+          index: -1
+        }
+      }
+
+      const { oldFilepath, extension } = getOldPathAndExtAtRoot(e)
+      const index = findElement(oldFilepath, e.dataType, extension, dir)
+      return {
+        dir,
+        index
+      }
+    }
+
+    dir = dirs.value.get(e.oldPath.slice(0, lastIndexOfSlash)) as ShortNode[]
+    if (!dir) {
+      return {
+        dir: undefined,
+        index: -1
+      }
+    }
+
+    const { oldFilepath, extension } = getOldPathAndExt(e, lastIndexOfSlash)
+    const index = findElement(oldFilepath, e.dataType, extension, dir)
+    return {
+      dir,
+      index
+    }
+  }
+
+  function getOldPathAndExtAtRoot(e: FsEvent) {
+    let oldFilepath: string
+    let extension: string
+    oldFilepath = e.oldPath
+    extension = ''
+
+    if (e.dataType === node.DataType.DIR) {
+      return {
+        oldFilepath,
+        extension
+      }
+    }
+
+    const i = e.oldPath.lastIndexOf('.')
+    oldFilepath = e.oldPath.slice(0, i)
+    extension = e.oldPath.slice(i)
+
+    return {
+      oldFilepath,
+      extension
+    }
+  }
+
+  function getOldPathAndExt(e: FsEvent, lastIndexOfSlash: number) {
+    let oldFilepath: string
+    let extension: string
+
+    oldFilepath = e.oldPath.slice(lastIndexOfSlash + 1)
+    extension = ""
+
+    if (e.dataType === node.DataType.DIR) {
+      return {
+        oldFilepath,
+        extension
+      }
+    }
+
+    const i = e.oldPath.lastIndexOf('.')
+    oldFilepath = e.oldPath.slice(lastIndexOfSlash + 1, i)
+    extension = e.oldPath.slice(i)
+
+    return {
+      oldFilepath,
+      extension
+    }
+  }
+
   function add(event: ShortNode, dirs: ShortNode[]) {
     const i = findIndexToInsertAt(event, dirs)
     dirs.splice(i + 1, 0, event)
   }
 
   function findIndexToInsertAt(event: ShortNode, dirs: ShortNode[], low?: number, high?: number): number {
+    if (dirs.length === 0) {
+      return -1
+    }
+
     low = low || 0
     high = high || dirs.length
     let median = Math.floor(low + (high - low) / 2)
 
-    if (high - low <= 1) {
-      if (median === 0) {
-        return -1
+    // if (high - low <= 1) {
+    if (median === low) {
+      if (less(dirs, median, event)) {
+        return median
       }
-      return median
+      return -1
     }
 
     if (less(dirs, median, event)) {

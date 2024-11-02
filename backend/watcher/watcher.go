@@ -126,9 +126,9 @@ type Watcher struct {
 	close  chan struct{}
 	wg     *sync.WaitGroup
 
+	mu *sync.Mutex
 	// mu protège les attributs le suivant
 	config       *config.AppConfig
-	mu           *sync.Mutex
 	running      bool
 	names        map[string]bool        // Booléan qui indique si on est récursif ou non
 	files        map[string]os.FileInfo // map des fichiers

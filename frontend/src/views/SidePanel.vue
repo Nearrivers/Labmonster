@@ -80,7 +80,7 @@ const {
   onLeftClick,
 } = useSidePanel();
 
-useFiletree(files, showToast);
+useFiletree(files);
 const keys = useMagicKeys();
 const F2 = keys['F2'];
 const moveElementCommand = ref<InstanceType<typeof MoveElementCommand> | null>(
