@@ -3,10 +3,10 @@ Name subject to change
 
 Labmonster is a desktop software for fighting games enthusiasts. Especially those who play too much [training mode](https://glossary.infil.net/?t=Lab).
 
-## 💪 Features
-- You can create graphs to visualize [RPS Situations](https://glossary.infil.net/?t=RPS) and better understand risk-reward
-- You can create character sheets on a game-to-game basis and recreate your own [Dustloop wiki](https://www.dustloop.com/w/Main_Page) equivalent
-- You can tell the software who are you playing and it will remember it. The next time you'll create a move of _another_ character that is punishable, the application will tell you how your character will be able to punish that move. You can rank punishes by what YOU prioritize in a game. Is it damage ? [Corner carry](https://glossary.infil.net/?t=Corner%20Carry) ? [Oki](https://glossary.infil.net/?t=RPS) and so on... The software will tell you "here, this punish does more damage but this one has better Oki".
+## 💪 Roadmap
+- You will be able to create graphs to visualize [RPS Situations](https://glossary.infil.net/?t=RPS) and better understand risk-reward
+- You will be able to  create character sheets on a game-to-game basis and recreate your own [Dustloop wiki](https://www.dustloop.com/w/Main_Page) equivalent
+- You will be able to  tell the software who are you playing and it will remember it. The next time you'll create a move of _another_ character that is punishable, the application will tell you how your character will be able to punish that move. You can rank punishes by what YOU prioritize in a game. Is it damage ? [Corner carry](https://glossary.infil.net/?t=Corner%20Carry) ? [Oki](https://glossary.infil.net/?t=RPS) and so on... The software will tell you "here, this punish does more damage but this one has better Oki".
 - You can launch a screen record and save the replay in the app
 - Hugely inspired by [Obsidian](https://obsidian.md/):
   - Elements in the app will be linkable between each other.
