@@ -1,14 +1,18 @@
 package dirhandler
 
 import (
+	"errors"
 	"flow-poc/backend/config"
 	"flow-poc/backend/filesystem/node"
 	"flow-poc/backend/filesystem/recentfiles"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var ErrMoveParentIntoChild = errors.New("impossible de déplacer un dossier parent dans un de ses enfants")
 
 type DirHandler struct {
 	Cfg         *config.AppConfig
@@ -40,7 +44,11 @@ func (dh *DirHandler) GetLabDirs() error {
 			return err
 		}
 
-		if !d.IsDir() || d.Name() == ".labmonster" || path == dh.GetLabPath() {
+		if d.Name() == ".labmonster" {
+			return filepath.SkipDir
+		}
+
+		if !d.IsDir() || path == dh.GetLabPath() {
 			return nil
 		}
 
@@ -65,7 +73,7 @@ func (dh *DirHandler) CreateDirectory(pathFromLabRoot string) (node.Node, error)
 	p := filepath.Join(dh.GetLabPath(), pathFromLabRoot)
 
 	if !doesDirExists(p) {
-		err := os.Mkdir(p, os.ModeAppend)
+		err := os.Mkdir(p, os.ModeDir)
 		if err != nil {
 			return node.Node{}, err
 		}
@@ -110,4 +118,87 @@ func (dh *DirHandler) RenameDirectory(oldPathFromRoot, newPathFromRoot string) e
 func doesDirExists(path string) bool {
 	_, err := os.Stat(path)
 	return !os.IsNotExist(err)
+}
+
+// Prevent the user to move a parent folder into one of its subfolders
+func (dh *DirHandler) MoveDir(oldPathFromRoot, newPathFromRoot string) error {
+	labPath := dh.GetLabPath()
+
+	p := filepath.Join(labPath, oldPathFromRoot)
+	np := filepath.Join(labPath, newPathFromRoot)
+	dirName := filepath.Base(p)
+
+	// You cannot move a parent folder into one of its subfolders
+	r, relErr := filepath.Rel(p, np)
+	if relErr != nil {
+		// filepath.Rel's error is nil if the paths are relatives so we leave if that's the case
+		return relErr
+	}
+
+	if !strings.Contains(r, "..") {
+		return ErrMoveParentIntoChild
+	}
+
+	err := filepath.WalkDir(p, func(path string, file fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		rel, relErr := filepath.Rel(p, path)
+		if relErr != nil {
+			return relErr
+		}
+
+		var newPath string
+
+		if rel == "." {
+			newPath = filepath.Join(np, dirName)
+			mkErr := os.Mkdir(newPath, fs.ModeDir)
+			if mkErr != nil {
+				return mkErr
+			}
+
+			return nil
+		}
+
+		newPath = filepath.Join(np, dirName, rel)
+
+		if file.IsDir() {
+			mkErr := os.Mkdir(newPath, fs.ModeDir)
+			if mkErr != nil {
+				return mkErr
+			}
+
+			return nil
+		}
+
+		newFile, fErr := os.Create(newPath)
+		if fErr != nil {
+			return fErr
+		}
+		defer newFile.Close()
+
+		oldFile, Oerr := os.Open(path)
+		if Oerr != nil {
+			return Oerr
+		}
+		defer oldFile.Close()
+
+		_, cErr := io.Copy(newFile, oldFile)
+		if cErr != nil {
+			return cErr
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	rAllErr := os.RemoveAll(p)
+	if rAllErr != nil {
+		return rAllErr
+	}
+	return nil
 }

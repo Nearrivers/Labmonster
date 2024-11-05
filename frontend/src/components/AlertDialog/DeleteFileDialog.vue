@@ -13,7 +13,7 @@
         <AlertDialogFooter :class="'items-center !justify-start'">
           <div class="mr-auto flex items-center gap-2">
             <Checkbox id="never-ask" />
-            <label for="never-ask" class="text-sm">Ne pas redemander</label>
+            <label for="never-ask" class="text-sm">Ne plus demander</label>
           </div>
           <AlertDialogAction
             :class="'bg-red-600 text-white hover:bg-red-500'"

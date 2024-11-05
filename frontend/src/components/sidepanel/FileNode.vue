@@ -1,6 +1,6 @@
 <template>
   <li
-    class="mb-0.5 w-full"
+    class="relative mb-0.5 w-full"
     :data-path="nodePath"
     data-type="file"
     :data-extension="fileNode.extension"
@@ -10,15 +10,18 @@
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger
-          class="h-7 w-full justify-start rounded-md hover:bg-accent hover:text-accent-foreground"
+          class="h-7 w-full cursor-default justify-start rounded-md hover:bg-accent hover:text-accent-foreground"
           :class="{ 'bg-accent text-accent-foreground': isActive }"
         >
-          <div class="flex w-full items-center gap-x-1 pl-[14px] font-normal">
+          <div
+            class="flex w-full items-center gap-x-1 font-normal"
+            :style="nodeStyle"
+          >
             <NodeIcon :fileType="props.fileNode.fileType" />
             <input
               role="textbox"
               ref="input"
-              class="w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap bg-transparent outline-none"
+              class="w-full cursor-default overflow-hidden text-ellipsis whitespace-nowrap bg-transparent outline-none"
               :id="nodePathWithoutSpaces"
               @blur.stop="onBlur"
               @keyup.enter="input?.blur()"
@@ -55,10 +58,12 @@ import NodeIcon from './NodeIcon.vue';
 const props = defineProps<{
   fileNode: node.Node;
   path: string;
+  offset: number;
 }>();
 
 const {
   nodePath,
+  nodeStyle,
   ext,
   fileName,
   input,

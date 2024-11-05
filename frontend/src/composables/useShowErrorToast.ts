@@ -1,16 +1,17 @@
-import { ToastAction, useToast } from "@/components/ui/toast";
-import { h } from "vue";
+import { ToastAction, useToast } from '@/components/ui/toast';
+import { h } from 'vue';
 
-export type ShowToastFunc = (err: unknown, title?: string) => void
+export type ShowToastFunc = (err: unknown, title?: string) => void;
 
 export function useShowErrorToast() {
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   const showToast: ShowToastFunc = (error: unknown, title?: string) => {
-    let description = String(error)
+    console.error(error)
+    let description = String(error);
 
     if (error instanceof Error) {
-      description = error.message
+      description = error.message;
     }
 
     toast({
@@ -28,9 +29,9 @@ export function useShowErrorToast() {
         },
       ),
     });
-  }
+  };
 
   return {
-    showToast
-  }
+    showToast,
+  };
 }

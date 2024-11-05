@@ -7,7 +7,7 @@
   </section>
   <ScrollArea class="b-4 h-[90svh]" data-path="/">
     <ul
-      class="w-full px-2 text-sm text-muted-foreground"
+      class="w-full px-1 text-sm text-muted-foreground"
       v-if="files.length > 0"
       @click.right.prevent="onRightClick"
       @click.left="onLeftClick"
@@ -18,8 +18,15 @@
           :fileNode="file"
           path=""
           :data-id="index"
+          :offset="14.5"
         />
-        <DirNode v-else :dirNode="file" path="" :data-id="index" />
+        <DirNode
+          v-else
+          :dirNode="file"
+          path=""
+          :data-id="index"
+          :offset="14.5"
+        />
       </template>
     </ul>
   </ScrollArea>
@@ -28,17 +35,24 @@
     :x="contextMenuX"
     :y="contextMenuY"
     :selected-node="selectedNode"
+    @move="onMoveClick"
   />
   <DirContextMenu
     ref="dirContextMenu"
     :x="contextMenuX"
     :y="contextMenuY"
     :selected-node="selectedNode"
+    @move="onMoveClick"
+  />
+  <MoveElementCommand
+    :selectedNode="selectedNode"
+    :key="contextMenuX"
+    ref="moveElementCommand"
   />
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FileNode from '@/components/sidepanel/FileNode.vue';
 import DirNode from '@/components/sidepanel/DirNode.vue';
@@ -49,6 +63,7 @@ import DirContextMenu from '@/components/contextmenus/DirContextMenu.vue';
 import { useFiletree } from '@/composables/useFiletree';
 import { useMagicKeys } from '@vueuse/core';
 import DataButtons from '@/components/sidepanel/DataButtons.vue';
+import MoveElementCommand from '../components/commands/MoveElementCommand.vue';
 
 const {
   files,
@@ -65,16 +80,19 @@ const {
   onLeftClick,
 } = useSidePanel();
 
-useFiletree(files, showToast);
+useFiletree(files);
 const keys = useMagicKeys();
 const F2 = keys['F2'];
+const moveElementCommand = ref<InstanceType<typeof MoveElementCommand> | null>(
+  null,
+);
 
 watch(F2, (v) => {
   if (!v) {
     return;
   }
 
-  console.log('test');
+  // console.log('test');
 });
 
 onMounted(async () => {
@@ -85,7 +103,11 @@ onMounted(async () => {
       await loadLabFiles();
     }
   } catch (error) {
-    showToast(String(error));
+    showToast(error);
   }
 });
+
+async function onMoveClick() {
+  await moveElementCommand.value?.showModal();
+}
 </script>

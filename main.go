@@ -7,9 +7,11 @@ import (
 	"time"
 
 	"flow-poc/backend/config"
+	"flow-poc/backend/db"
 	dirhandler "flow-poc/backend/filesystem/dir_handler"
 	"flow-poc/backend/filesystem/file_handler"
 	"flow-poc/backend/filesystem/node"
+	"flow-poc/backend/games"
 	"flow-poc/backend/topmenu"
 	"flow-poc/backend/watcher"
 
@@ -29,11 +31,13 @@ type Bar struct {
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
+	queries := db.ConnectToDb()
 	topmenu := topmenu.NewTopMenu()
 	config := config.NewAppConfig()
 	fh := file_handler.NewFileHandler(config)
 	dh := dirhandler.NewDirHandler(config, fh.RecentFiles)
 	w := watcher.New(config)
+	gr := games.NewGameRepository(queries)
 
 	go func() {
 		w.Wait()
@@ -82,6 +86,7 @@ func main() {
 			config,
 			fh,
 			dh,
+			gr,
 		},
 		EnumBind: []interface{}{
 			watcher.FsOps,

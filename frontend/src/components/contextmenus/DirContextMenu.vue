@@ -15,13 +15,7 @@
       </CtxItem>
     </CtxSection>
     <CtxSection>
-      <CtxItem>
-        <template #icon="{ strokeWidth, iconClass }">
-          <Files :stroke-width="strokeWidth" :class="iconClass" />
-        </template>
-        <template #text>Dupliquer</template>
-      </CtxItem>
-      <CtxItem>
+      <CtxItem @click="onMoveClick">
         <template #icon="{ strokeWidth, iconClass }">
           <FolderTree :stroke-width="strokeWidth" :class="iconClass" />
         </template>
@@ -50,7 +44,6 @@
 
 <script setup lang="ts">
 import {
-  Files,
   FolderOpen,
   FolderTree,
   PencilLine,
@@ -63,11 +56,16 @@ import CtxSection from '../ui/context-menu/CtxSection.vue';
 import CtxItem from '../ui/context-menu/CtxItem.vue';
 import { useDirContextMenu } from '@/composables/ContextMenus/useDirContextMenu';
 import DeleteDirDialog from '../AlertDialog/DeleteDirDialog.vue';
+import { NodeElement } from '@/types/NodeElement';
 
 const props = defineProps<{
   x: number;
   y: number;
-  selectedNode: HTMLLIElement | null;
+  selectedNode: NodeElement | null;
+}>();
+
+const emit = defineEmits<{
+  (e: 'move'): void;
 }>();
 
 const deleteDialog = ref<InstanceType<typeof DeleteDirDialog> | null>(null);
@@ -82,6 +80,11 @@ const {
 } = useDirContextMenu(ctxMenu, deleteDialog);
 
 const path = computed(() => props.selectedNode?.dataset.path || '');
+
+function onMoveClick() {
+  emit('move');
+  hidePopover();
+}
 
 defineExpose({
   showPopover,

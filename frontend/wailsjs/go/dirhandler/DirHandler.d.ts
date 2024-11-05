@@ -12,4 +12,6 @@ export function GetLabDirs():Promise<void>;
 
 export function GetLabPath():Promise<string>;
 
+export function MoveDir(arg1:string,arg2:string):Promise<void>;
+
 export function RenameDirectory(arg1:string,arg2:string):Promise<void>;

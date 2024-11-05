@@ -1,10 +1,10 @@
 import { RenameFile } from '$/file_handler/FileHandler';
-import { ref, computed, Ref } from 'vue';
+import { ref, computed, Ref, reactive } from 'vue';
 import { useShowErrorToast } from '../useShowErrorToast';
 import { useRoute } from 'vue-router';
 import { node } from '$/models';
 
-export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
+export function useFileNode(props: Ref<{ fileNode: node.Node; path: string, offset?: number }>) {
   const route = useRoute();
   const { showToast } = useShowErrorToast();
   const fileName = ref(props.value.fileNode.name);
@@ -12,6 +12,10 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
   const ext = computed(() =>
     props.value.fileNode.extension.replace('.', '').toLocaleUpperCase(),
   );
+
+  const nodeStyle = reactive({
+    paddingLeft: `${props.value.offset}px`
+  })
 
   const nodePath = ref(
     props.value.path
@@ -57,11 +61,15 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
     }
 
     input.value.toggleAttribute('readonly');
-    input.value.classList.add('cursor-pointer');
+    input.value.classList.add('cursor-default');
     input.value.classList.remove('cursor-text');
 
+    // We don't rename 
+    const newName = fileName.value.trim()
+      ? fileName.value + props.value.fileNode.extension
+      : props.value.fileNode.name + props.value.fileNode.extension
+
     try {
-      const newName = fileName.value + props.value.fileNode.extension;
       await RenameFile(
         props.value.path,
         props.value.fileNode.name + props.value.fileNode.extension,
@@ -69,11 +77,18 @@ export function useFileNode(props: Ref<{ fileNode: node.Node; path: string }>) {
       );
     } catch (error) {
       showToast(error);
+    } finally {
+      if (fileName.value.trim()) {
+        return
+      }
+
+      input.value.value = props.value.fileNode.name
     }
   }
 
   return {
     nodePath,
+    nodeStyle,
     nodePathWithoutSpaces,
     input,
     onBlur,

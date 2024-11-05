@@ -1,8 +1,10 @@
 package node
 
 import (
+	"fmt"
 	"io/fs"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 )
@@ -51,6 +53,20 @@ type Node struct {
 	FileType  FileType  `json:"fileType"`
 }
 
+type Nodes []*Node
+
+func (n Nodes) String() string {
+	s := "["
+	for i, node := range n {
+		if i > 0 {
+			s += ", "
+		}
+		s += fmt.Sprintf("%v", node)
+	}
+
+	return s + "]"
+}
+
 func NewNode(name, extension string, nodeType DataType) Node {
 	return Node{
 		Name:      name,
@@ -61,10 +77,11 @@ func NewNode(name, extension string, nodeType DataType) Node {
 	}
 }
 
-// Takes an array of fs.DirEntry to create an array of type *Node and returns it
-// This function ignore any .labmonster directory as it might contain config files that are not relevant to the user
-func CreateNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
-	dirNames := make([]*Node, 0)
+// Takes an array of fs.DirEntry to create an array of type *Node and returns it.
+// This function ignore any element that starts with a dot (.git or .labmonster for example) as
+// it contains config files that are not relevant to the user
+func CreateNodesFromDirEntries(entries []fs.DirEntry) (Nodes, error) {
+	dirNames := make(Nodes, 0)
 	for _, entry := range entries {
 		ext := filepath.Ext(entry.Name())
 		if entry.Name() == ext {
@@ -92,6 +109,18 @@ func CreateNodesFromDirEntries(entries []fs.DirEntry) ([]*Node, error) {
 		dirNames = append(dirNames, &newNode)
 	}
 
+	slices.SortStableFunc(dirNames, func(iNode, jNode *Node) int {
+		if iNode.Type == jNode.Type {
+			return strings.Compare(strings.ToLower(iNode.Name), strings.ToLower(jNode.Name))
+		}
+
+		if iNode.Type == DIR {
+			return -1
+		}
+
+		return 1
+	})
+
 	return dirNames, nil
 }
 
@@ -102,7 +131,7 @@ func DetectFileType(extension string) FileType {
 		return IMAGE
 	case ".json":
 		return GRAPH
-	case ".mp4", ".mpeg":
+	case ".mp4", ".mpeg", ".webm":
 		return VIDEO
 	default:
 		return UNSUPPORTED

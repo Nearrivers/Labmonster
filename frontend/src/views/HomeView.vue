@@ -1,5 +1,10 @@
 <template>
-  <ResizablePanelGroup direction="horizontal" class="h-[calc(100%-33px)]">
+  <ResizablePanelGroup
+    :autoSaveId="'home-view'"
+    direction="horizontal"
+    class="h-[calc(100%-33px)]"
+  >
+    <AppRibbon />
     <ResizablePanel
       :default-size="15"
       :min-size="10"
@@ -32,6 +37,7 @@ import { SIDE_PANEL_TOGGLED } from '@/constants/event-names/SIDE_PANEL_TOGGLED';
 import { sidePanelToggled } from '@/events/ToggleSidePanel';
 import { useEventListener } from '@/composables/useEventListener';
 import { ref } from 'vue';
+import AppRibbon from './AppRibbon.vue';
 
 const resizablePanel = ref<InstanceType<typeof ResizablePanel> | null>(null);
 useEventListener(sidePanelToggled, SIDE_PANEL_TOGGLED, toggleSidePanel);

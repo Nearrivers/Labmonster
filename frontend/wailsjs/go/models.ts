@@ -269,6 +269,57 @@ export namespace node {
 
 }
 
+export namespace repository {
+	
+	export class AddGameParams {
+	    name: string;
+	    iconpath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new AddGameParams(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.iconpath = source["iconpath"];
+	    }
+	}
+	export class EditGameParams {
+	    name: string;
+	    iconpath: string;
+	    id: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new EditGameParams(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.iconpath = source["iconpath"];
+	        this.id = source["id"];
+	    }
+	}
+	export class Game {
+	    id: number;
+	    name: string;
+	    iconpath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Game(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.iconpath = source["iconpath"];
+	    }
+	}
+
+}
+
 export namespace watcher {
 	
 	export enum Op {

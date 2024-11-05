@@ -38,10 +38,6 @@ export function OpenMedia(arg1) {
   return window['go']['file_handler']['FileHandler']['OpenMedia'](arg1);
 }
 
-export function OpenMediaConc(arg1) {
-  return window['go']['file_handler']['FileHandler']['OpenMediaConc'](arg1);
-}
-
 export function RenameFile(arg1, arg2, arg3) {
   return window['go']['file_handler']['FileHandler']['RenameFile'](arg1, arg2, arg3);
 }
@@ -50,6 +46,6 @@ export function SaveFile(arg1, arg2) {
   return window['go']['file_handler']['FileHandler']['SaveFile'](arg1, arg2);
 }
 
-export function SaveMedia(arg1, arg2, arg3) {
-  return window['go']['file_handler']['FileHandler']['SaveMedia'](arg1, arg2, arg3);
+export function SaveMedia(arg1, arg2, arg3, arg4) {
+  return window['go']['file_handler']['FileHandler']['SaveMedia'](arg1, arg2, arg3, arg4);
 }

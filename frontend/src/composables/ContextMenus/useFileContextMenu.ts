@@ -30,8 +30,6 @@ export function useFileContextMenu(
   }
 
   async function onDeleteClick(filePath: string, extension: string) {
-    console.log(filePath, extension)
-
     hidePopover();
     await nextTick();
     deleteDialog.value?.openDialog(filePath + extension);

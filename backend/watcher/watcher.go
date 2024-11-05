@@ -126,9 +126,9 @@ type Watcher struct {
 	close  chan struct{}
 	wg     *sync.WaitGroup
 
+	mu *sync.Mutex
 	// mu protège les attributs le suivant
 	config       *config.AppConfig
-	mu           *sync.Mutex
 	running      bool
 	names        map[string]bool        // Booléan qui indique si on est récursif ou non
 	files        map[string]os.FileInfo // map des fichiers
@@ -411,7 +411,6 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 			// Un fichier a été créé
 			creates[path] = info
 		}
-		// Je me fiche du reste je pense
 	}
 
 	// Boucle sur les 2 maps
@@ -442,7 +441,7 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 				DataType: dType,
 			}
 
-			// Si l'élément est toujours dans le même dossier, alors il a été renommé et non pas déplacé
+			// If the parent folder is the same, that means the file was renamed and not moved
 			if filepath.Dir(path1) == filepath.Dir(path2) {
 				e.Op = Rename
 			}
@@ -450,7 +449,6 @@ func (w *Watcher) pollEvents(files map[string]os.FileInfo, evt chan Event, cance
 			delete(removes, path1)
 			delete(creates, path2)
 
-			// Si le cycle n'est pas annulé, on écrit dans le channel evt
 			select {
 			case <-cancel:
 				return

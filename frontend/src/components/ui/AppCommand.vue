@@ -2,7 +2,7 @@
   <Teleport to="body">
     <dialog
       ref="dialog"
-      class="w-fit max-w-[40rem] animate-command-hide rounded-lg border border-border bg-white text-black shadow-md duration-200 backdrop:bg-black/80 backdrop:transition-opacity backdrop:duration-200 open:animate-command-show dark:bg-black dark:text-white"
+      class="w-fit max-w-[40rem] animate-command-hide rounded-lg border border-border bg-white text-black shadow-md duration-200 backdrop:bg-black/80 backdrop:transition-opacity backdrop:duration-200 open:animate-command-show dark:bg-secondary dark:text-white"
       @keydown.prevent.esc="hideModal"
     >
       <header class="flex justify-between border-b border-b-border px-1">
@@ -30,7 +30,7 @@
             v-for="(el, index) in fuzzyFilteredList"
             :key="el"
             class="m-1 cursor-default rounded-md px-2 py-1.5"
-            :class="{ 'bg-secondary': index === activeLine }"
+            :class="{ 'bg-accent': index === activeLine }"
             @mouseenter="activeLine = index"
             @click="emit('select', fuzzyFilteredList[index])"
           >

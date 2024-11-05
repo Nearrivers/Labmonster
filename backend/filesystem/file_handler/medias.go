@@ -1,19 +1,13 @@
 package file_handler
 
 import (
-	"bufio"
 	"encoding/base64"
 	"errors"
-	"fmt"
-	"io"
 	"mime"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
-
-	"github.com/wailsapp/wails/v2/pkg/logger"
 )
 
 var (
@@ -43,19 +37,37 @@ func (ft *FileHandler) OpenMedia(path string) (string, error) {
 	return "data:" + m + ";base64," + s, nil
 }
 
-func (fh *FileHandler) SaveMedia(pathToFile, mimetype, base64File string) (string, error) {
+func (fh *FileHandler) SaveMedia(fileName, pathToFile, mimetype, base64File string) (string, error) {
 	p := filepath.Dir(pathToFile)
 	b, err := fileToBytes(base64File, mimetype)
 	if err != nil {
 		return "", err
 	}
 
-	fileName, err := fh.createFileName(p, mimetype)
-	if err != nil {
-		return "", err
+	if fileName == "" {
+		fn, err := fh.createFileName(p, mimetype)
+		if err != nil {
+			return "", err
+		}
+
+		fileName = fn
+	} else {
+		_, ext, err := getTypeAndExtensionWithMime(mimetype)
+		if err != nil {
+			return "", err
+		}
+
+		fileName = filepath.Join(fh.GetLabPath(), p, fileName) + ext
 	}
 
-	f, err := os.Create(fileName)
+	var f *os.File
+
+	if doesFileExist(fileName) {
+		f, _, err = createNonDuplicateFile(fileName)
+	} else {
+		f, err = os.Create(fileName)
+	}
+
 	if err != nil {
 		return "", err
 	}
@@ -89,112 +101,46 @@ func fileToBytes(b64File, mimetype string) ([]byte, error) {
 }
 
 func (fh *FileHandler) createFileName(pathFromLabRoot, mimetype string) (string, error) {
-	t := time.Now()
-	path := filepath.Join(fh.GetLabPath(), pathFromLabRoot, "Pasted Image "+t.Format("20060102150405"))
+	var filename string
+	t := time.Now().Format("20060102150405")
 
+	mediaType, ext, err := getTypeAndExtensionWithMime(mimetype)
+	if err != nil {
+		return "", err
+	}
+
+	filename = mediaType + t + ext
+
+	return filepath.Join(fh.GetLabPath(), pathFromLabRoot, filename), nil
+}
+
+func getTypeAndExtensionWithMime(mimetype string) (string, string, error) {
+	var mediaType, extension string
+
+	mediaType = "Image "
 	switch mimetype {
 	case "image/jpeg":
-		return path + ".jpeg", nil
+		extension = ".jpeg"
 	case "image/png":
-		return path + ".png", nil
+		extension = ".png"
 	case "image/gif":
-		return path + ".gif", nil
+		extension = ".gif"
 	case "image/webp":
-		return path + ".webp", nil
+		extension = ".webp"
 	case "image/bmp":
-		return path + ".bmp", nil
+		extension = ".bmp"
 	case "video/mp4":
-		return path + ".mp4", nil
+		mediaType = "Video "
+		extension = ".mp4"
 	case "video/mpeg":
-		return path + ".mpeg", nil
+		mediaType = "Video "
+		extension = ".mpeg"
+	case "video/webm":
+		mediaType = "Video "
+		extension = ".webm"
 	default:
-		return "", ErrMediaNotSupported
-	}
-}
-
-type MediaChunk struct {
-	b      []byte
-	offset int
-}
-
-const (
-	mb    = 1024 * 1024
-	limit = 20 * mb
-)
-
-func (fh *FileHandler) OpenMediaConc(path string) ([]byte, error) {
-	log := logger.NewDefaultLogger()
-	var p string
-
-	if filepath.IsAbs(path) {
-		p = path
-	} else {
-		p = filepath.Join(fh.GetLabPath(), path)
+		return "", "", ErrMediaNotSupported
 	}
 
-	stat, err := os.Stat(p)
-	if err != nil {
-		return nil, err
-	}
-
-	fileSize := stat.Size()
-	log.Error(fmt.Sprintf("taille du fichier en octets: %d", fileSize))
-	b := make([]byte, 0)
-	wg := sync.WaitGroup{}
-	done := make(chan (bool), 1)
-	fileContentCh := make(chan (MediaChunk))
-
-	go func() {
-		for fc := range fileContentCh {
-			// b = slices.Insert(b, fc.offset, fc.b...)
-			b = append(b, fc.b...)
-		}
-
-		done <- true
-	}()
-
-	var current int64
-	var toReadLeft int64
-	f, err := os.Open(p)
-	if err != nil {
-		return nil, err
-	}
-
-	defer f.Close()
-	for ; current < fileSize; current += limit + 1 {
-		wg.Add(1)
-		toReadLeft = fileSize - current
-
-		go func(c, tr int64) {
-			readMedia(f, c, tr, fileContentCh)
-			log.Debug(fmt.Sprintf("Octets restant à lire: %d", tr))
-			wg.Done()
-		}(current, toReadLeft)
-	}
-
-	wg.Wait()
-	close(fileContentCh)
-
-	<-done
-	close(done)
-	return b, nil
-}
-
-func readMedia(f *os.File, offset, toReadLeft int64, ch chan<- (MediaChunk)) {
-	f.Seek(offset, 0)
-	reader := bufio.NewReader(f)
-	var b []byte
-
-	if toReadLeft > limit {
-		b = make([]byte, limit)
-	} else {
-		b = make([]byte, toReadLeft)
-	}
-
-	_, readErr := reader.Read(b)
-	if readErr != nil && readErr != io.EOF {
-		panic(readErr)
-	}
-
-	ch <- MediaChunk{b, int(offset)}
+	return mediaType, extension, nil
 }

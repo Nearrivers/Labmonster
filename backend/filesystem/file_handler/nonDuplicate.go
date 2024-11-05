@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-// Given an absolute path to a file we're trying to create. Before calling this function, we know that this file
-// already exists. This function will try to create the same file but with a number appended to its name in order to avoid duplicates.
+// Given an absolute path to a file we're trying to create. We need to know that this file
+// already exists before calling this function. This function will try to create the same file but with a number appended to its name in order to avoid duplicates.
 // It will continue to increment the appended number as long as the function finds a file with the same name. After succeeding in creating the file,
 // it will return an os.File pointer to it that the caller will have to close, the actual name of the file to avoid f.Stat() boilerplate and an error
 func createNonDuplicateFile(absPath string) (*os.File, string, error) {

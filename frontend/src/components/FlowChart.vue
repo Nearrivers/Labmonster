@@ -1,7 +1,7 @@
 <template>
   <VueFlow
     :nodes="nodes"
-    class="h-full"
+    class="h-full transition-transform"
     auto-connect
     :edges="edges"
     :default-edge-options="{
@@ -39,6 +39,10 @@
       />
     </template>
 
+    <template #node-common="props">
+      <CommonNode :id="props.id" :data="props.data" />
+    </template>
+
     <template #node-image="props">
       <ImageNode :id="props.id" :data="props.data" />
     </template>
@@ -72,10 +76,10 @@ import FilePanel from './flowchart/FilePanel.vue';
 import { useHandleFlowchartChanges } from '@/composables/Flowchart/useHandleFlowchartChanges';
 import { useFlowChart } from '@/composables/Flowchart/useFlowChart';
 import FlowchartContextMenu from './contextmenus/FlowchartContextMenu.vue';
-import { EventsOn } from '../../wailsjs/runtime/runtime';
 import TextNode from './flowchart/Nodes/TextNode.vue';
 import VideoNode from './flowchart/Nodes/VideoNode.vue';
 import ImageNode from './flowchart/Nodes/ImageNode.vue';
+import CommonNode from './flowchart/Nodes/CommonNode.vue';
 
 const edges = ref<Edge[]>([]);
 const contextMenuX = ref(100);
@@ -83,7 +87,7 @@ const contextMenuY = ref(100);
 const nodes = ref<Node<CustomNodeData>[]>([]);
 const { addNodes } = useVueFlow();
 const { createNewNode, zoomIn, zoomOut } = useTopMenuActions();
-const { path, fileName, onFsEvent } = useFlowChart();
+const { path, fileName } = useFlowChart();
 const { isSaving } = useHandleFlowchartChanges(path);
 const ctxMenu = ref<InstanceType<typeof FlowchartContextMenu> | null>(null);
 
@@ -92,8 +96,6 @@ function onFlowRightClick(e: MouseEvent) {
   contextMenuY.value = e.clientY;
   ctxMenu.value?.showPopover();
 }
-
-EventsOn('fsop', onFsEvent);
 
 function onAddNode() {
   addNodes(createNewNode());

@@ -10,7 +10,7 @@ export function useInputToggle(hidePopoverFunc?: () => void) {
 
     if (fileInput) {
       fileInput.toggleAttribute('readonly');
-      fileInput.classList.remove('cursor-pointer');
+      fileInput.classList.remove('cursor-default');
       fileInput.classList.add('cursor-text');
       fileInput.select();
       fileInput.focus();
