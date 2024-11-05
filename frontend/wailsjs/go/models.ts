@@ -1,3 +1,20 @@
+export namespace config {
+	
+	export class ConfigFile {
+	    LabPath: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ConfigFile(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.LabPath = source["LabPath"];
+	    }
+	}
+
+}
+
 export namespace graph {
 	
 	export class EdgeMarker {
